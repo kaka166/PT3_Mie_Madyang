@@ -2,25 +2,122 @@
 
 @section('content')
 
-<h2>Kategori Menu</h2>
+<style>
+    .kategori-container {
+        width: 100%;
+        margin-top: 10px;
+    }
 
-<a href="/admin/kategori-menu/create">Tambah Kategori</a>
+    .kategori-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
 
-<table border="1">
-    <tr>
-        <th>ID</th>
-        <th>Nama</th>
-    </tr>
+    .kategori-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #4b3b8f;
+    }
 
-    @foreach($kategori as $item)
+    .btn-add {
+        background: #4b3b8f;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 500;
+    }
 
-    <tr>
-        <td>{{ $item->id }}</td>
-        <td>{{ $item->nama_kategori }}</td>
-    </tr>
+    .btn-add:hover {
+        background: #3b2f73;
+    }
 
-    @endforeach
+    .table-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
 
-</table>
+    .table-kategori {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .table-kategori thead {
+        background: #4b3b8f;
+        color: white;
+    }
+
+    .table-kategori th {
+        text-align: left;
+        padding: 14px;
+        font-size: 14px;
+    }
+
+    .table-kategori td {
+        padding: 14px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .table-kategori tbody tr:hover {
+        background: #f3f1ff;
+    }
+</style>
+
+
+<div class="kategori-container">
+
+    <div class="kategori-header">
+
+        <div class="kategori-title">
+            Kategori Menu
+        </div>
+
+        <a href="/admin/kategori-menu/create" class="btn-add">
+            + Tambah Kategori
+        </a>
+
+    </div>
+
+
+    <div class="table-card">
+
+        <table class="table-kategori">
+
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nama</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach($kategori as $item)
+
+                <tr>
+
+                    <td>
+                        {{ $item->id }}
+                    </td>
+
+                    <td>
+                        {{ $item->nama_kategori }}
+                    </td>
+
+                </tr>
+
+                @endforeach
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
 
 @endsection
