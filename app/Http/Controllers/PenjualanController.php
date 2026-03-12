@@ -11,10 +11,17 @@ use Illuminate\Support\Facades\DB;
 
 class PenjualanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $penjualan = Penjualan::with('detail.menu')->get();
-        return response()->json($penjualan);
+        $role = $request->query('role', 'owner');
+        $penjualan = \App\Models\Penjualan::with('detail.menu')->latest()->get();
+        return view('penjualan.index', compact('penjualan', 'role'));
+    }
+    public function create(Request $request)
+    {
+        $role = $request->query('role', 'owner');
+        $menu = \App\Models\Menu::with('stokPorsi')->get();
+        return view('penjualan.create', compact('menu', 'role'));
     }
 
     public function store(Request $request)
@@ -30,7 +37,7 @@ class PenjualanController extends Controller
         try {
             $penjualan = Penjualan::create([
                 'tanggal' => now(),
-                'total' => 0, 
+                'total' => 0,
                 'user_id' => 1
             ]);
 
@@ -71,7 +78,6 @@ class PenjualanController extends Controller
                 'grand_total' => $grand_total,
                 'data' => $penjualan->load('detail.menu')
             ], 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()], 500);
@@ -138,14 +144,13 @@ class PenjualanController extends Controller
                 'grand_total_baru' => $grand_total_baru,
                 'data' => $penjualan->load('detail.menu')
             ]);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()], 500);
         }
     }
 
-    
+
     public function destroy($id)
     {
         DB::beginTransaction();
@@ -168,7 +173,6 @@ class PenjualanController extends Controller
             DB::commit();
 
             return response()->json(['message' => 'Transaksi berhasil dibatalkan dan stok porsi telah dikembalikan.']);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()], 500);

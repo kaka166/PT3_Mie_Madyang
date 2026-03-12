@@ -9,10 +9,15 @@ class Menu extends Model
     protected $table = 'menu';
 
     protected $fillable = [
-        'nama_menu',
         'kategori_id',
+        'nama_menu',
         'harga_jual'
     ];
+
+    public function stokPorsi()
+    {
+        return $this->hasOne(StokPorsi::class, 'menu_id');
+    }
 
     public function kategori()
     {
@@ -21,6 +26,6 @@ class Menu extends Model
 
     public function resep()
     {
-        return $this->hasMany(ResepMenu::class);
+        return $this->hasMany(ResepMenu::class, 'menu_id');
     }
 }

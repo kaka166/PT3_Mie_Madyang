@@ -12,9 +12,17 @@ use Illuminate\Support\Facades\DB;
 
 class ProduksiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Produksi::with('menu')->get();
+        $role = $request->query('role', 'owner');
+        $produksi = \App\Models\Produksi::with('menu')->get();
+        return view('produksi.index', compact('produksi', 'role'));
+    }
+    public function create(Request $request)
+    {
+        $role = $request->query('role', 'owner');
+        $menu = \App\Models\Menu::all();
+        return view('produksi.create', compact('menu', 'role'));
     }
 
     public function store(Request $request)
@@ -92,7 +100,6 @@ class ProduksiController extends Controller
                 'message' => 'Produksi berhasil!',
                 'hpp_per_porsi' => $hpp_per_porsi
             ], 201);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => 'Terjadi kesalahan sistem: ' . $e->getMessage()], 500);

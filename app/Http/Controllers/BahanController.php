@@ -7,9 +7,16 @@ use Illuminate\Http\Request;
 
 class BahanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Bahan::all();
+        $role = $request->query('role', 'owner');
+        $bahan = \App\Models\Bahan::all();
+        return view('bahan.index', compact('bahan', 'role'));
+    }
+    public function create(Request $request)
+    {
+        $role = $request->query('role', 'owner');
+        return view('bahan.create', compact('role'));
     }
 
     public function store(Request $request)

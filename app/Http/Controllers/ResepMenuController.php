@@ -9,21 +9,18 @@ use Illuminate\Http\Request;
 
 class ResepMenuController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return ResepMenu::with('menu', 'bahan')->get();
+        $role = $request->query('role', 'owner');
+        $resep = \App\Models\ResepMenu::with(['menu', 'bahan'])->get();
+        return view('resep-menu.index', compact('resep', 'role'));
     }
-
-    // untuk supply data dropdown di frontend
-    public function create()
+    public function create(Request $request)
     {
-        $menu = Menu::all();
-        $bahan = Bahan::all();
-
-        return response()->json([
-            'menu' => $menu,
-            'bahan' => $bahan
-        ]);
+        $role = $request->query('role', 'owner');
+        $menu = \App\Models\Menu::all();
+        $bahan = \App\Models\Bahan::all();
+        return view('resep-menu.create', compact('menu', 'bahan', 'role'));
     }
 
     public function store(Request $request)
@@ -36,8 +33,8 @@ class ResepMenuController extends Controller
         ]);
 
         $cekResep = ResepMenu::where('menu_id', $request->menu_id)
-                             ->where('bahan_id', $request->bahan_id)
-                             ->first();
+            ->where('bahan_id', $request->bahan_id)
+            ->first();
 
         if ($cekResep) {
             $cekResep->qty += $request->qty;
