@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Mie Ayam Ma-Dyang - The Culinary Curator</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "inverse-primary": "#ffb3b0",
+                        "on-secondary-container": "#696363",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#e9e0e0",
+                        "on-tertiary-fixed": "#002113",
+                        "primary-fixed": "#ffdad8",
+                        "inverse-on-surface": "#f1f1f1",
+                        "surface-container-highest": "#e2e2e2",
+                        "surface-container-high": "#e8e8e8",
+                        "outline-variant": "#ddc0be",
+                        "inverse-surface": "#2f3131",
+                        "background": "#f9f9f9",
+                        "primary-fixed-dim": "#ffb3b0",
+                        "primary": "#a0383b",
+                        "on-tertiary-container": "#f5fff6",
+                        "tertiary-container": "#00855a",
+                        "on-primary-container": "#fffbff",
+                        "error-container": "#ffdad6",
+                        "error": "#ba1a1a",
+                        "on-background": "#1a1c1c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-fixed": "#1e1b1b",
+                        "on-tertiary-fixed-variant": "#005235",
+                        "tertiary-fixed": "#85f9c0",
+                        "surface-bright": "#f9f9f9",
+                        "tertiary": "#006a46",
+                        "tertiary-fixed-dim": "#68dca5",
+                        "surface-variant": "#e2e2e2",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#cdc5c4",
+                        "surface": "#f9f9f9",
+                        "secondary": "#635d5d",
+                        "on-surface": "#1a1c1c",
+                        "on-primary-fixed-variant": "#842327",
+                        "on-secondary-fixed-variant": "#4b4646",
+                        "surface-container": "#eeeeee",
+                        "surface-tint": "#a33b3d",
+                        "on-primary-fixed": "#410006",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#564241",
+                        "surface-dim": "#dadada",
+                        "secondary-fixed": "#e9e0e0",
+                        "outline": "#8a7170",
+                        "on-error": "#ffffff",
+                        "surface-container-low": "#f3f3f3",
+                        "primary-container": "#c05051"
+                    },
+                    fontFamily: {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Plus Jakarta Sans"],
+                        "label": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .ambient-shadow {
+            shadow: 0px 12px 32px rgba(86, 66, 65, 0.06);
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .tonal-shift {
+            background-color: #f3f3f3;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background">
+    <!-- TopNavBar -->
+    <nav class="fixed top-0 w-full z-50 bg-white/80 dark:bg-stone-900/80 backdrop-blur-md shadow-sm">
+        <div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-20">
+            <div class="text-2xl font-bold text-orange-800 dark:text-orange-500 tracking-tight">
+                Mie Ayam Ma-Dyang
+            </div>
+            <div class="hidden md:flex items-center space-x-8">
+                <a class="text-orange-800 dark:text-orange-400 font-bold border-b-2 border-orange-800 dark:border-orange-500 pb-1 font-['Plus_Jakarta_Sans'] text-sm font-medium"
+                    href="#">Home</a>
+                <a class="text-stone-600 dark:text-stone-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors font-['Plus_Jakarta_Sans'] text-sm font-medium"
+                    href="#">Menu</a>
+                <a class="text-stone-600 dark:text-stone-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors font-['Plus_Jakarta_Sans'] text-sm font-medium"
+                    href="#">About</a>
+                <a class="text-stone-600 dark:text-stone-400 hover:text-orange-700 dark:hover:text-orange-300 transition-colors font-['Plus_Jakarta_Sans'] text-sm font-medium"
+                    href="#">Contact Us</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button
+                    class="text-stone-600 dark:text-stone-400 font-['Plus_Jakarta_Sans'] text-sm font-medium px-4 py-2 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-lg transition-all active:scale-95 duration-150 ease-in-out">Login</button>
+                <button
+                    class="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-['Plus_Jakarta_Sans'] text-sm font-semibold shadow-md active:scale-95 duration-150 ease-in-out bg-gradient-to-b from-primary to-primary-container">Register</button>
+            </div>
+        </div>
+    </nav>
+    <main class="pt-20">
+        <!-- Hero Section -->
+        <section class="relative overflow-hidden min-h-[870px] flex items-center bg-background">
+            <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
+                <div class="space-y-8">
+                    <div
+                        class="inline-flex items-center px-4 py-2 rounded-full bg-primary-fixed text-on-primary-fixed-variant font-medium text-xs tracking-widest uppercase">
+                        Authentic Flavors since 1998
+                    </div>
+                    <h1 class="text-6xl md:text-7xl font-bold text-on-surface leading-[1.1] tracking-tight">
+                        Cita Rasa <span class="text-primary italic font-black">Legendaris</span> di Setiap Suapan.
+                    </h1>
+                    <p class="text-lg text-on-surface-variant max-w-lg leading-relaxed">
+                        Nikmati kelezatan mie ayam dengan resep warisan yang dikurasi secara profesional untuk
+                        memanjakan lidah Anda. Kualitas bahan premium, rasa tak terlupakan.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4 pt-4">
+                        <button
+                            class="px-8 py-4 bg-primary text-on-primary rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 bg-gradient-to-b from-primary to-primary-container">
+                            Pesan Sekarang
+                            <span class="material-symbols-outlined">shopping_basket</span>
+                        </button>
+                        <button
+                            class="px-8 py-4 border-2 border-outline-variant/30 text-primary rounded-xl font-bold text-lg hover:bg-primary/5 transition-all">
+                            Lihat Menu
+                        </button>
+                    </div>
+                    <div class="flex items-center gap-6 pt-8">
+                        <div class="flex -space-x-3">
+                            <div
+                                class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-background">
+                                <span class="material-symbols-outlined text-sm">person</span>
+                            </div>
+                            <div
+                                class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-background">
+                                <span class="material-symbols-outlined text-sm">person</span>
+                            </div>
+                            <div
+                                class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-background">
+                                <span class="material-symbols-outlined text-sm">person</span>
+                            </div>
+                        </div>
+                        <p class="text-sm text-on-surface-variant font-medium">
+                            <span class="text-on-surface font-bold">12,000+</span> Pelanggan Puas
+                        </p>
+                    </div>
+                </div>
+                <div class="relative">
+                    <div class="absolute -top-20 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-50">
+                    </div>
+                    <div class="relative z-20 transform scale-110">
+                        <img alt="Mascot Ma-Dyang" class="w-full h-auto drop-shadow-2xl"
+                            data-alt="A friendly and professional chicken chef mascot wearing a chef hat, standing confidently with a thumbs up next to a bowl of noodles"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFbe8lwjOheNtzzhrq-94x0FnX2aDlhGrS1nU3VnBvrcq0lUFPZStUoftz5N8W5lmJkDhNzu_eeeUv__yOb69bFh1SC3-3PafvXSnPCQxMaEebV_FtdLcCdSSXDreXa7VmUryo6UBgoRzju25gXe_ixUZiwB_7-AZ__aA61qb6Cut-jFHUAv6gjDcA9CGcC25Sh_LsnobkPcUshJq846E7B8-ZyWZNv5Gi1QRkdxeXldaRofD603bbWogbfOo-aqMtHJWixBguQyo" />
+                    </div>
+                    <div
+                        class="absolute bottom-10 -left-10 bg-white p-6 rounded-2xl shadow-2xl glass-effect max-w-[200px] z-30">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span class="material-symbols-outlined text-tertiary">verified</span>
+                            <span class="font-bold text-on-surface">Terjamin</span>
+                        </div>
+                        <p class="text-xs text-on-surface-variant">Bahan pilihan 100% segar setiap harinya untuk
+                            kualitas terbaik.</p>
+                    </div>
+                </div>
+            </div>
+            <!-- Decorative Pattern -->
+            <div class="absolute inset-0 opacity-5 pointer-events-none"
+                style="background-image: radial-gradient(#a0383b 0.5px, transparent 0.5px); background-size: 24px 24px;">
+            </div>
+        </section>
+        <!-- Menu Favorit Section -->
+        <section class="py-24 bg-surface-container-low relative">
+            <div class="max-w-7xl mx-auto px-6">
+                <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+                    <div class="space-y-4">
+                        <span class="text-primary font-bold tracking-[0.2em] uppercase text-xs">Menu Favorit Kita</span>
+                        <h2 class="text-4xl md:text-5xl font-bold text-on-surface">Kurasi Rasa <br />Terbaik Hari Ini
+                        </h2>
+                    </div>
+                    <p class="max-w-md text-on-surface-variant leading-relaxed">
+                        Pilihan menu paling dicari oleh para pencinta kuliner Ma-Dyang. Dibuat dengan cinta dan bumbu
+                        rahasia keluarga.
+                    </p>
+                </div>
+                <!-- Bento Grid Layout for Menu -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                    <!-- Featured Menu Card -->
+                    <div
+                        class="md:col-span-8 group relative overflow-hidden rounded-3xl bg-surface-container-lowest shadow-sm hover:shadow-xl transition-all duration-500">
+                        <div class="aspect-[16/9] overflow-hidden">
+                            <img class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                                data-alt="Close up of Indonesian chicken noodles with golden broth, leafy greens, and succulent chicken pieces in a premium ceramic bowl"
+                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPLw6XYJvhjxex_ojIfHm-VLbwmL7wS-BFMzOGLB-htUThugPevO0pQ6mVbpokqfzITidlKItFFlcQVz-FiPvVDre0a-KILh9BA9XNHPmSADAkdTYQMI4vpLEAS7hTJu6JwI5kY9GX4s8wgV-OY1O-JehRdG03Og3Kv6bN2xv0HSnBsB0Fl7CdpXs9xTiqZBYWwh_BJFWhj49ZXGDcznwn0At5Iq2fOtHx_4Z8leCP6N2kU3PoeEsH3JVlddmYnfh1-X_tqEE7WhY" />
+                        </div>
+                        <div class="p-8 flex justify-between items-center">
+                            <div>
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span
+                                        class="px-2 py-1 bg-tertiary/10 text-tertiary text-[10px] font-bold rounded uppercase">Best
+                                        Seller</span>
+                                    <span class="text-tertiary font-bold text-xs">5.0 (2.1k Reviews)</span>
+                                </div>
+                                <h3 class="text-2xl font-bold text-on-surface">Mie Ayam Spesial Ma-Dyang</h3>
+                                <p class="text-on-surface-variant text-sm mt-1">Lengkap dengan bakso, pangsit, dan
+                                    ceker.</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-3xl font-black text-primary mb-2">Rp 25k</div>
+                                <button
+                                    class="p-4 bg-surface-container rounded-full group-hover:bg-primary group-hover:text-on-primary transition-colors">
+                                    <span class="material-symbols-outlined">add_shopping_cart</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Secondary Menu Cards -->
+                    <div class="md:col-span-4 flex flex-col gap-6">
+                        <div
+                            class="flex-1 bg-surface-container-lowest rounded-3xl p-6 shadow-sm group hover:shadow-xl transition-all overflow-hidden relative">
+                            <div class="flex gap-4 mb-4">
+                                <div class="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
+                                    <img class="w-full h-full object-cover"
+                                        data-alt="Artisanal deep fried wonton crackers in a bamboo basket with a side of spicy red chili dipping sauce"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBs2wHIKk_jiLKjUotC8SR1tES4OPrtwg-jv9tvujMJoIF30FdXpq1qQyv8uB6_LMy9q2KsjJQhyvpNxK87_OFTe10qfJ-197FDMjwE0K1E3-AnrjkEoSDj4TpphbRvRQjHXygQVmZbPzGGRym-GwHqx-3IuGntDhckUlBYRLcTYmcdHjMMKv7aX_tBzN6hqQ47RpFncld6XP5mWDCrb2QtkASa1JpHwYwt7mTFXPw6I2P9IDgj7oSeI_CA8aMubAgdcZfKLrBLM1A" />
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-on-surface leading-tight">Pangsit Goreng Kriuk
+                                    </h4>
+                                    <div class="text-primary font-bold text-xl mt-1">Rp 12k</div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-on-surface-variant leading-relaxed mb-4">Pelengkap sempurna yang
+                                renyah dengan bumbu rempah pilihan.</p>
+                            <button
+                                class="w-full py-3 bg-secondary-container text-on-secondary-container rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                                Tambahkan
+                                <span class="material-symbols-outlined text-sm">add</span>
+                            </button>
+                        </div>
+                        <div
+                            class="flex-1 bg-surface-container-lowest rounded-3xl p-6 shadow-sm group hover:shadow-xl transition-all overflow-hidden relative">
+                            <div class="flex gap-4 mb-4">
+                                <div class="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
+                                    <img class="w-full h-full object-cover"
+                                        data-alt="Refreshing tall glass of iced lemon tea with mint leaves and a slice of lemon on top, bright outdoor lighting"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB34KqEvrw2VeIoPsn2jl8vmGxaw8q6kN-Bg0FEDpcmtYrfktHz6yjzrcgAr0POUpxPCaw9YnuLnNAWWpCQBhOH9OjZ33K08rJRw_b8dSSFSdy97DnkKpdLYLqmnMEo7aFVMiYqeM5aZqEB3YtbhMJWWOjIehcd1yd-S_LeGY6GGU8q6fvM72-8qJL_W3BXImIZIIlYYDeWFQ7aAd_jq_IhCANOXT_4Ef3ZLWu6PrKZg8o6jcBFicfVBqif_xBitvfvEH-gXG__K7k" />
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-lg text-on-surface leading-tight">Es Jeruk Segar Madu</h4>
+                                    <div class="text-primary font-bold text-xl mt-1">Rp 15k</div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-on-surface-variant leading-relaxed mb-4">Perasan jeruk asli dengan
+                                sentuhan madu hutan yang menyegarkan.</p>
+                            <button
+                                class="w-full py-3 bg-secondary-container text-on-secondary-container rounded-xl text-sm font-bold flex items-center justify-center gap-2">
+                                Tambahkan
+                                <span class="material-symbols-outlined text-sm">add</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Inventory/Growth Stats Section (Editorial Style) -->
+        <section class="py-24 bg-background">
+            <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-12">
+                <div class="flex flex-col items-center text-center">
+                    <span class="text-6xl font-bold text-primary mb-2">25+</span>
+                    <span class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Cabang
+                        Nasional</span>
+                </div>
+                <div class="flex flex-col items-center text-center">
+                    <span class="text-6xl font-bold text-tertiary mb-2">100%</span>
+                    <span class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Bahan Alami</span>
+                </div>
+                <div class="flex flex-col items-center text-center">
+                    <span class="text-6xl font-bold text-on-surface mb-2">15</span>
+                    <span class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Resep
+                        Rahasia</span>
+                </div>
+                <div class="flex flex-col items-center text-center">
+                    <span class="text-6xl font-bold text-primary-container mb-2">4.9</span>
+                    <span class="text-xs uppercase tracking-widest font-bold text-on-surface-variant">Rating
+                        Google</span>
+                </div>
+            </div>
+        </section>
+        <!-- Contact/Newsletter Section -->
+        <section class="py-20 max-w-7xl mx-auto px-6 mb-20">
+            <div
+                class="bg-primary rounded-[2.5rem] p-12 md:p-20 relative overflow-hidden shadow-2xl bg-gradient-to-br from-primary to-primary-container">
+                <div class="relative z-10 max-w-2xl">
+                    <h2 class="text-4xl md:text-5xl font-bold text-on-primary mb-6">Jangan Lewatkan Promo Menarik Kami!
+                    </h2>
+                    <p class="text-primary-fixed/80 mb-10 text-lg">Dapatkan info menu baru dan diskon eksklusif setiap
+                        minggunya langsung di inbox Anda.</p>
+                    <form class="flex flex-col sm:flex-row gap-4">
+                        <input
+                            class="flex-1 px-6 py-4 rounded-xl border-none text-on-surface focus:ring-2 focus:ring-on-primary-container"
+                            placeholder="Alamat Email Anda" type="email" />
+                        <button
+                            class="px-8 py-4 bg-on-primary-container text-primary font-bold rounded-xl hover:bg-surface-bright transition-all">Berlangganan</button>
+                    </form>
+                </div>
+                <!-- Abstract Decorative Element -->
+                <div
+                    class="absolute right-0 bottom-0 transform translate-x-1/4 translate-y-1/4 w-96 h-96 bg-white/10 rounded-full blur-3xl">
+                </div>
+                <span
+                    class="absolute top-10 right-10 material-symbols-outlined text-[120px] text-white/10 select-none">local_fire_department</span>
+            </div>
+        </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-stone-100 dark:bg-stone-950 w-full py-12 border-t border-stone-200/20 dark:border-stone-800/20">
+        <div class="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto px-8 gap-6">
+            <div class="text-lg font-black text-stone-900 dark:text-stone-100">
+                Mie Ayam Ma-Dyang
+            </div>
+            <div class="flex flex-wrap justify-center gap-8">
+                <a class="text-stone-500 hover:underline decoration-orange-500 underline-offset-4 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest font-semibold transition-opacity opacity-80 hover:opacity-100"
+                    href="#">Privacy Policy</a>
+                <a class="text-stone-500 hover:underline decoration-orange-500 underline-offset-4 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest font-semibold transition-opacity opacity-80 hover:opacity-100"
+                    href="#">Terms of Service</a>
+                <a class="text-stone-500 hover:underline decoration-orange-500 underline-offset-4 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest font-semibold transition-opacity opacity-80 hover:opacity-100"
+                    href="#">Support</a>
+                <a class="text-stone-500 hover:underline decoration-orange-500 underline-offset-4 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest font-semibold transition-opacity opacity-80 hover:opacity-100"
+                    href="#">Instagram</a>
+            </div>
+            <div
+                class="text-stone-500 dark:text-stone-500 font-['Plus_Jakarta_Sans'] text-xs uppercase tracking-widest font-semibold">
+                © 2024 Mie Ayam Ma-Dyang. The Culinary Curator System.
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>
