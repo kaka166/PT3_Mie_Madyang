@@ -1,6 +1,6 @@
 "use client";
 
-import Navbar from "../../component/navbar"; 
+import Navbar from "../../src/components/navbar"; 
 
 export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Navbar from "../../component/navbar";
+import Navbar from "../../src/components/navbar";
 
 export default function AboutPage() {
   return (

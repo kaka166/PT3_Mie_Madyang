@@ -11,22 +11,20 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden bg-gray-50">
-      
       {/* Background Blur */}
       <div className="absolute -top-24 -left-24 w-72 h-72 bg-red-200/30 rounded-full blur-3xl" />
       <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-orange-200/20 rounded-full blur-3xl" />
 
       <div className="w-full max-w-md z-10">
-        
         {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex p-4 bg-white rounded-full mb-4 shadow-md">
             <Image
               src="https://placehold.co/100x100.png"
-                    alt={"Mie Ayam Ma-Dyang Logo"}
-                    width={100}
-                    height={100}
-                    className="object-cover"
+              alt={"Mie Ayam Ma-Dyang Logo"}
+              width={100}
+              height={100}
+              className="object-cover"
             />
           </div>
 
@@ -41,7 +39,6 @@ export default function LoginPage() {
         {/* Card */}
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
           <form onSubmit={handleSubmit} className="space-y-6">
-            
             {/* Username */}
             <div>
               <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">
@@ -97,12 +94,11 @@ export default function LoginPage() {
             </div>
 
             {/* Button */}
-            <button
-              type="submit"
-              className="w-full py-3 bg-gradient-to-b from-[#a0383b] to-[#c05051] text-white rounded-lg font-semibold shadow-md hover:brightness-105 active:scale-95 transition"
-            >
-              Login
-            </button>
+            <Link href="/admin">
+              <button className="w-full py-3 bg-gradient-to-b from-[#a0383b] to-[#c05051] text-white rounded-lg font-semibold shadow-md hover:brightness-105 active:scale-95 transition">
+                Login
+              </button>
+            </Link>
           </form>
 
           {/* Register */}
