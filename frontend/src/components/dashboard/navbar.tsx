@@ -8,23 +8,6 @@ export default function Navbar() {
           <span className="text-xl font-bold text-primary italic">
             Mie Ayam Ma-Dyang
           </span>
-          <nav className="hidden md:flex gap-6 items-center text-sm font-medium">
-            <a className="text-primary font-bold" href="#">
-              Dashboard
-            </a>
-            <a
-              className="text-neutral-600 hover:bg-neutral-100 px-3 py-1 rounded-lg transition-colors"
-              href="#"
-            >
-              Inventory
-            </a>
-            <a
-              className="text-neutral-600 hover:bg-neutral-100 px-3 py-1 rounded-lg transition-colors"
-              href="#"
-            >
-              Sales
-            </a>
-          </nav>
         </div>
 
         <div className="flex items-center gap-4">
