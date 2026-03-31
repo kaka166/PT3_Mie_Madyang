@@ -19,7 +19,7 @@ export default function Sidebar() {
     { icon: LayoutDashboard, label: "Admin", href: "/admin" },
     { icon: CreditCard, label: "Cashier", href: "/cashier" },
     { icon: Package2, label: "Inventory", href: "/inventory" },
-    { icon: BarChart3, label: "Reports", href: "#" },
+    { icon: BarChart3, label: "Reports", href: "/reports" },
     { icon: UtensilsCrossed, label: "Kitchen", href: "/kitchen" },
   ];
 
