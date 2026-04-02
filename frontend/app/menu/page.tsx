@@ -1,25 +1,38 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import Navbar from "../../src/components/navbar";
 import Image from "next/image";
+// Import service dan interface
+import { menuService, Menu } from "@/services/menuService";
 
 export default function MenuPage() {
-  const [mie, setMie] = useState([]);
-  const [topping, setTopping] = useState([]);
-  const [minuman, setMinuman] = useState([]);
+  const [mie, setMie] = useState<Menu[]>([]);
+  const [topping, setTopping] = useState<Menu[]>([]);
+  const [minuman, setMinuman] = useState<Menu[]>([]);
+
+  // Base URL untuk gambar agar rapi
+  const IMAGE_BASE_URL = "http://localhost:8000/storage/menu/";
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/menu")
-      .then(res => res.json())
-      .then(res => {
+    const loadMenu = async () => {
+      try {
+        const res = await menuService.getAll();
         const data = res.data;
 
-        setMie(data.filter(item => item.kategori.nama_kategori === "Mie"));
-        setTopping(data.filter(item => item.kategori.nama_kategori === "Topping"));
-        setMinuman(data.filter(item => item.kategori.nama_kategori === "Minuman"));
-      });
+        // Filter kategori berdasarkan data dari backend
+        // Hanya menampilkan menu yang is_active = 1
+        const activeData = data.filter((item: Menu) => item.is_active === 1);
+
+        setMie(activeData.filter((item: Menu) => item.kategori?.nama_kategori === "Mie"));
+        setTopping(activeData.filter((item: Menu) => item.kategori?.nama_kategori === "Topping"));
+        setMinuman(activeData.filter((item: Menu) => item.kategori?.nama_kategori === "Minuman"));
+      } catch (error) {
+        console.error("Gagal memuat menu:", error);
+      }
+    };
+
+    loadMenu();
   }, []);
 
   return (
@@ -71,7 +84,7 @@ export default function MenuPage() {
                   <div className="md:w-1/2 h-64 md:h-auto relative overflow-hidden">
                     <Image
                       alt={mie[0].nama_menu}
-                      src={`http://127.0.0.1:8000/storage/menu/${mie[0].gambar}`}
+                      src={`${IMAGE_BASE_URL}${mie[0].gambar}`}
                       fill
                       className="object-cover"
                     />
@@ -86,7 +99,7 @@ export default function MenuPage() {
                       </span>
                     </div>
                     <p className="text-[#564241] text-sm md:text-base mb-8 leading-relaxed">
-                      {mie[0].deskripsi ?? "Menu mie ayam spesial Ma-Dyang."}
+                      Menu mie ayam spesial Ma-Dyang.
                     </p>
                   </div>
                 </div>
@@ -109,7 +122,7 @@ export default function MenuPage() {
                     </span>
                   </div>
                   <p className="text-[#564241] text-sm leading-relaxed mb-6">
-                    {item.deskripsi ?? "Menu mie ayam spesial Ma-Dyang."}
+                    Menu mie ayam spesial Ma-Dyang.
                   </p>
                 </div>
               ))}
@@ -133,7 +146,7 @@ export default function MenuPage() {
                 <div className="aspect-square rounded-2xl overflow-hidden mb-4 relative shadow-sm border border-gray-50">
                   <Image
                     alt={item.nama_menu}
-                    src={`http://127.0.0.1:8000/storage/menu/${item.gambar}`}
+                    src={`${IMAGE_BASE_URL}${item.gambar}`}
                     fill
                     className="object-cover"
                   />
@@ -165,12 +178,11 @@ export default function MenuPage() {
                 key={item.id}
                 className="bg-[#f3f3f3] p-5 rounded-2xl flex items-center gap-6"
               >
-                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-sm">
+                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 shadow-sm relative">
                   <Image
-                    src={`http://127.0.0.1:8000/storage/menu/${item.gambar}`}
+                    src={`${IMAGE_BASE_URL}${item.gambar}`}
                     alt={item.nama_menu}
-                    width={100}
-                    height={100}
+                    fill
                     className="object-cover"
                   />
                 </div>
@@ -179,7 +191,7 @@ export default function MenuPage() {
                     {item.nama_menu}
                   </h4>
                   <p className="text-[10px] text-[#564241]">
-                    {item.deskripsi ?? ""}
+                    Pilihan minuman segar Ma-Dyang.
                   </p>
                 </div>
                 <span className="font-bold text-primary text-sm">
@@ -193,9 +205,6 @@ export default function MenuPage() {
         {/* CTA */}
         <div className="bg-[#ffdad8] rounded-[2.5rem] p-10 md:p-16 text-center relative overflow-hidden border border-primary/10">
           <div className="relative z-10">
-            <span className="material-symbols-outlined text-primary text-5xl mb-6">
-              restaurant
-            </span>
             <h2 className="text-2xl md:text-3xl font-bold font-headline mb-4 text-[#410006]">
               Ready to satisfy your cravings?
             </h2>

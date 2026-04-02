@@ -1,115 +1,118 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Search,
   Plus,
   Calculator,
   Pencil,
   Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Utensils,
   MoreHorizontal,
+  FolderPlus,
+  X,
+  Check,
+  AlertTriangle,
 } from "lucide-react";
-
-// TYPE MENU
-type Menu = {
-  id: number;
-  nama_menu: string;
-  harga_jual: number;
-  kategori_id: number;
-  is_active: number;
-  gambar?: string;
-  kategori?: {
-    nama_kategori: string;
-  };
-};
+import { menuService, Menu, Category } from "@/services/menuService";
 
 export default function InventoryPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState("All Items");
   const [search, setSearch] = useState("");
 
-  // MODAL STATE
+  // --- MODAL & UI STATE ---
   const [showModal, setShowModal] = useState(false);
+  const [showCatModal, setShowCatModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
+  const [confirmPopup, setConfirmPopup] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+    type: "danger" | "warning";
+  }>({
+    isOpen: false,
+    title: "",
+    message: "",
+    onConfirm: () => {},
+    type: "warning",
+  });
+
+  // --- FORM & CALC STATE ---
   const [form, setForm] = useState({
     nama_menu: "",
     harga_jual: "",
-    kategori_id: "1",
+    kategori_id: "",
     gambar: null as File | null,
   });
 
-  // FETCH MENU
-  const fetchMenu = async () => {
+  const [calc, setCalc] = useState({
+    hpp: 0,
+    mode: "manual",
+    value: 0,
+  });
+
+  const [editingCatId, setEditingCatId] = useState<number | null>(null);
+  const [editingCatName, setEditingCatName] = useState("");
+  const [newCatName, setNewCatName] = useState("");
+
+  // --- DATA FETCHING ---
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/menu");
-      const data = await res.json();
-      setMenus(data.data);
-    } catch (error) {
-      console.error("Gagal fetch menu:", error);
+      const [mRes, cRes] = await Promise.all([
+        menuService.getAll(),
+        menuService.getCategories(),
+      ]);
+      setMenus(mRes.data);
+      setCategories(cRes.data);
+    } catch (err) {
+      console.error("Gagal load data inventory:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // --- PRICE CALCULATOR LOGIC ---
+  const updateCalculatedPrice = (hpp: number, mode: string, value: number) => {
+    if (mode === "manual") return;
+    let total = hpp;
+    if (mode === "margin") total = hpp + value;
+    else if (mode === "percent") total = hpp + (hpp * value) / 100;
+    setForm((f) => ({ ...f, harga_jual: String(Math.round(total)) }));
+  };
+
+  const handleCalcChange = (
+    field: "hpp" | "mode" | "value",
+    val: string | number,
+  ) => {
+    const numVal = Number(val);
+    const nextCalc = { ...calc, [field]: field === "mode" ? val : numVal };
+    setCalc(nextCalc);
+    updateCalculatedPrice(
+      field === "hpp" ? numVal : calc.hpp,
+      field === "mode" ? String(val) : calc.mode,
+      field === "value" ? numVal : calc.value,
+    );
+  };
+
+  // --- MENU ACTIONS ---
+  const toggleMenu = async (menu: Menu) => {
+    try {
+      await menuService.toggleStatus(menu);
+      fetchData();
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  useEffect(() => {
-    fetchMenu();
-  }, []);
-
-  // TOGGLE POS
-  const toggleMenu = async (menu: Menu) => {
-    await fetch(`http://127.0.0.1:8000/api/menu/${menu.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        kategori_id: menu.kategori_id,
-        nama_menu: menu.nama_menu,
-        harga_jual: menu.harga_jual,
-        is_active: menu.is_active ? 0 : 1,
-      }),
-    });
-
-    fetchMenu();
-  };
-
-  // DELETE
-  const deleteMenu = async (id: number) => {
-    if (!confirm("Hapus menu ini?")) return;
-
-    await fetch(`http://127.0.0.1:8000/api/menu/${id}`, {
-      method: "DELETE",
-    });
-
-    fetchMenu();
-  };
-
-  // OPEN ADD MODAL
-  const openAddModal = () => {
-    setIsEdit(false);
-    setForm({
-      nama_menu: "",
-      harga_jual: "",
-      kategori_id: "1",
-      gambar: null,
-    });
-    setShowModal(true);
-  };
-
-  // OPEN EDIT MODAL
-  const openEditModal = (menu: Menu) => {
-    setIsEdit(true);
-    setSelectedId(menu.id);
-    setForm({
-      nama_menu: menu.nama_menu,
-      harga_jual: String(menu.harga_jual),
-      kategori_id: String(menu.kategori_id),
-      gambar: null,
-    });
-    setShowModal(true);
-  };
-
-  // SUBMIT (ADD / EDIT + UPLOAD GAMBAR)
   const submitMenu = async () => {
     const formData = new FormData();
     formData.append("nama_menu", form.nama_menu);
@@ -117,185 +120,269 @@ export default function InventoryPage() {
     formData.append("kategori_id", form.kategori_id);
     if (form.gambar) formData.append("gambar", form.gambar);
 
-    if (isEdit) {
-      formData.append("_method", "PUT"); // Laravel PUT via POST
-      await fetch(`http://127.0.0.1:8000/api/menu/${selectedId}`, {
-        method: "POST",
-        body: formData,
-      });
-    } else {
-      await fetch("http://127.0.0.1:8000/api/menu", {
-        method: "POST",
-        body: formData,
-      });
+    try {
+      if (isEdit && selectedId) {
+        formData.append("_method", "PUT");
+        await menuService.update(selectedId, formData);
+      } else {
+        await menuService.create(formData);
+      }
+      setShowModal(false);
+      fetchData();
+    } catch (err) {
+      alert("Gagal simpan menu.");
     }
-
-    setShowModal(false);
-    fetchMenu();
   };
 
-  // FILTER + SEARCH
+  const deleteMenu = (id: number) => {
+    setConfirmPopup({
+      isOpen: true,
+      type: "danger",
+      title: "Hapus Menu?",
+      message: "Data menu ini akan dihapus permanen dari sistem database.",
+      onConfirm: async () => {
+        await menuService.delete(id);
+        setConfirmPopup((prev) => ({ ...prev, isOpen: false }));
+        fetchData();
+      },
+    });
+  };
+
+  // --- CATEGORY ACTIONS ---
+  const handleToggleCategory = (cat: Category) => {
+    const isActivating = cat.is_active === 0;
+    setConfirmPopup({
+      isOpen: true,
+      type: isActivating ? "warning" : "warning",
+      title: isActivating ? "Aktifkan Kategori?" : "Nonaktifkan Kategori?",
+      message: isActivating
+        ? `Mengaktifkan ${cat.nama_kategori} akan memunculkan kembali kategori ini di POS.`
+        : `Jika ${cat.nama_kategori} dimatikan, semua menu di dalamnya otomatis nonaktif di POS.`,
+      onConfirm: async () => {
+        try {
+          await menuService.toggleCategoryStatus(cat);
+          setConfirmPopup((prev) => ({ ...prev, isOpen: false }));
+          fetchData();
+        } catch (err) {
+          alert("Gagal mengubah status kategori.");
+        }
+      },
+    });
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCatName) return;
+    await menuService.createCategory(newCatName);
+    setNewCatName("");
+    setShowCatModal(false);
+    fetchData();
+  };
+
+  const handleUpdateCategory = async (id: number) => {
+    await menuService.updateCategory(id, editingCatName);
+    setEditingCatId(null);
+    fetchData();
+  };
+
   const filteredMenus = menus.filter((menu) => {
     const matchFilter =
-      filter === "All Items" ||
-      menu.kategori?.nama_kategori === filter;
-
+      filter === "All Items" || menu.kategori?.nama_kategori === filter;
     const matchSearch = menu.nama_menu
       .toLowerCase()
       .includes(search.toLowerCase());
-
     return matchFilter && matchSearch;
   });
 
   return (
-    <div className="min-h-screen bg-[#f9f9f9] p-8">
-      {/* HEADER */}
-      <div className="flex flex-col md:flex-row justify-between mb-6 gap-4">
+    <div className="min-h-screen bg-[#f9f9f9] p-4 md:p-8 font-sans">
+      {/* 1. HEADER SECTION */}
+      <div className="flex flex-col md:flex-row justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Menu & POS Controls</h1>
+          <h1 className="text-2xl font-bold text-neutral-800 tracking-tight">
+            Menu & Inventory Controls
+          </h1>
           <p className="text-sm text-zinc-500">
-            Curate your offerings and manage pricing visibility.
+            Kelola menu, strategi harga, dan pantau stok bahan baku.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="relative">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400"
               size={16}
             />
             <input
-              placeholder="Search items..."
+              placeholder="Cari menu..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-zinc-100 rounded-full text-sm w-64"
+              className="pl-9 pr-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm w-full md:w-64 focus:outline-none focus:ring-2 focus:ring-red-500/20 transition-all"
             />
           </div>
 
-          <button className="flex items-center gap-2 px-5 py-2 bg-green-700 text-white rounded-xl font-semibold">
-            <Calculator size={16} /> Kalkulator
+          <button
+            onClick={() => setShowCatModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-zinc-200"
+          >
+            <FolderPlus size={16} /> Kategori
           </button>
 
           <button
-            onClick={openAddModal}
-            className="flex items-center gap-2 px-5 py-2 bg-red-600 text-white rounded-xl font-semibold"
+            onClick={() => {
+              setIsEdit(false);
+              setCalc({ hpp: 0, mode: "manual", value: 0 });
+              setForm({
+                nama_menu: "",
+                harga_jual: "",
+                kategori_id: categories[0]?.id.toString() || "",
+                gambar: null,
+              });
+              setShowModal(true);
+            }}
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-red-600/20"
           >
-            <Plus size={16} /> Tambah
+            <Plus size={16} /> Tambah Menu
           </button>
         </div>
       </div>
 
-      {/* FILTER */}
-      <div className="flex gap-2 mb-6">
-        {["All Items", "Mie", "Topping", "Minuman"].map((item, i) => (
+      {/* 2. FILTER TABS */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
+        <button
+          onClick={() => setFilter("All Items")}
+          className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === "All Items" ? "bg-red-600 text-white shadow-md shadow-red-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}
+        >
+          Semua
+        </button>
+        {categories.map((cat) => (
           <button
-            key={i}
-            onClick={() => setFilter(item)}
-            className={`px-4 py-2 rounded-full text-sm ${
-              filter === item
-                ? "bg-red-600 text-white"
-                : "bg-white border text-zinc-600"
-            }`}
+            key={cat.id}
+            onClick={() => setFilter(cat.nama_kategori)}
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === cat.nama_kategori ? "bg-red-600 text-white shadow-md shadow-red-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}
           >
-            {item}
+            {cat.nama_kategori}
           </button>
         ))}
       </div>
 
-      {/* TABLE MENU */}
-      <div className="bg-white rounded-2xl shadow overflow-hidden mb-10">
-        <table className="w-full text-sm">
-          <thead className="bg-zinc-100 text-xs uppercase text-zinc-500">
-            <tr>
-              <th className="px-6 py-3 text-left">Menu Name</th>
-              <th className="px-6 py-3 text-left">Category</th>
-              <th className="px-6 py-3 text-left">Price</th>
-              <th className="px-6 py-3 text-center">POS Visibility</th>
-              <th className="px-6 py-3 text-right">Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredMenus.map((item) => (
-              <tr key={item.id} className="border-t border-zinc-200 hover:bg-zinc-50">
-                <td className="px-6 py-4">{item.nama_menu}</td>
-                <td className="px-6 py-4">{item.kategori?.nama_kategori}</td>
-                <td className="px-6 py-4">Rp {item.harga_jual}</td>
-
-                <td className="px-6 py-4 text-center">
-                  <button
-                    onClick={() => toggleMenu(item)}
-                    className={`w-11 h-6 flex items-center rounded-full transition ${
-                      item.is_active ? "bg-red-600" : "bg-zinc-300"
-                    }`}
-                  >
-                    <div
-                      className={`w-5 h-5 bg-white rounded-full shadow transform transition ${
-                        item.is_active ? "translate-x-5" : "translate-x-1"
-                      }`}
-                    />
-                  </button>
-                </td>
-
-                <td className="px-6 py-4 flex justify-end gap-2">
-                  <Pencil
-                    size={16}
-                    className="text-zinc-500 cursor-pointer"
-                    onClick={() => openEditModal(item)}
-                  />
-                  <Trash2
-                    size={16}
-                    className="text-red-500 cursor-pointer"
-                    onClick={() => deleteMenu(item.id)}
-                  />
-                </td>
+      {/* 3. MENU TABLE */}
+      <div className="bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden mb-12">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead className="bg-zinc-50/50 text-[10px] uppercase font-bold text-zinc-400 tracking-widest">
+              <tr>
+                <th className="px-6 py-4 text-left">Nama Menu</th>
+                <th className="px-6 py-4 text-left">Kategori</th>
+                <th className="px-6 py-4 text-left">Harga Jual</th>
+                <th className="px-6 py-4 text-center">Visibilitas POS</th>
+                <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div className="flex justify-between items-center px-6 py-4 border-t border-zinc-200 text-xs">
-          <span className="text-zinc-500">
-            Total Menu: {filteredMenus.length}
-          </span>
+            </thead>
+            <tbody className="divide-y divide-zinc-50">
+              {filteredMenus.map((item) => (
+                <tr
+                  key={item.id}
+                  className="hover:bg-zinc-50/30 transition-colors group"
+                >
+                  <td className="px-6 py-4 font-bold text-neutral-700">
+                    {item.nama_menu}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span className="bg-zinc-100 text-zinc-500 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight">
+                      {item.kategori?.nama_kategori}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 font-black text-neutral-800">
+                    Rp {item.harga_jual.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <button
+                      onClick={() => toggleMenu(item)}
+                      className={`w-11 h-6 flex items-center rounded-full transition-all mx-auto ${item.is_active ? "bg-green-500" : "bg-zinc-300"}`}
+                    >
+                      <div
+                        className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-all ${item.is_active ? "translate-x-6" : "translate-x-1"}`}
+                      />
+                    </button>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex justify-end gap-2 text-zinc-400">
+                      <button
+                        onClick={() => {
+                          setIsEdit(true);
+                          setSelectedId(item.id);
+                          setForm({
+                            nama_menu: item.nama_menu,
+                            harga_jual: String(item.harga_jual),
+                            kategori_id: String(item.kategori_id),
+                            gambar: null,
+                          });
+                          setShowModal(true);
+                        }}
+                        className="p-2 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all"
+                      >
+                        <Pencil size={16} />
+                      </button>
+                      <button
+                        onClick={() => deleteMenu(item.id)}
+                        className="p-2 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* STOCK INVENTORY */}
-      <div>
-        <h2 className="text-xl font-bold mb-1">
-          Stock Inventory (Bahan Baku)
-        </h2>
-        <p className="text-sm text-zinc-500 mb-4">
-          Real-time tracking of ingredients and supply health.
-        </p>
+      {/* 4. STOCK INVENTORY (BAHAN BAKU) */}
+      <div className="mt-4">
+        <div className="flex justify-between items-end mb-4">
+          <div>
+            <h2 className="text-xl font-bold text-neutral-800">
+              Stock Bahan Baku
+            </h2>
+            <p className="text-sm text-zinc-500">
+              Pantau ketersediaan bahan real-time.
+            </p>
+          </div>
+          <button className="text-xs font-bold text-red-600 flex items-center gap-1 hover:underline">
+            Lihat Semua Laporan <ChevronRight size={14} />
+          </button>
+        </div>
 
-        <div className="bg-white rounded-2xl shadow overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-zinc-100 text-xs uppercase text-zinc-500">
+            <thead className="bg-zinc-50/50 text-[10px] uppercase font-bold text-zinc-400 tracking-widest">
               <tr>
-                <th className="px-6 py-3 text-left">Ingredient</th>
-                <th className="px-6 py-3 text-left">Last Supply</th>
-                <th className="px-6 py-3 text-center">Stock</th>
-                <th className="px-6 py-3 text-left">Unit</th>
-                <th className="px-6 py-3 text-left">Status</th>
-                <th className="px-6 py-3 text-right">Action</th>
+                <th className="px-6 py-4 text-left">Bahan Baku</th>
+                <th className="px-6 py-4 text-left">Terakhir Suplai</th>
+                <th className="px-6 py-4 text-center">Stok Sisa</th>
+                <th className="px-6 py-4 text-left">Satuan</th>
+                <th className="px-6 py-4 text-left">Status</th>
+                <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
-
-            <tbody>
-              <tr className="border-t border-zinc-200">
-                <td className="px-6 py-4">Tepung Terigu</td>
-                <td className="px-6 py-4">Oct 24</td>
-                <td className="px-6 py-4 text-center font-bold">142</td>
-                <td className="px-6 py-4">KG</td>
+            <tbody className="divide-y divide-zinc-50">
+              <tr className="hover:bg-zinc-50/30">
+                <td className="px-6 py-4 font-bold text-neutral-700">
+                  Tepung Terigu Segitiga Biru
+                </td>
+                <td className="px-6 py-4 text-zinc-500">02 Apr 2026</td>
+                <td className="px-6 py-4 text-center font-black text-neutral-800">
+                  142
+                </td>
+                <td className="px-6 py-4 text-zinc-500">KG</td>
                 <td className="px-6 py-4">
-                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs">
-                    safe
+                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">
+                    Aman
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  <MoreHorizontal size={16} />
+                  <MoreHorizontal className="ml-auto text-zinc-300 cursor-pointer" />
                 </td>
               </tr>
             </tbody>
@@ -303,71 +390,303 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* MODAL */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl p-6 w-[400px]">
-            <h2 className="text-lg font-bold mb-4">
-              {isEdit ? "Edit Menu" : "Tambah Menu"}
-            </h2>
+      {/* --- MODAL POPUPS --- */}
 
-            <div className="space-y-3">
-              <input
-                type="text"
-                placeholder="Nama Menu"
-                value={form.nama_menu}
-                onChange={(e) =>
-                  setForm({ ...form, nama_menu: e.target.value })
-                }
-                className="w-full border rounded-lg px-3 py-2"
-              />
-
-              <input
-                type="number"
-                placeholder="Harga"
-                value={form.harga_jual}
-                onChange={(e) =>
-                  setForm({ ...form, harga_jual: e.target.value })
-                }
-                className="w-full border rounded-lg px-3 py-2"
-              />
-
-              <select
-                value={form.kategori_id}
-                onChange={(e) =>
-                  setForm({ ...form, kategori_id: e.target.value })
-                }
-                className="w-full border rounded-lg px-3 py-2"
-              >
-                <option value="1">Mie</option>
-                <option value="2">Topping</option>
-                <option value="3">Minuman</option>
-              </select>
-
-              <input
-                type="file"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    gambar: e.target.files ? e.target.files[0] : null,
-                  })
-                }
-              />
+      {/* CONFIRMATION POPUP */}
+      {confirmPopup.isOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl animate-in fade-in zoom-in duration-200 text-center">
+            <div
+              className={`w-16 h-16 rounded-2xl mb-6 mx-auto flex items-center justify-center ${confirmPopup.type === "danger" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-600"}`}
+            >
+              <AlertTriangle size={32} />
             </div>
-
-            <div className="flex justify-end gap-2 mt-4">
+            <h3 className="text-xl font-bold text-neutral-800 mb-2">
+              {confirmPopup.title}
+            </h3>
+            <p className="text-sm text-zinc-500 mb-8 leading-relaxed">
+              {confirmPopup.message}
+            </p>
+            <div className="flex gap-3">
               <button
-                onClick={() => setShowModal(false)}
-                className="px-4 py-2 bg-gray-200 rounded-lg"
+                onClick={() =>
+                  setConfirmPopup((prev) => ({ ...prev, isOpen: false }))
+                }
+                className="flex-1 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors"
               >
                 Batal
               </button>
+              <button
+                onClick={confirmPopup.onConfirm}
+                className={`flex-1 py-3 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all ${confirmPopup.type === "danger" ? "bg-red-600 shadow-red-200" : "bg-amber-600 shadow-amber-200"}`}
+              >
+                Ya, Lanjutkan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
+      {/* MODAL KATEGORI */}
+      {showCatModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-xl font-bold text-neutral-800">
+                Kelola Kategori
+              </h2>
+              <button
+                onClick={() => setShowCatModal(false)}
+                className="p-2 hover:bg-zinc-100 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="flex gap-2 mb-8">
+              <input
+                type="text"
+                placeholder="Tambah kategori..."
+                value={newCatName}
+                onChange={(e) => setNewCatName(e.target.value)}
+                className="flex-1 border-b border-zinc-200 py-2 outline-none focus:border-green-600 text-sm font-medium"
+              />
+              <button
+                onClick={handleAddCategory}
+                className="bg-green-700 text-white px-5 py-2 rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-green-100"
+              >
+                Tambah
+              </button>
+            </div>
+
+            <div className="space-y-3 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
+              <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-4">
+                Daftar Kategori Aktif
+              </label>
+              {categories.map((cat) => (
+                <div
+                  key={cat.id}
+                  className={`flex items-center justify-between p-4 rounded-2xl transition-all border group ${cat.is_active ? "bg-zinc-50 border-transparent hover:border-zinc-200" : "bg-zinc-100/50 border-zinc-200 opacity-60"}`}
+                >
+                  <div className="flex flex-col">
+                    {editingCatId === cat.id ? (
+                      <input
+                        autoFocus
+                        type="text"
+                        value={editingCatName}
+                        onChange={(e) => setEditingCatName(e.target.value)}
+                        className="bg-transparent border-b border-green-600 outline-none text-sm font-bold"
+                      />
+                    ) : (
+                      <span
+                        className={`text-sm font-bold transition-all ${cat.is_active ? "text-zinc-700" : "text-zinc-400 line-through"}`}
+                      >
+                        {cat.nama_kategori}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    {editingCatId === cat.id ? (
+                      <button
+                        onClick={() => handleUpdateCategory(cat.id)}
+                        className="text-[10px] font-bold text-green-600 uppercase px-3 py-1 bg-green-50 rounded-lg"
+                      >
+                        Simpan
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleToggleCategory(cat)}
+                          className={`w-8 h-4.5 flex items-center rounded-full transition-all px-0.5 mr-2 ${cat.is_active ? "bg-green-500 shadow-md" : "bg-zinc-300"}`}
+                        >
+                          <div
+                            className={`w-3.5 h-3.5 bg-white rounded-full transform transition-all ${cat.is_active ? "translate-x-3.5" : "translate-x-0"}`}
+                          />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingCatId(cat.id);
+                            setEditingCatName(cat.nama_kategori);
+                          }}
+                          className="p-1.5 text-zinc-400 opacity-0 group-hover:opacity-100 hover:text-blue-500 transition-all"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL MENU */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl overflow-y-auto max-h-[90vh] animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center mb-8">
+              <h2 className="text-2xl font-bold text-neutral-800">
+                {isEdit ? "Update Menu" : "Tambah Menu Baru"}
+              </h2>
+              <button
+                onClick={() => setShowModal(false)}
+                className="p-2 hover:bg-zinc-100 rounded-full transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
+                    Nama Menu
+                  </label>
+                  <input
+                    type="text"
+                    value={form.nama_menu}
+                    onChange={(e) =>
+                      setForm({ ...form, nama_menu: e.target.value })
+                    }
+                    className="w-full border-b-2 border-zinc-100 py-2 outline-none focus:border-red-500 font-bold text-lg transition-all"
+                    placeholder="Masukkan nama..."
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
+                    Kategori
+                  </label>
+                  <select
+                    value={form.kategori_id}
+                    onChange={(e) =>
+                      setForm({ ...form, kategori_id: e.target.value })
+                    }
+                    className="w-full border-b-2 border-zinc-100 py-2 outline-none bg-transparent font-bold"
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id.toString()}>
+                        {c.nama_kategori}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* KALKULATOR HARGA JUAL */}
+              <div className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100 space-y-5">
+                <div className="flex items-center gap-2 text-red-600 font-bold text-[11px] uppercase tracking-widest">
+                  <Calculator size={16} /> Kalkulator Harga Jual
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
+                      HPP (Modal)
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Modal bahan..."
+                      className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm focus:ring-2 ring-red-500/10 transition-all"
+                      onChange={(e) => handleCalcChange("hpp", e.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
+                      Metode Laba
+                    </label>
+                    <select
+                      className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2.5 text-sm outline-none shadow-sm transition-all font-medium"
+                      value={calc.mode}
+                      onChange={(e) => handleCalcChange("mode", e.target.value)}
+                    >
+                      <option value="manual">Harga Manual</option>
+                      <option value="margin">Margin Rp</option>
+                      <option value="percent">Persentase (%)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {calc.mode !== "manual" && (
+                  <div className="animate-in slide-in-from-top-2 duration-300">
+                    <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
+                      {calc.mode === "margin"
+                        ? "Input Margin Untung (Rp)"
+                        : "Input Persentase Untung (%)"}
+                    </label>
+                    <input
+                      type="number"
+                      placeholder={
+                        calc.mode === "margin" ? "Contoh: 5000" : "Contoh: 30"
+                      }
+                      className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm transition-all"
+                      onChange={(e) =>
+                        handleCalcChange("value", e.target.value)
+                      }
+                    />
+                  </div>
+                )}
+
+                <div className="pt-4 border-t border-zinc-200">
+                  <span className="text-[9px] font-bold text-zinc-400 uppercase block mb-2">
+                    Hasil Harga Jual Akhir
+                  </span>
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xl font-bold text-zinc-400">Rp</span>
+                    <input
+                      type="number"
+                      value={form.harga_jual}
+                      readOnly={calc.mode !== "manual"}
+                      onChange={(e) =>
+                        setForm({ ...form, harga_jual: e.target.value })
+                      }
+                      className={`text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${calc.mode !== "manual" ? "text-green-600" : "text-neutral-800"}`}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-3">
+                  Foto Produk
+                </label>
+                <div className="border-2 border-dashed border-zinc-200 rounded-3xl p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
+                  <input
+                    type="file"
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        gambar: e.target.files ? e.target.files[0] : null,
+                      })
+                    }
+                  />
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Plus size={24} />
+                    </div>
+                    <p className="text-xs font-bold text-zinc-400">
+                      {form.gambar
+                        ? form.gambar.name
+                        : "Klik untuk upload foto menu"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-10">
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-8 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors"
+              >
+                Batal
+              </button>
               <button
                 onClick={submitMenu}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg"
+                className="px-10 py-3 bg-neutral-900 hover:bg-black text-white rounded-2xl text-sm font-bold active:scale-95 transition-all shadow-xl shadow-zinc-200"
               >
-                Simpan
+                Simpan Menu
               </button>
             </div>
           </div>
@@ -376,3 +695,21 @@ export default function InventoryPage() {
     </div>
   );
 }
+
+// Tambahan Lucide-React yang mungkin belum diimport (ChevronRight)
+const ChevronRight = ({ size }: { size: number }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className="lucide lucide-chevron-right"
+  >
+    <path d="m9 18 6-6-6-6" />
+  </svg>
+);
