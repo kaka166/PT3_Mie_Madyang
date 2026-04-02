@@ -105,13 +105,20 @@ export default function InventoryPage() {
 
   // --- MENU ACTIONS ---
   const toggleMenu = async (menu: Menu) => {
-    try {
-      await menuService.toggleStatus(menu);
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  try {
+    // Update UI langsung
+    setMenus((prev) =>
+      prev.map((m) =>
+        m.id === menu.id ? { ...m, is_active: m.is_active ? 0 : 1 } : m
+      )
+    );
+
+    await menuService.toggleStatus(menu);
+  } catch (err) {
+    console.error(err);
+    fetchData(); // reload jika gagal
+  }
+};
 
   const submitMenu = async () => {
     const formData = new FormData();

@@ -20,3 +20,4 @@ Route::delete('/kategori/{id}', [MenuKategoriController::class, 'destroy']);
 
 // ROUTE TOGGLE KATEGORI (CASCADING)
 Route::put('/kategori/{id}/toggle', [MenuKategoriController::class, 'toggleStatus']);
+Route::put('/menu/{id}/toggle', [MenuController::class, 'toggle']);

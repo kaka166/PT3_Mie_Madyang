@@ -166,7 +166,7 @@ export default function POSPage() {
           {/* MENU */}
           <div className="flex-[2] flex flex-col gap-6 overflow-hidden">
             <div className="flex gap-3 overflow-x-auto pb-2">
-              {["All Items", "Mie", "Topping", "Minuman", "Snacks"].map(
+              {["All Items", "Mie", "Topping", "Minuman"].map(
                 (c, i) => (
                   <button
                     key={i}
