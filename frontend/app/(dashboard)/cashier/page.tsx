@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 /* ================= TYPES ================= */
 type MenuItem = {
@@ -7,7 +7,8 @@ type MenuItem = {
   name: string;
   price: number;
   stock: number;
-  img: string;
+  kategori: string;
+  gambar?: string;
 };
 
 type CartItem = {
@@ -17,58 +18,59 @@ type CartItem = {
   qty: number;
 };
 
-/* ================= DATA ================= */
-const initialMenus: MenuItem[] = [
-  {
-    id: 1,
-    name: "Mie Ayam Spesial",
-    price: 18000,
-    stock: 42,
-    img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d",
-  },
-  {
-    id: 2,
-    name: "Mie Ayam Bakso Pedas",
-    price: 22000,
-    stock: 15,
-    img: "https://images.unsplash.com/photo-1604908177522-4027c8b4a0d4",
-  },
-  {
-    id: 3,
-    name: "Pangsit Goreng (3pcs)",
-    price: 5000,
-    stock: 120,
-    img: "https://images.unsplash.com/photo-1604908177341-cb8c55e4f7f2",
-  },
-  {
-    id: 4,
-    name: "Es Teh Manis",
-    price: 6000,
-    stock: 85,
-    img: "https://images.unsplash.com/photo-1551024709-8f23befc6c43",
-  },
-  {
-    id: 5,
-    name: "Sate Ati Ampela",
-    price: 4000,
-    stock: 0,
-    img: "https://images.unsplash.com/photo-1604908177010-5c5c1f4b4f9f",
-  },
-  {
-    id: 6,
-    name: "Wedang Jahe",
-    price: 8000,
-    stock: 24,
-    img: "https://images.unsplash.com/photo-1604908177456-1a0d1c4e0c3a",
-  },
-];
-
 /* ================= COMPONENT ================= */
 export default function POSPage() {
-  const [menus, setMenus] = useState<MenuItem[]>(initialMenus);
+  const [menus, setMenus] = useState<MenuItem[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [filter, setFilter] = useState("All Items");
+  const [search, setSearch] = useState("");
 
-  /* ================= LOGIC ================= */
+  /* ================= FETCH MENU FROM INVENTORY ================= */
+  const fetchMenu = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/api/menu");
+      const data = await res.json();
+
+      const activeMenus = data.data
+        .filter((item: any) => item.is_active === 1)
+        .map((item: any) => ({
+          id: item.id,
+          name: item.nama_menu,
+          price: item.harga_jual,
+          stock: 50,
+          kategori: item.kategori?.nama_kategori,
+          gambar: item.gambar,
+        }));
+
+      setMenus(activeMenus);
+    } catch (error) {
+      console.error("Gagal fetch menu:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMenu();
+
+    const interval = setInterval(() => {
+      fetchMenu();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  /* ================= FILTER + SEARCH ================= */
+  const filteredMenus = menus.filter((menu) => {
+    const matchFilter =
+      filter === "All Items" || menu.kategori === filter;
+
+    const matchSearch = menu.name
+      .toLowerCase()
+      .includes(search.toLowerCase());
+
+    return matchFilter && matchSearch;
+  });
+
+  /* ================= LOGIC CART ================= */
 
   const addToCart = (menu: MenuItem) => {
     if (menu.stock === 0) return;
@@ -80,7 +82,7 @@ export default function POSPage() {
         if (exist.qty >= menu.stock) return prev;
 
         return prev.map((i) =>
-          i.id === menu.id ? { ...i, qty: i.qty + 1 } : i,
+          i.id === menu.id ? { ...i, qty: i.qty + 1 } : i
         );
       }
 
@@ -91,7 +93,9 @@ export default function POSPage() {
     });
 
     setMenus((prev) =>
-      prev.map((m) => (m.id === menu.id ? { ...m, stock: m.stock - 1 } : m)),
+      prev.map((m) =>
+        m.id === menu.id ? { ...m, stock: m.stock - 1 } : m
+      )
     );
   };
 
@@ -103,12 +107,12 @@ export default function POSPage() {
 
         setMenus((prevMenus) =>
           prevMenus.map((m) =>
-            m.id === id ? { ...m, stock: m.stock - 1 } : m,
-          ),
+            m.id === id ? { ...m, stock: m.stock - 1 } : m
+          )
         );
 
         return item.id === id ? { ...item, qty: item.qty + 1 } : item;
-      }),
+      })
     );
   };
 
@@ -119,14 +123,14 @@ export default function POSPage() {
           if (item.id === id) {
             setMenus((prevMenus) =>
               prevMenus.map((m) =>
-                m.id === id ? { ...m, stock: m.stock + 1 } : m,
-              ),
+                m.id === id ? { ...m, stock: m.stock + 1 } : m
+              )
             );
             return { ...item, qty: item.qty - 1 };
           }
           return item;
         })
-        .filter((item) => item.qty > 0),
+        .filter((item) => item.qty > 0)
     );
   };
 
@@ -148,6 +152,8 @@ export default function POSPage() {
 
             <div className="relative">
               <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
                 className="pl-4 pr-4 py-2 bg-gray-100 rounded-full text-sm w-64"
                 placeholder="Search menu items..."
               />
@@ -164,25 +170,32 @@ export default function POSPage() {
                 (c, i) => (
                   <button
                     key={i}
+                    onClick={() => setFilter(c)}
                     className={`px-6 py-2.5 rounded-full text-sm font-semibold ${
-                      i === 0 ? "bg-[#a0383b] text-white" : "bg-white border"
+                      filter === c
+                        ? "bg-[#a0383b] text-white"
+                        : "bg-white border"
                     }`}
                   >
                     {c}
                   </button>
-                ),
+                )
               )}
             </div>
 
             <div className="flex-1 overflow-y-auto grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5 pb-8">
-              {menus.map((item) => (
+              {filteredMenus.map((item) => (
                 <div
                   key={item.id}
                   className="group bg-white p-4 rounded-2xl hover:shadow-lg transition"
                 >
                   <div className="relative h-40 w-full mb-4 rounded-xl overflow-hidden">
                     <img
-                      src={`https://placehold.co/400x300?text=${encodeURIComponent(item.name)}`}
+                      src={
+                        item.gambar
+                          ? `http://127.0.0.1:8000/storage/menu/${item.gambar}`
+                          : `https://placehold.co/400x300?text=${encodeURIComponent(item.name)}`
+                      }
                       className={`w-full h-full object-cover ${
                         item.stock === 0 ? "opacity-50" : ""
                       }`}
@@ -205,7 +218,9 @@ export default function POSPage() {
 
                   <div className="flex justify-between items-center mt-2">
                     <span
-                      className={`font-bold ${item.stock === 0 ? "text-gray-400" : "text-red-600"}`}
+                      className={`font-bold ${
+                        item.stock === 0 ? "text-gray-400" : "text-red-600"
+                      }`}
                     >
                       Rp {item.price.toLocaleString()}
                     </span>
@@ -235,10 +250,7 @@ export default function POSPage() {
 
             <div className="flex-1 p-6 space-y-4 overflow-y-auto">
               {cart.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between items-center"
-                >
+                <div key={item.id} className="flex justify-between items-center">
                   <div>
                     <p className="text-sm font-bold">{item.name}</p>
                     <p className="text-xs text-red-600">
@@ -249,7 +261,7 @@ export default function POSPage() {
                   <div className="flex items-center bg-gray-100 rounded-full px-2 py-1 gap-2 shadow-inner">
                     <button
                       onClick={() => decreaseQty(item.id)}
-                      className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow text-gray-600 hover:bg-red-500 hover:text-white transition active:scale-90"
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow"
                     >
                       −
                     </button>
@@ -260,7 +272,7 @@ export default function POSPage() {
 
                     <button
                       onClick={() => increaseQty(item.id)}
-                      className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow text-gray-600 hover:bg-green-500 hover:text-white transition active:scale-90"
+                      className="w-7 h-7 flex items-center justify-center rounded-full bg-white shadow"
                     >
                       +
                     </button>

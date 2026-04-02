@@ -11,7 +11,11 @@ class Menu extends Model
     protected $fillable = [
         'kategori_id',
         'nama_menu',
-        'harga_jual'
+        'harga_jual',
+        'deskripsi',
+        'gambar',
+        'is_featured',
+        'is_active'
     ];
 
     public function stokPorsi()

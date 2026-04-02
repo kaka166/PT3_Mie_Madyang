@@ -64,6 +64,7 @@ class MenuController extends Controller
             'gambar' => $namaFile,
             'deskripsi' => $request->deskripsi,
             'is_featured' => $request->is_featured ?? 0,
+            'is_active' => 1 // default tampil di POS
         ]);
 
         return response()->json([
@@ -88,13 +89,22 @@ class MenuController extends Controller
             'kategori_id' => 'required|exists:menu_kategori,id',
             'nama_menu' => 'required|string|max:255',
             'harga_jual' => 'required|numeric|min:0',
+            'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $menu->update([
-            'kategori_id' => $request->kategori_id,
-            'nama_menu' => $request->nama_menu,
-            'harga_jual' => $request->harga_jual,
-        ]);
+        // Update data
+        $menu->kategori_id = $request->kategori_id;
+        $menu->nama_menu = $request->nama_menu;
+        $menu->harga_jual = $request->harga_jual;
+
+        // Update gambar jika ada
+        if ($request->hasFile('gambar')) {
+            $namaFile = time() . '.' . $request->gambar->extension();
+            $request->gambar->storeAs('menu', $namaFile, 'public');
+            $menu->gambar = $namaFile;
+        }
+
+        $menu->save();
 
         return response()->json([
             'success' => true,
