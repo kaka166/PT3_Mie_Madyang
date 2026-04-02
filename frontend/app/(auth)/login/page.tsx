@@ -34,13 +34,7 @@ export default function LoginPage() {
       />
 
       <div className="relative z-10 w-full max-w-md px-4 pt-10 pb-12 flex flex-col items-center">
-
-        {/* ============================================================
-            📌 AREA BANNER / LOGO
-            Gambar diambil dari variabel BANNER_SRC, BANNER_ALT,
-            BANNER_WIDTH, dan BANNER_HEIGHT yang ada di atas.
-            Cukup ubah variabel-variabel tersebut, jangan ubah bagian ini.
-        ============================================================ */}
+          {/* Banner & Welcome Text */}
         <div className="mb-6 flex flex-col items-center">
           <Image
             src={BANNER_SRC}
@@ -50,7 +44,7 @@ export default function LoginPage() {
             className="object-contain drop-shadow-md"
             priority
           />
-          <p className="text-white text-sm mt-3 font-light tracking-wide">
+          <p className="text-white text-sm mt-6 font-light tracking-wide">
             Selamat datang!
           </p>
         </div>

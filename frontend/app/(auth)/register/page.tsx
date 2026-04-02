@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import {
@@ -10,9 +11,20 @@ import {
   Lock,
   ShieldCheck,
   ArrowRight,
-  Utensils,
   LucideIcon,
 } from "lucide-react";
+
+// ============================================================
+// ✏️ GANTI PATH/URL GAMBAR DI SINI
+const BANNER_SRC = "/assets/Logo_Mie_Ma-Dyang_RemovedBG.png";
+
+// ✏️ GANTI TEKS ALT
+const BANNER_ALT = "Banner Mie Ayam Ma-Dyang";
+
+// ✏️ GANTI UKURAN TAMPILAN GAMBAR (px)
+const BANNER_WIDTH = 600;
+const BANNER_HEIGHT = 600;
+// ============================================================
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -31,114 +43,119 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="flex-grow flex items-center justify-center px-4 py-12 md:py-24 relative overflow-hidden bg-gray-50">
+    <main className="min-h-screen flex flex-col items-center relative bg-gray-100 overflow-hidden">
+      {/* Red chevron background — sama seperti login */}
+      <div
+        className="absolute top-0 left-0 right-0 bg-[#c93535]"
+        style={{
+          height: "52%",
+          clipPath: "polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%)",
+        }}
+      />
 
-      {/* Background */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-red-200/30 rounded-full blur-3xl" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-orange-200/20 rounded-full blur-3xl" />
+      <div className="relative z-10 w-full max-w-lg px-4 pt-10 pb-12 flex flex-col items-center">
 
-      <div className="w-full max-w-5xl flex flex-col md:flex-row bg-white rounded-[2rem] overflow-hidden shadow-2xl border border-gray-100">
-
-        {/* LEFT */}
-        <div className="hidden md:flex md:w-5/12 bg-gradient-to-b from-[#a0383b] to-[#c05051] p-12 flex-col justify-between items-center text-center">
-          
-          <div>
-            <h1 className="text-white font-bold text-4xl mb-4">
-              Selamat Datang!
-            </h1>
-            <p className="text-white/80 text-lg">
-              Bergabunglah dengan komunitas pecinta Mie Ayam terbaik.
-            </p>
-          </div>
-
-          {/* Icon Besar */}
-          <div className="relative w-64 h-64 flex items-center justify-center">
-            <div className="absolute inset-0 bg-white/10 rounded-full animate-pulse"></div>
-            <div className="w-48 h-48 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-md">
-              <Utensils className="text-white w-20 h-20" />
-            </div>
-          </div>
-
-          <p className="text-white/60 text-sm italic">
-            Kelezatan autentik dalam setiap mangkuk.
+        {/* ============================================================
+            📌 AREA BANNER / LOGO — sama seperti login
+        ============================================================ */}
+        <div className="mb-6 flex flex-col items-center">
+          <Image
+            src={BANNER_SRC}
+            alt={BANNER_ALT}
+            width={BANNER_WIDTH}
+            height={BANNER_HEIGHT}
+            className="object-contain drop-shadow-md"
+            priority
+          />
+          <p className="text-white text-sm mt-6 font-light tracking-wide">
+            Selamat datang!
           </p>
         </div>
+        {/* ========================================================== */}
 
-        {/* RIGHT */}
-        <div className="w-full md:w-7/12 p-8 md:p-16">
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-2xl w-full px-8 py-8">
 
-          {/* Header */}
-          <div className="mb-10 text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <Utensils className="text-red-500 w-6 h-6" />
-              <span className="text-red-500 font-extrabold text-xl uppercase">
-                Mie Ayam Ma-Dyang
-              </span>
-            </div>
-
-            <h2 className="text-gray-800 text-2xl font-bold">
-              Daftar Akun Baru
+          {/* Title */}
+          <div className="text-center mb-1">
+            <h2
+              className="text-2xl font-bold tracking-[0.25em] text-gray-800"
+              style={{ fontFamily: "Georgia, serif" }}
+            >
+              Register
             </h2>
-            <p className="text-gray-500 text-sm mt-1">
-              Lengkapi data diri Anda untuk mulai mengelola kedai.
-            </p>
           </div>
+          <p className="text-center text-gray-400 text-xs mb-6">
+            Lengkapi data diri Anda untuk mulai mengelola kedai.
+          </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
 
             {/* Username + Nama */}
-            <div className="grid md:grid-cols-2 gap-5">
-              
-              <InputField icon={User} placeholder="ma_dyang_user" label="Username" />
-              <InputField icon={Badge} placeholder="Nama Sesuai KTP" label="Nama Lengkap" />
-
+            <div>
+              <InputField icon={User}  label="Username"     placeholder="e.x: Prellzy" />
+            </div>
+            <div>
+              <InputField icon={Badge} label="Nama Lengkap" placeholder="Nama Sesuai KTP" />
             </div>
 
-            <InputField icon={Mail} placeholder="example@email.com" label="Email" type="email" />
-            <InputField icon={Phone} placeholder="0812-xxxx-xxxx" label="Nomor Telepon" type="tel" />
+            <InputField icon={Mail}  label="Email"          placeholder="example@email.com" type="email" />
+            <InputField icon={Phone} label="Nomor Telepon"  placeholder="0812-xxxx-xxxx"    type="tel" />
 
             {/* Password */}
-            <div className="grid md:grid-cols-2 gap-5">
-              
-              <InputField icon={Lock} placeholder="••••••••" label="Password" type="password" />
-              <InputField icon={ShieldCheck} placeholder="••••••••" label="Konfirmasi Password" type="password" />
-
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <InputField icon={Lock}        label="Password"           placeholder="••••••••" type="password" />
+              <InputField icon={ShieldCheck} label="Konfirmasi Password" placeholder="••••••••" type="password" />
             </div>
 
             {/* Terms */}
             <div className="flex items-start gap-3 py-2">
-              <input type="checkbox" required className="mt-1 w-5 h-5 accent-red-500 cursor-pointer" />
+              <input
+                type="checkbox"
+                required
+                className="mt-1 w-4 h-4 accent-[#c93535] cursor-pointer"
+              />
               <p className="text-gray-500 text-xs">
                 Saya setuju dengan{" "}
-                <Link href="#" className="text-red-500 font-semibold hover:underline">
+                <Link href="#" className="text-[#c93535] font-semibold hover:underline">
                   Syarat & Ketentuan
                 </Link>{" "}
                 serta{" "}
-                <Link href="#" className="text-red-500 font-semibold hover:underline">
+                <Link href="#" className="text-[#c93535] font-semibold hover:underline">
                   Kebijakan Privasi
                 </Link>
               </p>
             </div>
 
-            {/* Button */}
-            <button className="w-full bg-gradient-to-b from-[#a0383b] to-[#c05051] text-white py-4 rounded-xl font-bold text-lg shadow-md hover:brightness-110 active:scale-95 transition flex items-center justify-center gap-2 group">
+            {/* Submit Button — sama seperti login */}
+            <button
+              type="submit"
+              className="w-full py-3 bg-[#c93535] hover:bg-[#a82828] active:scale-[0.98] text-white font-bold rounded-lg tracking-widest text-sm transition flex items-center justify-center gap-2 group"
+            >
               Daftar Sekarang
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition" />
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
             </button>
 
           </form>
 
-          {/* Footer */}
-          <div className="mt-8 pt-6 border-t text-center">
-            <p className="text-gray-500 text-sm">
-              Sudah punya akun?
-              <Link href="/login" className="text-red-500 font-bold ml-1 hover:underline">
-                Masuk di sini
-              </Link>
-            </p>
-          </div>
+          {/* Divider & Login */}
+          <hr className="my-5 border-gray-100" />
+          <p className="text-center text-sm text-gray-400">
+            Sudah punya akun?{" "}
+            <Link href="/login" className="text-[#c93535] font-bold hover:underline">
+              Masuk di sini
+            </Link>
+          </p>
 
         </div>
+
+        {/* Footer */}
+        <div className="flex gap-5 mt-6 text-xs text-gray-300">
+          <span>Help Center</span>
+          <span>Privacy Policy</span>
+          <span>Terms</span>
+        </div>
+
       </div>
     </main>
   );
@@ -160,16 +177,16 @@ function InputField({
 }: InputFieldProps) {
   return (
     <div className="space-y-1.5">
-      <label className="text-gray-500 text-[10px] uppercase tracking-widest font-bold ml-1">
+      <label className="block text-xs font-semibold text-gray-500 mb-1.5 ml-1">
         {label}
       </label>
       <div className="relative group">
-        <Icon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-red-500 transition" />
+        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-[#c93535] transition" />
         <input
           type={type}
           placeholder={placeholder}
           required
-          className="w-full pl-11 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-xl focus:ring-2 focus:ring-red-200 focus:border-red-400 outline-none transition"
+          className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 bg-gray-50 focus:outline-none focus:border-[#c93535] focus:bg-white transition"
         />
       </div>
     </div>
