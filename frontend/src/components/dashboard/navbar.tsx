@@ -1,27 +1,19 @@
 import Image from "next/image";
 import { Bell, Settings } from "lucide-react";
 
-// ============================================================
-// ✏️ GANTI PATH/URL GAMBAR DI SINI
+//  GANTI PATH/URL GAMBAR DI SINI
 const BANNER_SRC = "/assets/Logo_Mie_Ma-Dyang_RemovedBG.png";
 
-// ✏️ GANTI TEKS ALT
 const BANNER_ALT = "Logo Mie Ayam Ma-Dyang";
 
-// ✏️ GANTI UKURAN TAMPILAN GAMBAR (px)
+// GANTI UKURAN TAMPILAN GAMBAR (px)
 const BANNER_WIDTH = 120;
 const BANNER_HEIGHT = 40;
-// ============================================================
 
 export default function Navbar() {
   return (
     <header className="bg-white/80 backdrop-blur-md border-b border-neutral-100 fixed top-0 z-40 w-full">
       <div className="flex justify-between items-center w-full px-6 py-3">
-
-        {/* ============================================================
-            📌 AREA BANNER / LOGO
-            Ganti variabel BANNER_SRC di atas untuk mengganti gambar.
-        ============================================================ */}
         <div className="flex items-center gap-8">
           <Image
             src={BANNER_SRC}
@@ -32,7 +24,6 @@ export default function Navbar() {
             priority
           />
         </div>
-        {/* ========================================================== */}
 
         <div className="flex items-center gap-4">
           <div className="flex gap-2">
