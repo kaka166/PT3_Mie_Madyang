@@ -94,20 +94,18 @@ export const menuService = {
 
     // Toggle status
     toggleStatus: async (menu: Menu): Promise<void> => {
-        const res = await fetch(`${API_BASE_URL}/menu/${menu.id}`, {
+        const res = await fetch(`${API_BASE_URL}/menu/${menu.id}/toggle`, {
             method: "PUT",
             headers: {
-                "Content-Type": "application/json",
                 "Accept": "application/json"
-            },
-            body: JSON.stringify({
-                nama_menu: menu.nama_menu,
-                harga_jual: menu.harga_jual,
-                kategori_id: menu.kategori_id,
-                is_active: menu.is_active ? 0 : 1,
-            }),
+            }
         });
-        if (!res.ok) throw new Error("Gagal mengubah status menu");
+
+        if (!res.ok) {
+            const err = await res.json();
+            console.error("Toggle error:", err);
+            throw new Error("Gagal toggle status");
+        }
     },
 
     toggleCategoryStatus: async (category: Category) => {

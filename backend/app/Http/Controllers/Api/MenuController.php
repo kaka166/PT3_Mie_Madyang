@@ -85,6 +85,23 @@ class MenuController extends Controller
             ], 404);
         }
 
+        // =========================
+        // JIKA HANYA TOGGLE POS
+        // =========================
+        if ($request->has('is_active') && !$request->has('nama_menu')) {
+            $menu->is_active = $request->is_active;
+            $menu->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status POS berhasil diubah',
+                'data' => $menu
+            ]);
+        }
+
+        // =========================
+        // JIKA EDIT MENU
+        // =========================
         $request->validate([
             'kategori_id' => 'required|exists:menu_kategori,id',
             'nama_menu' => 'required|string|max:255',
@@ -92,12 +109,10 @@ class MenuController extends Controller
             'gambar' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // Update data
         $menu->kategori_id = $request->kategori_id;
         $menu->nama_menu = $request->nama_menu;
         $menu->harga_jual = $request->harga_jual;
 
-        // Update gambar jika ada
         if ($request->hasFile('gambar')) {
             $namaFile = time() . '.' . $request->gambar->extension();
             $request->gambar->storeAs('menu', $namaFile, 'public');
@@ -141,6 +156,18 @@ class MenuController extends Controller
         return response()->json([
             'success' => true,
             'data' => $kategori
+        ]);
+    }
+
+    public function toggle($id)
+    {
+        $menu = Menu::findOrFail($id);
+        $menu->is_active = !$menu->is_active;
+        $menu->save();
+
+        return response()->json([
+            'message' => 'Status menu berhasil diubah',
+            'is_active' => $menu->is_active
         ]);
     }
 }

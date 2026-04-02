@@ -123,8 +123,8 @@ export default function POSPage() {
 
   // Kalkulasi Harga
   const subtotal = cart.reduce((acc, item) => acc + item.price * item.qty, 0);
-  const diskon = 0; // State diskon jika nanti diperlukan
-  const tax = subtotal * 0.11; // Sesuai desain referensi PPN 11%
+  const diskon = 0; 
+  const tax = subtotal * 0.11; 
   const total = subtotal - diskon + tax;
 
   /* ================= UI HELPER ================= */
@@ -262,7 +262,6 @@ export default function POSPage() {
                 {paymentMethod === "QRIS" ? (
                   <>
                     <div className="bg-white p-4 rounded-2xl shadow-sm mb-4 w-full flex justify-center">
-                       {/* Kamu bisa ganti src di bawah ini dengan gambar QRIS aslimu (misal: /images/qris.jpg) */}
                       <img src="https://placehold.co/400x400?text=Scan+QRIS" alt="QRIS Code" className="w-48 h-48 object-cover rounded-xl" />
                     </div>
                     <p className="text-sm font-bold text-gray-600 text-center">Scan QR Untuk<br/>Melakukan Pembayaran</p>
@@ -284,9 +283,8 @@ export default function POSPage() {
                 <button 
                   onClick={() => {
                     alert("Proses Cetak Struk dan Kirim Data ke Backend!");
-                    // Disini nanti kamu tambahkan logika fetch() POST ke backend Laravel
                     setShowPaymentModal(false);
-                    setCart([]); // Kosongkan keranjang setelah sukses
+                    setCart([]); 
                   }}
                   className="w-full bg-[#ff6b6b] text-white py-4 rounded-xl font-bold text-sm tracking-wide hover:bg-[#ff5252] transition shadow-md"
                 >
@@ -323,6 +321,8 @@ export default function POSPage() {
 
         <div className="flex-1 flex overflow-hidden p-6 gap-6 relative z-0">
           <div className="flex-[2] flex flex-col gap-6 overflow-hidden">
+            
+            {/* BAGIAN YANG KONFLIK SUDAH DIBERESKAN DI SINI */}
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {["All Items", "Mie", "Topping", "Minuman", "Snacks"].map((c, i) => (
                 <button
@@ -470,7 +470,6 @@ export default function POSPage() {
                 </div>
 
                 <button 
-                  // ====== TRIGGER MUNCULKAN MODAL =====
                   onClick={() => setShowPaymentModal(true)}
                   disabled={cart.length === 0}
                   className="w-full text-white py-4 font-extrabold text-sm tracking-wide hover:bg-[#ff5252] transition disabled:opacity-50 disabled:cursor-not-allowed"
