@@ -2,126 +2,153 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+
+// GANTI PATH/URL GAMBAR DI SINI LURRR
+const BANNER_SRC = "/assets/Logo_Mie_Ma-Dyang_RemovedBG.png";
+
+// GANTI TEKS ALT 
+const BANNER_ALT = "Banner Mie Ayam Ma-Dyang";
+
+// GANTI UKURAN TAMPILAN GAMBAR (px)
+const BANNER_WIDTH = 600;
+const BANNER_HEIGHT = 600;
 
 export default function LoginPage() {
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const [showPw, setShowPw] = useState(false);
+
+  // Simulasi login (ganti dengan logika autentikasi sebenarnya)
+  const handleLogin = () => {
     alert("Login berhasil! Mengarahkan ke Dashboard...");
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center px-4 py-8 relative overflow-hidden bg-gray-50">
-      {/* Background Blur */}
-      <div className="absolute -top-24 -left-24 w-72 h-72 bg-red-200/30 rounded-full blur-3xl" />
-      <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-orange-200/20 rounded-full blur-3xl" />
+    <main className="min-h-screen flex flex-col items-center relative bg-gray-100 overflow-hidden">
+      {/* Red chevron background */}
+      <div
+        className="absolute top-0 left-0 right-0 bg-[#c93535]"
+        style={{
+          height: "52%",
+          clipPath: "polygon(0 0, 100% 0, 100% 78%, 50% 100%, 0 78%)",
+        }}
+      />
 
-      <div className="w-full max-w-md z-10">
-        {/* Header */}
-        <div className="text-center mb-10">
-          <div className="inline-flex p-4 bg-white rounded-full mb-4 shadow-md">
-            <Image
-              src="https://placehold.co/100x100.png"
-              alt={"Mie Ayam Ma-Dyang Logo"}
-              width={100}
-              height={100}
-              className="object-cover"
+      <div className="relative z-10 w-full max-w-md px-4 pt-10 pb-12 flex flex-col items-center">
+
+        {/* ============================================================
+            📌 AREA BANNER / LOGO
+            Gambar diambil dari variabel BANNER_SRC, BANNER_ALT,
+            BANNER_WIDTH, dan BANNER_HEIGHT yang ada di atas.
+            Cukup ubah variabel-variabel tersebut, jangan ubah bagian ini.
+        ============================================================ */}
+        <div className="mb-6 flex flex-col items-center">
+          <Image
+            src={BANNER_SRC}
+            alt={BANNER_ALT}
+            width={BANNER_WIDTH}
+            height={BANNER_HEIGHT}
+            className="object-contain drop-shadow-md"
+            priority
+          />
+          <p className="text-white text-sm mt-3 font-light tracking-wide">
+            Selamat datang!
+          </p>
+        </div>
+        {/* ========================================================== */}
+
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-2xl w-full px-8 py-8">
+          {/* Title */}
+          <div className="text-center mb-1">
+            <h2
+              className="text-2xl font-bold tracking-[0.25em] text-gray-800"
+              style={{ fontFamily: "Georgia, serif" }}
+            >
+              Login
+            </h2>
+          </div>
+          <p className="text-center text-gray-400 text-xs mb-6">
+            Please login to admin dashboard
+          </p>
+
+          {/* Username */}
+          <div className="mb-4">
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5">
+              Username
+            </label>
+            <input
+              type="text"
+              placeholder="Admin"
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-lg text-sm text-gray-700 bg-gray-50 focus:outline-none focus:border-[#c93535] focus:bg-white transition"
             />
           </div>
 
-          <h1 className="text-3xl font-bold text-[#b23b3b]">
-            Mie Ayam Ma-Dyang
-          </h1>
-          <p className="text-gray-500 text-sm mt-1">
-            Welcome back, Curator. Please login to manage your stall.
+          {/* Password */}
+          <div className="mb-4">
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                type={showPw ? "text" : "password"}
+                placeholder="••••••••••••"
+                className="w-full px-3.5 py-2.5 pr-10 border border-gray-200 rounded-lg text-sm text-gray-700 bg-gray-50 focus:outline-none focus:border-[#c93535] focus:bg-white transition"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPw(!showPw)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {showPw ? (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                ) : (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember me */}
+          <div className="flex items-center gap-2 mb-5">
+            <input
+              type="checkbox"
+              id="remember"
+              className="w-4 h-4 accent-[#c93535] cursor-pointer"
+            />
+            <label htmlFor="remember" className="text-sm text-gray-500 cursor-pointer">
+              Remember me
+            </label>
+          </div>
+
+          {/* Login Button */}
+          <Link href="/admin">
+            <button
+              onClick={handleLogin}
+              className="w-full py-3 bg-[#c93535] hover:bg-[#a82828] active:scale-[0.98] text-white font-bold rounded-lg tracking-widest text-sm transition"
+            >
+              Login
+            </button>
+          </Link>
+
+          {/* Divider & Register */}
+          <hr className="my-5 border-gray-100" />
+          <p className="text-center text-sm text-gray-400">
+            Don&apos;t have an account?{" "}
+            <Link href="/register" className="text-[#c93535] font-bold hover:underline">
+              Register here
+            </Link>
           </p>
         </div>
 
-        {/* Card */}
-        <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Username */}
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">
-                Username
-              </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
-                  person
-                </span>
-                <input
-                  type="text"
-                  placeholder="Enter your username"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-400 outline-none transition"
-                />
-              </div>
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2 ml-1">
-                Password
-              </label>
-              <div className="relative">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg">
-                  lock
-                </span>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-gray-100 border border-gray-200 rounded-lg focus:ring-2 focus:ring-red-200 focus:border-red-400 outline-none transition"
-                />
-              </div>
-            </div>
-
-            {/* Remember & Forgot */}
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded text-red-500 focus:ring-red-400"
-                />
-                <span className="text-gray-600">Remember me</span>
-              </label>
-
-              <Link
-                href="#"
-                className="text-red-500 font-semibold hover:underline"
-              >
-                Forgot Password?
-              </Link>
-            </div>
-
-            {/* Button */}
-            <Link href="/admin">
-              <button className="w-full py-3 bg-gradient-to-b from-[#a0383b] to-[#c05051] text-white rounded-lg font-semibold shadow-md hover:brightness-105 active:scale-95 transition">
-                Login
-              </button>
-            </Link>
-          </form>
-
-          {/* Register */}
-          <div className="mt-8 pt-6 border-t border-gray-100 text-center">
-            <p className="text-sm text-gray-500">
-              Dont have an account?{" "}
-              <Link
-                href="/register"
-                className="text-red-500 font-bold hover:underline"
-              >
-                Register here
-              </Link>
-            </p>
-          </div>
-        </div>
-
         {/* Footer */}
-        <div className="text-center mt-8 text-xs text-gray-400 space-x-4">
-          <span>Help Center</span>
-          <span>Privacy Policy</span>
-          <span>Terms</span>
-        </div>
       </div>
     </main>
   );
-}
+} 
