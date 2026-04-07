@@ -59,6 +59,11 @@ export default function InventoryPage() {
   const [editingCatName, setEditingCatName] = useState("");
   const [newCatName, setNewCatName] = useState("");
 
+  const formatRupiah = (value: string | number) => {
+    if (!value) return "";
+    return new Intl.NumberFormat("id-ID").format(Number(value));
+  };
+
   // --- DATA FETCHING ---
   const fetchData = useCallback(async () => {
     setIsLoading(true);
@@ -94,31 +99,41 @@ export default function InventoryPage() {
     val: string | number,
   ) => {
     const numVal = Number(val);
-    const nextCalc = { ...calc, [field]: field === "mode" ? val : numVal };
+
+    const nextCalc = {
+      ...calc,
+      [field]: field === "mode" ? val : numVal,
+    };
+
     setCalc(nextCalc);
-    updateCalculatedPrice(
-      field === "hpp" ? numVal : calc.hpp,
-      field === "mode" ? String(val) : calc.mode,
-      field === "value" ? numVal : calc.value,
-    );
+
+    const hpp = field === "hpp" ? numVal : calc.hpp;
+    const mode = field === "mode" ? String(val) : calc.mode;
+    const value = field === "value" ? numVal : calc.value;
+
+    if (mode !== "manual" && (!hpp || !value)) {
+      return;
+    }
+
+    updateCalculatedPrice(hpp, mode, value);
   };
 
   // --- MENU ACTIONS ---
   const toggleMenu = async (menu: Menu) => {
-  try {
-    // Update UI langsung
-    setMenus((prev) =>
-      prev.map((m) =>
-        m.id === menu.id ? { ...m, is_active: m.is_active ? 0 : 1 } : m
-      )
-    );
+    try {
+      // Update UI langsung
+      setMenus((prev) =>
+        prev.map((m) =>
+          m.id === menu.id ? { ...m, is_active: m.is_active ? 0 : 1 } : m,
+        ),
+      );
 
-    await menuService.toggleStatus(menu);
-  } catch (err) {
-    console.error(err);
-    fetchData(); // reload jika gagal
-  }
-};
+      await menuService.toggleStatus(menu);
+    } catch (err) {
+      console.error(err);
+      fetchData(); // reload jika gagal
+    }
+  };
 
   const submitMenu = async () => {
     const formData = new FormData();
@@ -300,7 +315,11 @@ export default function InventoryPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 font-black text-neutral-800">
-                    Rp {item.harga_jual.toLocaleString()}
+                    {new Intl.NumberFormat("id-ID", {
+                      style: "currency",
+                      currency: "IDR",
+                      minimumFractionDigits: 0,
+                    }).format(item.harga_jual)}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button
@@ -330,12 +349,12 @@ export default function InventoryPage() {
                       >
                         <Pencil size={16} />
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => deleteMenu(item.id)}
                         className="p-2 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all"
                       >
                         <Trash2 size={16} />
-                      </button>
+                      </button> */}
                     </div>
                   </td>
                 </tr>
@@ -641,13 +660,18 @@ export default function InventoryPage() {
                   <div className="flex items-baseline gap-2">
                     <span className="text-xl font-bold text-zinc-400">Rp</span>
                     <input
-                      type="number"
-                      value={form.harga_jual}
+                      type="text" // ⬅️ ganti dari number ke text
+                      value={formatRupiah(form.harga_jual)}
                       readOnly={calc.mode !== "manual"}
-                      onChange={(e) =>
-                        setForm({ ...form, harga_jual: e.target.value })
-                      }
-                      className={`text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${calc.mode !== "manual" ? "text-green-600" : "text-neutral-800"}`}
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, ""); // ambil angka saja
+                        setForm({ ...form, harga_jual: raw });
+                      }}
+                      className={`text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${
+                        calc.mode !== "manual"
+                          ? "text-green-600"
+                          : "text-neutral-800"
+                      }`}
                     />
                   </div>
                 </div>
