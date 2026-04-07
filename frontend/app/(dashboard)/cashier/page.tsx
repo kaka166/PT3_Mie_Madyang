@@ -324,7 +324,7 @@ export default function POSPage() {
             
             {/* BAGIAN YANG KONFLIK SUDAH DIBERESKAN DI SINI */}
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {["All Items", "Mie", "Topping", "Minuman", "Snacks"].map((c, i) => (
+              {["All Items", "Mie", "Topping", "Minuman"].map((c, i) => (
                 <button
                   key={i}
                   onClick={() => setFilter(c)}
@@ -337,7 +337,11 @@ export default function POSPage() {
               ))}
             </div>
 
-            <div className="flex-1 overflow-y-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-8 pr-2">
+            <div className="flex-1 overflow-y-auto">
+              <div className="grid 
+                grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 
+                gap-5 pb-8 pr-2 
+                content-start">
               {filteredMenus.map((item) => (
                 <div key={item.id} className="group bg-white p-4 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 transition duration-200 flex flex-col">
                   <div className="relative h-40 w-full mb-4 rounded-xl overflow-hidden bg-gray-100">
@@ -372,6 +376,7 @@ export default function POSPage() {
                   </div>
                 </div>
               ))}
+             </div>
             </div>
           </div>
 
