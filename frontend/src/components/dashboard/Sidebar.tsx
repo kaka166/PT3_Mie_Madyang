@@ -30,7 +30,7 @@ export default function Sidebar() {
   const menuItems = [
     { icon: LayoutDashboard, label: "Admin",     href: "/admin" },
     { icon: CreditCard,      label: "Cashier",   href: "/cashier" },
-    { icon: Package2,        label: "Inventory", href: "/inventory" },
+    { icon: Package2,        label: "Menu", href: "/inventory" },
     { icon: BarChart3,       label: "Reports",   href: "/reports" },
     { icon: UtensilsCrossed, label: "Kitchen",   href: "/kitchen" },
   ];

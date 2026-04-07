@@ -345,58 +345,6 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      {/* 4. STOCK INVENTORY (BAHAN BAKU) */}
-      <div className="mt-4">
-        <div className="flex justify-between items-end mb-4">
-          <div>
-            <h2 className="text-xl font-bold text-neutral-800">
-              Stock Bahan Baku
-            </h2>
-            <p className="text-sm text-zinc-500">
-              Pantau ketersediaan bahan real-time.
-            </p>
-          </div>
-          <button className="text-xs font-bold text-red-600 flex items-center gap-1 hover:underline">
-            Lihat Semua Laporan <ChevronRight size={14} />
-          </button>
-        </div>
-
-        <div className="bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-50/50 text-[10px] uppercase font-bold text-zinc-400 tracking-widest">
-              <tr>
-                <th className="px-6 py-4 text-left">Bahan Baku</th>
-                <th className="px-6 py-4 text-left">Terakhir Suplai</th>
-                <th className="px-6 py-4 text-center">Stok Sisa</th>
-                <th className="px-6 py-4 text-left">Satuan</th>
-                <th className="px-6 py-4 text-left">Status</th>
-                <th className="px-6 py-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-50">
-              <tr className="hover:bg-zinc-50/30">
-                <td className="px-6 py-4 font-bold text-neutral-700">
-                  Tepung Terigu Segitiga Biru
-                </td>
-                <td className="px-6 py-4 text-zinc-500">02 Apr 2026</td>
-                <td className="px-6 py-4 text-center font-black text-neutral-800">
-                  142
-                </td>
-                <td className="px-6 py-4 text-zinc-500">KG</td>
-                <td className="px-6 py-4">
-                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase">
-                    Aman
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-right">
-                  <MoreHorizontal className="ml-auto text-zinc-300 cursor-pointer" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
       {/* --- MODAL POPUPS --- */}
 
       {/* CONFIRMATION POPUP */}

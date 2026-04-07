@@ -209,6 +209,8 @@ export default function KitchenPage() {
         </div>
       </div>
 
+      
+
       {/* FORM SECTION */}
       <div className="mt-12 grid md:grid-cols-2 gap-8">
         {/* PRODUKSI */}
@@ -260,5 +262,7 @@ export default function KitchenPage() {
         </div>
       </div>
     </div>
+
+    
   );
 }
