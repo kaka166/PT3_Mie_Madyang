@@ -1,16 +1,12 @@
 "use client";
 import React, { useEffect, useState } from "react";
+// Import utilitas format uang
+import { formatRupiah } from "@/utils/formatCurrency";
+// Import tipe data dari service
+import { ApiMenu, MenuItem } from "@/services/cashierService";
 
 /* ================= TYPES ================= */
-type MenuItem = {
-  id: number;
-  name: string;
-  price: number;
-  stock: number;
-  kategori: string;
-  gambar?: string;
-};
-
+// Menggunakan MenuItem yang sudah diimport dari service
 type CartItem = {
   id: number;
   name: string;
@@ -30,7 +26,7 @@ export default function POSPage() {
 
   // State Baru untuk Pop-up Pembayaran
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("QRIS"); // Default QRIS
+  const [paymentMethod, setPaymentMethod] = useState("QRIS");
   const [customerName, setCustomerName] = useState("");
   const [tableNumber, setTableNumber] = useState("");
 
@@ -38,19 +34,20 @@ export default function POSPage() {
   const [taxPercent, setTaxPercent] = useState(11);
   const [showTaxModal, setShowTaxModal] = useState(false);
 
-  /* ================= FETCH MENU ================= */
+  /* ================= FETCH MENU (Tanpa Service, Clean Types) ================= */
   const fetchMenu = async () => {
     try {
       const res = await fetch("http://127.0.0.1:8000/api/menu");
-      const data = await res.json();
-      const activeMenus = data.data
-        .filter((item: any) => item.is_active === 1)
-        .map((item: any) => ({
+      const data: { data: ApiMenu[] } = await res.json(); // Hapus any
+
+      const activeMenus: MenuItem[] = data.data
+        .filter((item: ApiMenu) => item.is_active === 1)
+        .map((item: ApiMenu) => ({
           id: item.id,
           name: item.nama_menu,
           price: item.harga_jual,
           stock: 50,
-          kategori: item.kategori?.nama_kategori,
+          kategori: item.kategori?.nama_kategori || "",
           gambar: item.gambar,
         }));
       setMenus(activeMenus);
@@ -60,21 +57,31 @@ export default function POSPage() {
   };
 
   useEffect(() => {
-    fetchMenu();
-    const interval = setInterval(() => {
+    // Pakai setTimeout 0 supaya panggilannya nggak dianggap sinkron
+    // oleh React (menghindari error Cascading Renders)
+    const timeoutId = setTimeout(() => {
+      // 1. Load LocalStorage
+      const saved = localStorage.getItem("taxConfig");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setIsTaxEnabled(parsed.enabled);
+        setTaxPercent(parsed.percent);
+      }
+
+      // 2. Fetch Menu pertama kali
+      fetchMenu();
+    }, 0);
+
+    // 3. Setup polling interval
+    const intervalId = setInterval(() => {
       fetchMenu();
     }, 5000);
-    return () => clearInterval(interval);
-  }, []);
 
-  useEffect(() => {
-    const saved = localStorage.getItem("taxConfig");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setIsTaxEnabled(parsed.enabled);
-      setTaxPercent(parsed.percent);
-    }
-  }, []);
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+    };
+  }, []); // Dependensi kosong supaya cuma jalan sekali saat mount
 
   useEffect(() => {
     localStorage.setItem(
@@ -208,12 +215,14 @@ export default function POSPage() {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setShowTaxModal(false)}
-                className="px-4 py-2 text-gray-500">
+                className="px-4 py-2 text-gray-500"
+              >
                 Batal
               </button>
               <button
                 onClick={() => setShowTaxModal(false)}
-                className="px-4 py-2 bg-[#ff6b6b] text-white rounded-lg">
+                className="px-4 py-2 bg-[#ff6b6b] text-white rounded-lg"
+              >
                 Simpan
               </button>
             </div>
@@ -247,7 +256,8 @@ export default function POSPage() {
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5 text-gray-600 mr-2"
                     viewBox="0 0 20 20"
-                    fill="currentColor">
+                    fill="currentColor"
+                  >
                     <path
                       fillRule="evenodd"
                       d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
@@ -268,7 +278,8 @@ export default function POSPage() {
                     className="h-5 w-5 text-gray-600 mr-2"
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor">
+                    stroke="currentColor"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -304,7 +315,8 @@ export default function POSPage() {
                 {cart.map((item, idx) => (
                   <div
                     key={idx}
-                    className="grid grid-cols-[40px_1fr_100px_100px] text-sm py-3 px-4 border-b border-gray-100 items-start">
+                    className="grid grid-cols-[40px_1fr_100px_100px] text-sm py-3 px-4 border-b border-gray-100 items-start"
+                  >
                     <span className="font-bold text-gray-800">{item.qty}</span>
                     <div>
                       <p className="font-semibold text-gray-800">{item.name}</p>
@@ -315,10 +327,10 @@ export default function POSPage() {
                       )}
                     </div>
                     <span className="text-right text-gray-600">
-                      Rp{item.price.toLocaleString("id-ID")}
+                      {formatRupiah(item.price)}
                     </span>
                     <span className="text-right font-bold text-gray-800">
-                      Rp{(item.price * item.qty).toLocaleString("id-ID")}
+                      {formatRupiah(item.price * item.qty)}
                     </span>
                   </div>
                 ))}
@@ -328,22 +340,22 @@ export default function POSPage() {
               <div className="border-t border-gray-300 pt-4 w-2/3 ml-auto space-y-2">
                 <div className="flex justify-between text-base font-medium text-gray-400">
                   <span>Subtotal</span>
-                  <span>Rp. {subtotal.toLocaleString("id-ID")}</span>
+                  <span>{formatRupiah(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-base font-medium text-gray-400">
                   <span>Diskon</span>
-                  <span>Rp. {diskon.toLocaleString("id-ID")}</span>
+                  <span>{formatRupiah(diskon)}</span>
                 </div>
                 <div className="flex justify-between text-base font-medium text-gray-400 pb-4 border-b border-gray-200">
-                  <span>Pajak(PPN 11%)</span>
-                  <span>Rp. {tax.toLocaleString("id-ID")}</span>
+                  <span>Pajak (PPN {taxPercent}%)</span>
+                  <span>{formatRupiah(tax)}</span>
                 </div>
                 <div className="flex justify-between items-end pt-2">
                   <span className="text-xl font-bold text-[#ff6b6b]">
                     Total
                   </span>
                   <span className="text-4xl font-extrabold text-gray-800">
-                    Rp. {total.toLocaleString("id-ID")}
+                    {formatRupiah(total)}
                   </span>
                 </div>
               </div>
@@ -358,13 +370,15 @@ export default function POSPage() {
               <div className="flex gap-4 mb-6">
                 <button
                   onClick={() => setPaymentMethod("QRIS")}
-                  className={`flex-1 py-6 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition bg-white ${paymentMethod === "QRIS" ? "border-[#ff6b6b] shadow-sm" : "border-transparent text-gray-400 hover:border-gray-200"}`}>
+                  className={`flex-1 py-6 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition bg-white ${paymentMethod === "QRIS" ? "border-[#ff6b6b] shadow-sm" : "border-transparent text-gray-400 hover:border-gray-200"}`}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className={`h-8 w-8 ${paymentMethod === "QRIS" ? "text-gray-800" : "text-gray-400"}`}
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor">
+                    stroke="currentColor"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -373,19 +387,22 @@ export default function POSPage() {
                     />
                   </svg>
                   <span
-                    className={`font-bold ${paymentMethod === "QRIS" ? "text-gray-800" : "text-gray-500"}`}>
+                    className={`font-bold ${paymentMethod === "QRIS" ? "text-gray-800" : "text-gray-500"}`}
+                  >
                     QRIS
                   </span>
                 </button>
                 <button
                   onClick={() => setPaymentMethod("Tunai")}
-                  className={`flex-1 py-6 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition bg-white ${paymentMethod === "Tunai" ? "border-[#ff6b6b] shadow-sm" : "border-transparent text-gray-400 hover:border-gray-200"}`}>
+                  className={`flex-1 py-6 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition bg-white ${paymentMethod === "Tunai" ? "border-[#ff6b6b] shadow-sm" : "border-transparent text-gray-400 hover:border-gray-200"}`}
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className={`h-8 w-8 ${paymentMethod === "Tunai" ? "text-gray-800" : "text-gray-400"}`}
                     fill="none"
                     viewBox="0 0 24 24"
-                    stroke="currentColor">
+                    stroke="currentColor"
+                  >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -394,7 +411,8 @@ export default function POSPage() {
                     />
                   </svg>
                   <span
-                    className={`font-bold ${paymentMethod === "Tunai" ? "text-gray-800" : "text-gray-500"}`}>
+                    className={`font-bold ${paymentMethod === "Tunai" ? "text-gray-800" : "text-gray-500"}`}
+                  >
                     Tunai
                   </span>
                 </button>
@@ -425,7 +443,8 @@ export default function POSPage() {
                         className="h-16 w-16 text-gray-400 mx-auto mb-4"
                         fill="none"
                         viewBox="0 0 24 24"
-                        stroke="currentColor">
+                        stroke="currentColor"
+                      >
                         <path
                           strokeLinecap="round"
                           strokeLinejoin="round"
@@ -436,8 +455,7 @@ export default function POSPage() {
                       <p className="text-sm font-bold text-gray-600 text-center">
                         Silakan terima uang tunai
                         <br />
-                        sebesar Rp{total.toLocaleString("id-ID")} dari
-                        pelanggan.
+                        sebesar {formatRupiah(total)} dari pelanggan.
                       </p>
                     </div>
                   </>
@@ -452,12 +470,14 @@ export default function POSPage() {
                     setShowPaymentModal(false);
                     setCart([]);
                   }}
-                  className="w-full bg-[#ff6b6b] text-white py-4 rounded-xl font-bold text-sm tracking-wide hover:bg-[#ff5252] transition shadow-md">
+                  className="w-full bg-[#ff6b6b] text-white py-4 rounded-xl font-bold text-sm tracking-wide hover:bg-[#ff5252] transition shadow-md"
+                >
                   KONFIRMASI & CETAK STRUK
                 </button>
                 <button
                   onClick={() => setShowPaymentModal(false)}
-                  className="w-full py-3 text-sm font-bold text-gray-400 hover:text-gray-600 transition">
+                  className="w-full py-3 text-sm font-bold text-gray-400 hover:text-gray-600 transition"
+                >
                   Batalkan & Kembali ke POS
                 </button>
               </div>
@@ -465,7 +485,6 @@ export default function POSPage() {
           </div>
         </div>
       )}
-      {/* ========================================================== */}
 
       <main className="flex-1 flex flex-col min-w-0">
         <header className="bg-white flex justify-between items-center w-full px-8 py-4 z-10 shadow-sm relative">
@@ -486,7 +505,6 @@ export default function POSPage() {
 
         <div className="flex-1 flex overflow-hidden p-6 gap-6 relative z-0">
           <div className="flex-[2] flex flex-col gap-6 overflow-hidden">
-            {/* BAGIAN YANG KONFLIK SUDAH DIBERESKAN DI SINI */}
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {["All Items", "Mie", "Topping", "Minuman"].map((c, i) => (
                 <button
@@ -496,7 +514,8 @@ export default function POSPage() {
                     filter === c
                       ? "bg-[#a0383b] text-white shadow-md"
                       : "bg-white border text-gray-600 hover:bg-gray-50"
-                  }`}>
+                  }`}
+                >
                   {c}
                 </button>
               ))}
@@ -507,11 +526,13 @@ export default function POSPage() {
                 className="grid 
                 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 
                 gap-5 pb-8 pr-2 
-                content-start">
+                content-start"
+              >
                 {filteredMenus.map((item) => (
                   <div
                     key={item.id}
-                    className="group bg-white p-4 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 transition duration-200 flex flex-col">
+                    className="group bg-white p-4 rounded-2xl shadow-sm hover:shadow-xl border border-gray-100 transition duration-200 flex flex-col"
+                  >
                     <div className="relative h-40 w-full mb-4 rounded-xl overflow-hidden bg-gray-100">
                       <img
                         src={
@@ -538,8 +559,9 @@ export default function POSPage() {
                     </h3>
                     <div className="flex justify-between items-center mt-3 pt-3 border-t border-gray-100">
                       <span
-                        className={`font-bold ${item.stock === 0 ? "text-gray-400" : "text-[#a0383b]"}`}>
-                        Rp {item.price.toLocaleString("id-ID")}
+                        className={`font-bold ${item.stock === 0 ? "text-gray-400" : "text-[#a0383b]"}`}
+                      >
+                        {formatRupiah(item.price)}
                       </span>
                       <button
                         onClick={() => addToCart(item)}
@@ -548,7 +570,8 @@ export default function POSPage() {
                           item.stock === 0
                             ? "bg-gray-100 text-gray-300 cursor-not-allowed"
                             : "bg-red-50 text-[#a0383b] hover:bg-[#a0383b] hover:text-white"
-                        }`}>
+                        }`}
+                      >
                         +
                       </button>
                     </div>
@@ -576,19 +599,22 @@ export default function POSPage() {
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-2xl p-4 shadow-sm relative">
+                  className="bg-white rounded-2xl p-4 shadow-sm relative"
+                >
                   <div className="flex justify-between items-start">
                     <h3 className="font-bold text-gray-800 text-base w-4/5">
                       {item.name}
                     </h3>
                     <button
                       onClick={() => removeItem(item.id)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition">
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-5 w-5"
                         viewBox="0 0 20 20"
-                        fill="currentColor">
+                        fill="currentColor"
+                      >
                         <path
                           fillRule="evenodd"
                           d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
@@ -599,15 +625,16 @@ export default function POSPage() {
                   </div>
 
                   <p className="text-sm font-bold text-yellow-500 mt-1 mb-3">
-                    Rp{item.price.toLocaleString("id-ID")} x {item.qty} = Rp
-                    {(item.price * item.qty).toLocaleString("id-ID")}
+                    {formatRupiah(item.price)} x {item.qty} =
+                    {formatRupiah(item.price * item.qty)}
                   </p>
 
                   <div className="flex justify-between items-center mt-2">
                     <div className="flex items-center bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
                       <button
                         onClick={() => decreaseQty(item.id)}
-                        className="w-8 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-200 font-bold">
+                        className="w-8 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-200 font-bold"
+                      >
                         −
                       </button>
                       <span className="text-xs font-bold w-6 text-center text-gray-700">
@@ -615,7 +642,8 @@ export default function POSPage() {
                       </span>
                       <button
                         onClick={() => increaseQty(item.id)}
-                        className="w-8 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-200 font-bold">
+                        className="w-8 h-7 flex items-center justify-center text-gray-500 hover:bg-gray-200 font-bold"
+                      >
                         +
                       </button>
                     </div>
@@ -636,13 +664,15 @@ export default function POSPage() {
                     ) : (
                       <button
                         onClick={() => setEditingNoteId(item.id)}
-                        className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition ${item.note ? "bg-red-50 text-[#a0383b] border-red-200" : "text-gray-400 bg-white border-gray-200 hover:bg-gray-50"}`}>
+                        className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg border transition ${item.note ? "bg-red-50 text-[#a0383b] border-red-200" : "text-gray-400 bg-white border-gray-200 hover:bg-gray-50"}`}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           className="h-3.5 w-3.5"
                           fill="none"
                           viewBox="0 0 24 24"
-                          stroke="currentColor">
+                          stroke="currentColor"
+                        >
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
@@ -670,7 +700,7 @@ export default function POSPage() {
               <div className="border-t border-gray-300 pt-4 space-y-2 mb-6">
                 <div className="flex justify-between text-sm font-medium text-gray-500">
                   <span>Subtotal</span>
-                  <span>Rp.{subtotal.toLocaleString("id-ID")}</span>
+                  <span>{formatRupiah(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm font-medium text-gray-500 items-center">
                   <div className="flex items-center gap-2">
@@ -680,7 +710,8 @@ export default function POSPage() {
                         isTaxEnabled
                           ? "cursor-pointer hover:underline"
                           : "opacity-50"
-                      }`}>
+                      }`}
+                    >
                       Pajak ({taxPercent}%)
                     </span>
 
@@ -688,7 +719,8 @@ export default function POSPage() {
                       onClick={() => setIsTaxEnabled(!isTaxEnabled)}
                       className={`w-8 h-4 flex items-center rounded-full p-0.5 transition ${
                         isTaxEnabled ? "bg-[#ff6b6b]" : "bg-gray-300"
-                      }`}>
+                      }`}
+                    >
                       <div
                         className={`bg-white w-3 h-3 rounded-full transform transition ${
                           isTaxEnabled ? "translate-x-4" : ""
@@ -697,11 +729,11 @@ export default function POSPage() {
                     </button>
                   </div>
 
-                  <span>Rp.{tax.toLocaleString("id-ID")}</span>
+                  <span>{formatRupiah(tax)}</span>
                 </div>
                 <div className="flex justify-between font-extrabold text-base text-gray-800 pt-1">
                   <span>Total</span>
-                  <span>Rp.{total.toLocaleString("id-ID")}</span>
+                  <span>{formatRupiah(total)}</span>
                 </div>
               </div>
 
@@ -710,7 +742,8 @@ export default function POSPage() {
                   <select
                     value={orderType}
                     onChange={(e) => setOrderType(e.target.value)}
-                    className="w-full bg-transparent text-white py-3 px-4 font-bold text-sm appearance-none outline-none cursor-pointer">
+                    className="w-full bg-transparent text-white py-3 px-4 font-bold text-sm appearance-none outline-none cursor-pointer"
+                  >
                     <option value="Dine In" className="text-gray-800">
                       Dine In
                     </option>
@@ -724,7 +757,8 @@ export default function POSPage() {
                       className="h-4 w-4 text-white"
                       fill="none"
                       viewBox="0 0 24 24"
-                      stroke="currentColor">
+                      stroke="currentColor"
+                    >
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
@@ -738,7 +772,8 @@ export default function POSPage() {
                 <button
                   onClick={() => setShowPaymentModal(true)}
                   disabled={cart.length === 0}
-                  className="w-full text-white py-4 font-extrabold text-sm tracking-wide hover:bg-[#ff5252] transition disabled:opacity-50 disabled:cursor-not-allowed">
+                  className="w-full text-white py-4 font-extrabold text-sm tracking-wide hover:bg-[#ff5252] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
                   LANJUTKAN KE PEMBAYARAN
                 </button>
               </div>
