@@ -13,6 +13,7 @@ import {
   ArrowRight,
   LucideIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 // ============================================================
 // ✏️ GANTI PATH/URL GAMBAR DI SINI
@@ -36,9 +37,12 @@ export default function RegisterPage() {
     confirmPassword: "",
   });
 
+  const router = useRouter();
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Registering with:", formData);
+    router.push("/login");
     alert("Pendaftaran berhasil! Silakan login.");
   };
 
