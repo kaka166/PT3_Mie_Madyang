@@ -95,11 +95,11 @@ export default function Sidebar() {
                       <Link
                         key={sub.label}
                         href={sub.href}
-                        // Efek membesar pas dihover
+                        // Efek membesar pas dihover dan border disesuaikan
                         className={`flex items-center px-4 py-2 rounded-r-md transform transition-all duration-200 border-l-[5px] ${
                           isSubActive
-                            ? "bg-white-300 border-neutral-600 text-neutral-800 font-bold scale-105 shadow-sm"
-                            : "text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800 hover:scale-105"
+                            ? "bg-neutral-200 border-neutral-600 text-neutral-800 font-bold scale-105 shadow-sm"
+                            : "border-transparent text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800 hover:scale-105"
                         }`}
                       >
                         <span className="text-sm font-semibold">{sub.label}</span>
