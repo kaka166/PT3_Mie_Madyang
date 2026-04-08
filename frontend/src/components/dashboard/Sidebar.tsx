@@ -30,13 +30,23 @@ export default function Sidebar() {
   const menuItems = [
     { icon: LayoutDashboard, label: "Admin",     href: "/admin" },
     { icon: CreditCard,      label: "Cashier",   href: "/cashier" },
-    { icon: Package2,        label: "Menu", href: "/inventory" },
-    { icon: BarChart3,       label: "Reports",   href: "/reports" },
+    { icon: Package2,        label: "Menu",      href: "/inventory" },
     { icon: UtensilsCrossed, label: "Kitchen",   href: "/kitchen" },
+    { 
+      icon: BarChart3,       
+      label: "Reports",   
+      href: "/reports",
+      // Sub-menu langsung dideklarasikan di sini
+      subItems: [
+        { label: "Penjualan", href: "/reports/penjualan" },
+        { label: "Pengeluaran", href: "/reports/pengeluaran" },
+        { label: "HPP", href: "/reports/hpp" },
+        { label: "Stock Bahan", href: "/reports/stock-bahan" },
+      ]
+    },
   ];
 
   return (
-    // top-0 agar tembus sampai atas, z-50 lebih tinggi dari navbar (z-40)
     <aside className="fixed left-0 top-0 h-full w-64 bg-neutral-100 shadow-sm flex flex-col z-50">
       <div className="flex items-center px-6 py-4 border-b border-neutral-200 min-h-[57px]">
         <Image
@@ -55,28 +65,56 @@ export default function Sidebar() {
       </div>
 
       {/* Menu */}
-      <nav className="flex-1 px-3 space-y-1">
+      <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
-          const isActive = pathname === item.href;
+          const hasSubItems = !!item.subItems;
+          // Parent aktif jika path cocok ATAU salah satu sub-item-nya sedang aktif
+          const isParentActive = pathname === item.href || (hasSubItems && item.subItems.some(sub => pathname.startsWith(sub.href)));
+
           return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transform transition-all duration-200 ${
-                isActive
-                  ? "bg-white text-primary scale-105 shadow-md border-l-4 border-primary font-bold"
-                  : "text-neutral-500 hover:text-primary hover:bg-neutral-200"
-              }`}
-            >
-              <item.icon size={20} />
-              <span className="text-sm font-semibold">{item.label}</span>
-            </Link>
+            <div key={item.label} className="flex flex-col">
+              {/* Parent Link */}
+              <Link
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-r-lg transform transition-all duration-200 ${
+                  isParentActive
+                    ? "bg-white text-primary scale-105 shadow-md border-l-4 border-primary font-bold"
+                    : "text-neutral-500 hover:text-primary hover:bg-neutral-200"
+                }`}
+              >
+                <item.icon size={20} />
+                <span className="text-sm font-semibold">{item.label}</span>
+              </Link>
+
+              {/* Sub-Items dibawah reports aktif tanpa dropdown bolooo */}
+              {hasSubItems && (
+                <div className="flex flex-col gap-2 mt-2 ml-6 mr-2 mb-2">
+                  {item.subItems.map((sub) => {
+                    const isSubActive = pathname === sub.href;
+                    return (
+                      <Link
+                        key={sub.label}
+                        href={sub.href}
+                        // Efek membesar pas dihover
+                        className={`flex items-center px-4 py-2 rounded-r-md transform transition-all duration-200 border-l-[5px] ${
+                          isSubActive
+                            ? "bg-white-300 border-neutral-600 text-neutral-800 font-bold scale-105 shadow-sm"
+                            : "text-neutral-600 hover:bg-neutral-200 hover:text-neutral-800 hover:scale-105"
+                        }`}
+                      >
+                        <span className="text-sm font-semibold">{sub.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           );
         })}
       </nav>
 
       {/* Bottom */}
-      <div className="px-3 border-t border-neutral-200 pt-4">
+      <div className="px-3 border-t border-neutral-200 pt-4 pb-4">
         <Link
           href="#"
           className="flex items-center gap-3 text-neutral-500 px-4 py-3 hover:text-primary transition-colors"
@@ -89,7 +127,6 @@ export default function Sidebar() {
           <span className="text-sm font-semibold">Logout</span>
         </button>
       </div>
-
     </aside>
   );
 }
