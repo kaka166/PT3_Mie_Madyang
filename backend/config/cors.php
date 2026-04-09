@@ -7,8 +7,15 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://pt-3-mie-madyang-gamma.vercel.app',
+        'https://pt3-kelompok.farelzy.my.id',
+        'http://pt3-kelompok.farelzy.my.id',
+        'https://pt-3-mie-madyang-gamma.vercel.app', 
+        'http://localhost:3000',
     ],
+
+    'allowed_origins_patterns' => [],
+
+    'supports_credentials' => true,
 
     'allowed_origins_patterns' => [
         '#^https:\/\/.*\.vercel\.app$#'
