@@ -1,0 +1,25 @@
+name: Deploy Ma-Dyang Backend
+
+on:
+  push:
+    branches: [ develop ] # CI/CD jalan setiap kamu push ke branch main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploying to VPS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{  '103.253.212.209' }}
+          username: ${{ 'relz' }}
+          password: ${{ 'farelzy@!VPS' }}
+          script: |
+            cd /home/relz/kuliah/PT3_Mie_Madyang/backend
+            git pull origin develop
+            composer install --no-dev --optimize-autoloader
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            sudo systemctl restart php8.3-fpm
+            echo "Anjay, Deploy Berhasil, Lur!"
