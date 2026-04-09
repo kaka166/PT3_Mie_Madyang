@@ -11,34 +11,30 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-
         $request->validate([
             'login'    => 'required|string',
             'password' => 'required|string',
         ]);
 
-
-        $user = User::where('email', $request->login)
-            ->orWhere('name', $request->login)
+        // Sekarang kita cari di kolom 'username' atau 'email' secara spesifik
+        $user = User::where('username', $request->login)
+            ->orWhere('email', $request->login)
             ->first();
-
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json([
                 'status'  => 'error',
-                'message' => 'Kredensial (Email/Nama atau Password) salah.'
+                'message' => 'Username/Email atau password salah.'
             ], 401);
         }
-
 
         $token = $user->createToken('ma_dyang_token')->plainTextToken;
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Login Berhasil',
             'data' => [
                 'token' => $token,
-                'user'  => $user
+                'user' => $user
             ]
         ]);
     }
@@ -55,34 +51,31 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        // 1. Validasi sesuai dengan JSON yang kamu kirim
         $request->validate([
-            'fullName' => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
+            'username' => 'required|string|unique:users',
+            'fullName' => 'required|string',
+            'email'    => 'required|email|unique:users',
+            'phone'    => 'nullable|string',
             'password' => 'required|string|min:8',
-            'role'     => 'nullable|string',
-            // 'username' & 'phone' divalidasi kalau kamu mau, 
-            // tapi di sini kita simpan yang ada kolomnya saja di DB standar.
         ]);
 
-        // 2. Simpan ke Database (Mapping field)
         $user = User::create([
-            'name'     => $request->fullName, // fullName masuk ke kolom name
+            'username' => $request->username,
+            'name'     => $request->fullName, // fullName masuk ke kolom 'name'
             'email'    => $request->email,
+            'phone'    => $request->phone,
             'password' => Hash::make($request->password),
-            // Jika di DB kamu belum ada kolom 'role', baris di bawah ini dihapus saja:
-            // 'role'  => $request->role, 
+            'role'     => $request->role ?? 'kasir',
         ]);
 
-        // 3. Buat Token
         $token = $user->createToken('ma_dyang_token')->plainTextToken;
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'User berhasil didaftarkan',
-            'data'    => [
+            'status' => 'success',
+            'message' => 'User berhasil didaftarkan!',
+            'data' => [
                 'token' => $token,
-                'user'  => $user
+                'user' => $user
             ]
         ], 201);
     }
