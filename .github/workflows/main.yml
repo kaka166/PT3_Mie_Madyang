@@ -13,6 +13,7 @@ jobs:
         with:
           host: ${{  '103.253.212.209' }}
           username: ${{ 'relz' }}
+          port: 2222
           password: ${{ 'farelzy@!VPS' }}
           script: |
             cd /home/relz/kuliah/PT3_Mie_Madyang/backend
