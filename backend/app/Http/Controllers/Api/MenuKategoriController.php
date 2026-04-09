@@ -62,7 +62,7 @@ class MenuKategoriController extends Controller
 
             // 2. Cascading: Jika kategori mati, semua menu di dalamnya IKUT MATI
             if ($statusBaru == 0) {
-                DB::table('menu')->where('kategori_id', $id)->update([
+                DB::table('menu_kategori')->where('kategori_id', $id)->update([
                     'is_active' => 0,
                     'updated_at' => now()
                 ]);
@@ -88,12 +88,19 @@ class MenuKategoriController extends Controller
     // Update Nama Kategori
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'nama_kategori' => 'required|string|unique:menu_kategori,nama_kategori,' . $id
+        ]);
+
         DB::table('menu_kategori')->where('id', $id)->update([
             'nama_kategori' => $request->nama_kategori,
             'updated_at' => now()
         ]);
 
-        return response()->json(['success' => true, 'data' => DB::table('menu_kategori')->where('id', $id)->first()]);
+        return response()->json([
+            'success' => true,
+            'data' => DB::table('menu_kategori')->where('id', $id)->first()
+        ]);
     }
 
     // Hapus Kategori
@@ -101,5 +108,23 @@ class MenuKategoriController extends Controller
     {
         DB::table('menu_kategori')->where('id', $id)->delete();
         return response()->json(['success' => true]);
+    }
+
+    //new
+    public function show($id)
+    {
+        $kategori = DB::table('menu_kategori')->where('id', $id)->first();
+
+        if (!$kategori) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kategori tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $kategori
+        ]);
     }
 }
