@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, FormEvent, ChangeEvent } from "react";
 import {
-  User,
+  User as UserIcon,
   Badge,
   Mail,
   Phone,
@@ -14,20 +14,17 @@ import {
   LucideIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/authService";
 
-// ============================================================
-// ✏️ GANTI PATH/URL GAMBAR DI SINI
 const BANNER_SRC = "/assets/Logo_Mie_Ma-Dyang_RemovedBG.png";
-
-// ✏️ GANTI TEKS ALT
 const BANNER_ALT = "Banner Mie Ayam Ma-Dyang";
-
-// ✏️ GANTI UKURAN TAMPILAN GAMBAR (px)
 const BANNER_WIDTH = 600;
 const BANNER_HEIGHT = 600;
-// ============================================================
 
 export default function RegisterPage() {
+  const router = useRouter();
+
+  // STATES
   const [formData, setFormData] = useState({
     username: "",
     fullName: "",
@@ -36,19 +33,53 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
   });
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
-  const router = useRouter();
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Registering with:", formData);
-    router.push("/login");
-    alert("Pendaftaran berhasil! Silakan login.");
+    setLoading(true);
+    setError("");
+
+    // 1. Validasi Password Match di Client
+    if (formData.password !== formData.confirmPassword) {
+      setError("Konfirmasi password tidak cocok!");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // 2. Kirim 5 parameter sesuai authService terbaru
+      await authService.register(
+        formData.username,
+        formData.fullName,
+        formData.email,
+        formData.phone,
+        formData.password,
+      );
+
+      alert(
+        "Pendaftaran berhasil! Akun @" + formData.username + " sudah aktif.",
+      );
+      router.push("/login");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Terjadi kesalahan saat mendaftar.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <main className="min-h-screen flex flex-col items-center relative bg-gray-100 overflow-hidden">
-      {/* Red chevron background — sama seperti login */}
       <div
         className="absolute top-0 left-0 right-0 bg-[#c93535]"
         style={{
@@ -58,10 +89,6 @@ export default function RegisterPage() {
       />
 
       <div className="relative z-10 w-full max-w-lg px-4 pt-10 pb-12 flex flex-col items-center">
-
-        {/* ============================================================
-            📌 AREA BANNER / LOGO — sama seperti login
-        ============================================================ */}
         <div className="mb-6 flex flex-col items-center">
           <Image
             src={BANNER_SRC}
@@ -75,12 +102,8 @@ export default function RegisterPage() {
             Selamat datang!
           </p>
         </div>
-        {/* ========================================================== */}
 
-        {/* Card */}
         <div className="bg-white rounded-2xl shadow-2xl w-full px-8 py-8">
-
-          {/* Title */}
           <div className="text-center mb-1">
             <h2
               className="text-2xl font-bold tracking-[0.25em] text-gray-800"
@@ -93,73 +116,125 @@ export default function RegisterPage() {
             Lengkapi data diri Anda untuk mulai mengelola kedai.
           </p>
 
+          {error && (
+            <div className="mb-4 p-3 text-xs text-center bg-red-50 text-red-600 rounded-lg border border-red-100 animate-pulse">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-5">
-
-            {/* Username + Nama */}
-            <div>
-              <InputField icon={User}  label="Username"     placeholder="e.x: Prellzy" />
-            </div>
-            <div>
-              <InputField icon={Badge} label="Nama Lengkap" placeholder="Nama Sesuai KTP" />
-            </div>
-
-            <InputField icon={Mail}  label="Email"          placeholder="example@email.com" type="email" />
-            <InputField icon={Phone} label="Nomor Telepon"  placeholder="0812-xxxx-xxxx"    type="tel" />
-
-            {/* Password */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <InputField icon={Lock}        label="Password"           placeholder="••••••••" type="password" />
-              <InputField icon={ShieldCheck} label="Konfirmasi Password" placeholder="••••••••" type="password" />
+              <InputField
+                icon={UserIcon}
+                label="Username"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="e.x: raven_zy"
+              />
+              <InputField
+                icon={Badge}
+                label="Nama Lengkap"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Nama Sesuai KTP"
+              />
             </div>
 
-            {/* Terms */}
+            <InputField
+              icon={Mail}
+              label="Email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="example@email.com"
+              type="email"
+            />
+            <InputField
+              icon={Phone}
+              label="Nomor Telepon"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="0812-xxxx-xxxx"
+              type="tel"
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <InputField
+                icon={Lock}
+                label="Password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                type="password"
+              />
+              <InputField
+                icon={ShieldCheck}
+                label="Konfirmasi Password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="••••••••"
+                type="password"
+              />
+            </div>
+
             <div className="flex items-start gap-3 py-2">
               <input
                 type="checkbox"
                 required
                 className="mt-1 w-4 h-4 accent-[#c93535] cursor-pointer"
               />
-              <p className="text-gray-500 text-xs">
+              <p className="text-gray-500 text-xs leading-relaxed">
                 Saya setuju dengan{" "}
-                <Link href="#" className="text-[#c93535] font-semibold hover:underline">
+                <Link
+                  href="#"
+                  className="text-[#c93535] font-semibold hover:underline"
+                >
                   Syarat & Ketentuan
                 </Link>{" "}
                 serta{" "}
-                <Link href="#" className="text-[#c93535] font-semibold hover:underline">
+                <Link
+                  href="#"
+                  className="text-[#c93535] font-semibold hover:underline"
+                >
                   Kebijakan Privasi
                 </Link>
               </p>
             </div>
 
-            {/* Submit Button — sama seperti login */}
             <button
               type="submit"
-              className="w-full py-3 bg-[#c93535] hover:bg-[#a82828] active:scale-[0.98] text-white font-bold rounded-lg tracking-widest text-sm transition flex items-center justify-center gap-2 group"
+              disabled={loading}
+              className={`w-full py-3 ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-[#c93535] hover:bg-[#a82828]"} text-white font-bold rounded-lg tracking-widest text-sm transition flex items-center justify-center gap-2 group shadow-lg active:scale-95`}
             >
-              Daftar Sekarang
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+              {loading ? "MENDAFTAR..." : "Daftar Sekarang"}
+              {!loading && (
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+              )}
             </button>
-
           </form>
 
-          {/* Divider & Login */}
           <hr className="my-5 border-gray-100" />
           <p className="text-center text-sm text-gray-400">
             Sudah punya akun?{" "}
-            <Link href="/login" className="text-[#c93535] font-bold hover:underline">
+            <Link
+              href="/login"
+              className="text-[#c93535] font-bold hover:underline"
+            >
               Masuk di sini
             </Link>
           </p>
-
         </div>
 
-        {/* Footer */}
         <div className="flex gap-5 mt-6 text-xs text-gray-300">
           <span>Help Center</span>
           <span>Privacy Policy</span>
           <span>Terms</span>
         </div>
-
       </div>
     </main>
   );
@@ -170,6 +245,9 @@ type InputFieldProps = {
   icon: LucideIcon;
   label: string;
   placeholder: string;
+  name: string;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
   type?: string;
 };
 
@@ -177,6 +255,9 @@ function InputField({
   icon: Icon,
   label,
   placeholder,
+  name,
+  value,
+  onChange,
   type = "text",
 }: InputFieldProps) {
   return (
@@ -187,6 +268,9 @@ function InputField({
       <div className="relative group">
         <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-[#c93535] transition" />
         <input
+          name={name}
+          value={value}
+          onChange={onChange}
           type={type}
           placeholder={placeholder}
           required
