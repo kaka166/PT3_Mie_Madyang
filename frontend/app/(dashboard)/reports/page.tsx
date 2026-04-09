@@ -26,24 +26,12 @@ const transactions = [
 
 export default function ReportsPage() {
   return (
-    <div>
+    // [KOMENTAR] DITAMBAHKAN bg-neutral-100 dan p-8 AGAR JARAK TEPI KONSISTEN DENGAN HALAMAN LAIN
+    <div className="min-h-screen bg-neutral-0 p-1 font-sans">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* --- Title --- */}
         <h1 className="text-4xl font-bold text-[#424242]">Reports</h1>
-
-        {/* --- Tab Navigation --- */}
-        <div className="flex gap-3">
-          <button className="px-6 py-2 rounded-lg bg-white border border-red-200 text-gray-800 font-medium shadow-sm">
-            Keuangan
-          </button>
-          <button className="px-6 py-2 rounded-lg bg-[#FF4C4C] text-white font-medium shadow-md">
-            Penjualan
-          </button>
-          <button className="px-6 py-2 rounded-lg bg-[#FF4C4C] text-white font-medium shadow-md">
-            Kas
-          </button>
-        </div>
 
         {/* --- Summary Cards --- */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -68,7 +56,6 @@ export default function ReportsPage() {
               Lihat Laporan Lengkap
             </button>
           </div>
-
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
