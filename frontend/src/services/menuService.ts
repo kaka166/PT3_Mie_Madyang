@@ -1,137 +1,165 @@
-// src/services/menuService.ts
-
 export interface Menu {
-    id: number;
-    nama_menu: string;
-    harga_jual: number;
-    kategori_id: number;
-    is_active: number;
-    gambar?: string;
-    kategori?: {
-        nama_kategori: string;
-    };
+  id: number;
+  nama_menu: string;
+  harga_jual: number;
+  kategori_id: number;
+  is_active: number;
+  gambar?: string;
+  kategori?: {
+    nama_kategori: string;
+  };
 }
 
 export interface Category {
-    id: number;
-    nama_kategori: string;
-    is_active: number;
+  id: number;
+  nama_kategori: string;
+  is_active: number;
 }
 
-// UBAH 127.0.0.1 JADI localhost AGAR SAMA DENGAN FRONTEND
 const API_BASE_URL = "http://localhost:8000/api";
 
 export const menuService = {
-    getCategories: async () => {
-        const res = await fetch(`${API_BASE_URL}/kategori`);
-        if (!res.ok) throw new Error("Gagal fetch kategori");
-        return res.json();
-    },
+  // ========================
+  // GET DATA
+  // ========================
+  getCategories: async () => {
+    const res = await fetch(`${API_BASE_URL}/kategori`);
+    const data = await res.json();
 
-    getAll: async (): Promise<{ data: Menu[] }> => {
-        const res = await fetch(`${API_BASE_URL}/menu`, {
-            headers: { "Accept": "application/json" }
-        });
-        if (!res.ok) throw new Error("Gagal mengambil data menu");
-        return res.json();
-    },
+    if (!res.ok) throw new Error(data.message || "Gagal fetch kategori");
+    return data;
+  },
 
-    // Tambah menu baru
-    create: async (formData: FormData): Promise<void> => {
-        const res = await fetch(`${API_BASE_URL}/menu`, {
-            method: "POST",
-            body: formData,
-            // PENTING: Jangan pasang header Content-Type di sini kalau pakai FormData
-            headers: { "Accept": "application/json" }
-        });
+  getAll: async (): Promise<{ data: Menu[] }> => {
+    const res = await fetch(`${API_BASE_URL}/menu`, {
+      headers: { Accept: "application/json" },
+    });
 
-        if (!res.ok) {
-            const errorData = await res.json();
-            console.error("Laravel Validation Error:", errorData);
-            throw new Error(errorData.message || "Gagal menambah menu");
-        }
-    },
+    const data = await res.json();
 
-    createCategory: async (nama: string) => {
-        const res = await fetch(`${API_BASE_URL}/kategori`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nama_kategori: nama }),
-        });
-        if (!res.ok) throw new Error("Gagal simpan kategori");
-        return res.json();
-    },
+    if (!res.ok) throw new Error(data.message || "Gagal mengambil menu");
+    return data;
+  },
 
-    updateCategory: async (id: number, nama: string) => {
-        const res = await fetch(`http://localhost:8000/api/kategori/${id}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nama_kategori: nama }),
-        });
-        return res.json();
-    },
-    deleteCategory: async (id: number) => {
-        const res = await fetch(`http://localhost:8000/api/kategori/${id}`, {
-            method: "DELETE",
-        });
-        return res.json();
-    },
+  // ========================
+  // CATEGORY
+  // ========================
+  createCategory: async (nama: string) => {
+    const res = await fetch(`${API_BASE_URL}/kategori`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nama_kategori: nama }),
+    });
 
-    // Update menu (dengan spoofing PUT)
-    update: async (id: number, formData: FormData): Promise<void> => {
-        const res = await fetch(`${API_BASE_URL}/menu/${id}`, {
-            method: "POST", // Tetap POST untuk upload file di Laravel
-            body: formData,
-            headers: { "Accept": "application/json" }
-        });
+    const data = await res.json();
 
-        if (!res.ok) {
-            const errorData = await res.json();
-            console.error("Laravel Update Error:", errorData);
-            throw new Error(errorData.message || "Gagal mengupdate menu");
-        }
-    },
+    if (!res.ok) {
+      console.error("ERROR LARAVEL:", data);
+      throw new Error(data.message || "Gagal tambah kategori");
+    }
 
-    // Toggle status
-    toggleStatus: async (menu: Menu): Promise<void> => {
-        const res = await fetch(`${API_BASE_URL}/menu/${menu.id}/toggle`, {
-            method: "PUT",
-            headers: {
-                "Accept": "application/json"
-            }
-        });
+    return data;
+  },
 
-        if (!res.ok) {
-            const err = await res.json();
-            console.error("Toggle error:", err);
-            throw new Error("Gagal toggle status");
-        }
-    },
+  updateCategory: async (id: number, nama: string) => {
+    const res = await fetch(`${API_BASE_URL}/kategori/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nama_kategori: nama }),
+    });
 
-    toggleCategoryStatus: async (category: Category) => {
-        const res = await fetch(`http://localhost:8000/api/kategori/${category.id}/toggle`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            }
-        });
+    const data = await res.json();
 
-        if (!res.ok) {
-            // Ambil pesan error asli dari Laravel
-            const errorData = await res.json().catch(() => ({}));
-            console.error("LARAVEL NYERAH KARENA:", errorData); // <--- CEK DI CONSOLE F12
-            throw new Error(errorData.message || "Gagal mengubah status kategori");
-        }
-        return res.json();
-    },
+    if (!res.ok) throw new Error(data.message || "Gagal update kategori");
+    return data;
+  },
 
-    // Hapus menu
-    delete: async (id: number): Promise<void> => {
-        const res = await fetch(`${API_BASE_URL}/menu/${id}`, {
-            method: "DELETE",
-            headers: { "Accept": "application/json" }
-        });
-        if (!res.ok) throw new Error("Gagal menghapus menu");
-    },
+  deleteCategory: async (id: number) => {
+    const res = await fetch(`${API_BASE_URL}/kategori/${id}`, {
+      method: "DELETE",
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Gagal hapus kategori");
+    return data;
+  },
+
+  toggleCategoryStatus: async (category: Category) => {
+    const res = await fetch(`${API_BASE_URL}/kategori/${category.id}/toggle`, {
+      method: "PUT",
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    const data = await res.json();
+
+    console.log("RESPONSE TOGGLE:", data);
+
+    if (!res.ok) {
+      console.error("TOGGLE ERROR:", data);
+      throw new Error(data.message || "Gagal toggle kategori");
+    }
+
+    return data;
+  },
+
+  // ========================
+  // MENU
+  // ========================
+  create: async (formData: FormData) => {
+    const res = await fetch(`${API_BASE_URL}/menu`, {
+      method: "POST",
+      body: formData,
+      headers: { Accept: "application/json" },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("CREATE MENU ERROR:", data);
+      throw new Error(data.message || "Gagal tambah menu");
+    }
+  },
+
+  update: async (id: number, formData: FormData) => {
+    const res = await fetch(`${API_BASE_URL}/menu/${id}`, {
+      method: "POST",
+      body: formData,
+      headers: { Accept: "application/json" },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("UPDATE MENU ERROR:", data);
+      throw new Error(data.message || "Gagal update menu");
+    }
+  },
+
+  toggleStatus: async (menu: Menu) => {
+    const res = await fetch(`${API_BASE_URL}/menu/${menu.id}/toggle`, {
+      method: "PUT",
+      headers: { Accept: "application/json" },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      console.error("TOGGLE MENU ERROR:", data);
+      throw new Error(data.message || "Gagal toggle menu");
+    }
+  },
+
+  delete: async (id: number) => {
+    const res = await fetch(`${API_BASE_URL}/menu/${id}`, {
+      method: "DELETE",
+      headers: { Accept: "application/json" },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) throw new Error(data.message || "Gagal hapus menu");
+  },
 };
