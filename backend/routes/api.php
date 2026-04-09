@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\MenuKategoriController;
+use App\Http\Controllers\Api\AuthController;
 
 // ROUTE MENU
 Route::get('/menu', [MenuController::class, 'index']);
@@ -21,3 +22,10 @@ Route::delete('/kategori/{id}', [MenuKategoriController::class, 'destroy']);
 // ROUTE TOGGLE KATEGORI (CASCADING)
 Route::put('/kategori/{id}/toggle', [MenuKategoriController::class, 'toggleStatus']);
 Route::put('/menu/{id}/toggle', [MenuController::class, 'toggle']);
+
+//login
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
+});
