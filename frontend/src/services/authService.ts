@@ -2,11 +2,11 @@
 
 export interface User {
   id: number;
-  username: string; // Tambahkan ini
-  name: string; // Ini dari fullName di database
+  username: string;
+  name: string;
   email: string;
-  phone?: string; // Tambahkan ini (optional)
-  role: string; // Sekarang sudah ada di DB
+  phone?: string;
+  role: number; // Menggunakan ID: 1 (Owner), 2 (Kasir), 3 (Dapur)
   created_at: string;
   updated_at: string;
 }
@@ -34,13 +34,18 @@ export const authService = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
+          "Accept": "application/json",
         },
         body: JSON.stringify({
-          login: identifier, // Bisa diisi username atau email
+          login: identifier,
           password: password,
         }),
       });
+
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server tidak merespon dengan JSON. Cek apakah backend menyala?");
+      }
 
       const result = await response.json();
 
@@ -58,6 +63,7 @@ export const authService = {
 
       return successData;
     } catch (error) {
+      console.error("Auth Error:", error);
       if (error instanceof Error) throw error;
       throw new Error("Terjadi kesalahan koneksi ke server.");
     }
@@ -75,30 +81,54 @@ export const authService = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Accept: "application/json",
+          "Accept": "application/json",
         },
         body: JSON.stringify({
-          username: username, // Kirim username ke kolom baru
-          fullName: fullName, // Kirim ke name di Laravel
-          email: email,
-          phone: phone, // Kirim ke phone di Laravel
-          password: password,
+          username,
+          fullName,
+          email,
+          phone,
+          password,
         }),
       });
 
       const result = await response.json();
 
       if (!response.ok) {
-        // Jika ada error validasi dari Laravel (misal email duplikat)
         const errorData = result as ErrorResponse;
-        throw new Error(errorData.message || "Pendaftaran gagal, lur!");
+        const firstError = errorData.errors ? Object.values(errorData.errors)[0][0] : null;
+        throw new Error(firstError || errorData.message || "Pendaftaran gagal!");
       }
 
       return result as LoginResponse;
     } catch (error) {
       if (error instanceof Error) throw error;
-      throw new Error("Terjadi kesalahan saat mendaftar.");
+      throw new Error("Terjadi kesalahan koneksi ke server.");
     }
+  },
+
+  getRole(): number | null {
+    if (typeof window !== "undefined") {
+      const userJson = localStorage.getItem("user");
+      if (userJson) {
+        try {
+          const user = JSON.parse(userJson) as User;
+          return Number(user.role);
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  },
+
+  getRoleName(roleId: number): string {
+    const roles: Record<number, string> = {
+      1: "Owner",
+      2: "Kasir",
+      3: "Dapur",
+    };
+    return roles[roleId] || "Guest";
   },
 
   logout(): void {

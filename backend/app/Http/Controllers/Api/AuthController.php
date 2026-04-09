@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -51,32 +52,50 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
-        $request->validate([
-            'username' => 'required|string|unique:users',
+        
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string|unique:users,username',
             'fullName' => 'required|string',
-            'email'    => 'required|email|unique:users',
+            'email'    => 'required|email|unique:users,email',
             'phone'    => 'nullable|string',
             'password' => 'required|string|min:8',
+            'role'     => 'nullable|integer|in:1,2,3',
         ]);
 
-        $user = User::create([
-            'username' => $request->username,
-            'name'     => $request->fullName, // fullName masuk ke kolom 'name'
-            'email'    => $request->email,
-            'phone'    => $request->phone,
-            'password' => Hash::make($request->password),
-            'role'     => $request->role ?? 'kasir',
-        ]);
+        if ($validator->fails()) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Validasi gagal, lur!',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
 
-        $token = $user->createToken('ma_dyang_token')->plainTextToken;
+        try {
+            $user = User::create([
+                'username' => $request->username,
+                'name'     => $request->fullName,
+                'email'    => $request->email,
+                'phone'    => $request->phone,
+                'password' => Hash::make($request->password),
+                'role'     => $request->role ?? 2,
+            ]);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'User berhasil didaftarkan!',
-            'data' => [
-                'token' => $token,
-                'user' => $user
-            ]
-        ], 201);
+            $token = $user->createToken('ma_dyang_token')->plainTextToken;
+
+            return response()->json([
+                'status'  => 'success',
+                'message' => 'User berhasil didaftarkan!',
+                'data'    => [
+                    'token' => $token,
+                    'user'  => $user
+                ]
+            ], 201);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Gagal mendaftar: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

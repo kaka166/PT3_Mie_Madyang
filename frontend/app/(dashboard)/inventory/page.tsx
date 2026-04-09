@@ -5,11 +5,8 @@ import {
   Plus,
   Calculator,
   Pencil,
-  Trash2,
-  MoreHorizontal,
   FolderPlus,
   X,
-  Check,
   AlertTriangle,
 } from "lucide-react";
 import { menuService, Menu, Category } from "@/services/menuService";
@@ -152,23 +149,24 @@ export default function InventoryPage() {
       setShowModal(false);
       fetchData();
     } catch (err) {
-      alert("Gagal simpan menu.");
+      console.error(err);
+      fetchData(); // reload jika gagal
     }
   };
 
-  const deleteMenu = (id: number) => {
-    setConfirmPopup({
-      isOpen: true,
-      type: "danger",
-      title: "Hapus Menu?",
-      message: "Data menu ini akan dihapus permanen dari sistem database.",
-      onConfirm: async () => {
-        await menuService.delete(id);
-        setConfirmPopup((prev) => ({ ...prev, isOpen: false }));
-        fetchData();
-      },
-    });
-  };
+  // const deleteMenu = (id: number) => {
+  //   setConfirmPopup({
+  //     isOpen: true,
+  //     type: "danger",
+  //     title: "Hapus Menu?",
+  //     message: "Data menu ini akan dihapus permanen dari sistem database.",
+  //     onConfirm: async () => {
+  //       await menuService.delete(id);
+  //       setConfirmPopup((prev) => ({ ...prev, isOpen: false }));
+  //       fetchData();
+  //     },
+  //   });
+  // };
 
   // --- CATEGORY ACTIONS ---
   const handleToggleCategory = (cat: Category) => {

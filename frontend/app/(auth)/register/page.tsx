@@ -46,7 +46,6 @@ export default function RegisterPage() {
     setLoading(true);
     setError("");
 
-    // 1. Validasi Password Match di Client
     if (formData.password !== formData.confirmPassword) {
       setError("Konfirmasi password tidak cocok!");
       setLoading(false);
@@ -54,7 +53,7 @@ export default function RegisterPage() {
     }
 
     try {
-      // 2. Kirim 5 parameter sesuai authService terbaru
+      // Panggil dengan 5 parameter: username, fullName, email, phone, password
       await authService.register(
         formData.username,
         formData.fullName,
@@ -64,14 +63,16 @@ export default function RegisterPage() {
       );
 
       alert(
-        "Pendaftaran berhasil! Akun @" + formData.username + " sudah aktif.",
+        "Pendaftaran berhasil, lur! Akun @" +
+          formData.username +
+          " siap digunakan.",
       );
       router.push("/login");
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Terjadi kesalahan saat mendaftar.");
+        setError("Gagal daftar, coba cek koneksi atau data kamu.");
       }
     } finally {
       setLoading(false);
