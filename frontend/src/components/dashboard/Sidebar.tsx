@@ -56,7 +56,10 @@ export default function Sidebar({
       icon: UtensilsCrossed, 
       label: "Kitchen", 
       href: "/kitchen", 
-      allowedRoles: [1, 2, 3] 
+      allowedRoles: [1, 2, 3],
+      subItems: [
+        { label: "Stock", href: "/kitchen/stock" },
+      ],
     },
     {
       icon: BarChart3,
