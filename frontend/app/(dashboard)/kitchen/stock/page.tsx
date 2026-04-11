@@ -280,7 +280,7 @@ export default function StockBahanPage() {
           <div className="flex w-full max-w-4xl flex-col md:flex-row overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh]">
             
             {/* Bagian Kiri: Form Input */}
-            <div className="flex-1 p-6 overflow-y-auto">
+            <div className="flex-1 p-6 overflow-y-auto flex flex-col">
               <h2 className="mb-6 text-2xl font-bold text-gray-900">Penyesuaian Stock</h2>
               
               <div className="mb-4">
@@ -298,7 +298,7 @@ export default function StockBahanPage() {
                   <div className="text-lg font-bold">15 Kg</div>
                 </div>
                 <div className="flex-1">
-                  <label className="block text-sm font-semibold mb-2">Jumlah Baru</label>
+                  <label className="block text-sm font-semibold mb-2">Jumlah perubahan stock</label>
                   <div className="flex border rounded-lg overflow-hidden bg-gray-100">
                     <input type="number" placeholder="Jumlah" className="w-full bg-transparent p-2 text-sm outline-none" />
                     <select className="bg-gray-200 border-l px-2 text-sm outline-none font-medium">
@@ -324,15 +324,7 @@ export default function StockBahanPage() {
                 </div>
               </div>
 
-              <div className="mb-6">
-                <label className="block text-sm font-semibold mb-2">Tambahkan Catatan (Opsional)</label>
-                <textarea 
-                  placeholder="Catatan..." 
-                  className="w-full bg-gray-100 border-none rounded-xl p-3 text-sm h-24 focus:ring-2 focus:ring-red-200 outline-none resize-none"
-                ></textarea>
-              </div>
-
-              <button className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors">
+              <button className="mt-auto w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors">
                 Simpan
               </button>
             </div>
@@ -364,10 +356,6 @@ export default function StockBahanPage() {
                   <div>
                     <div className="text-gray-400 text-xs mb-1">Jumlah Sekarang</div>
                     <div className="font-medium text-gray-700">15 Kg</div>
-                  </div>
-                  <div>
-                    <div className="text-gray-400 text-xs mb-1">qty</div>
-                    <div className="font-medium text-gray-700">-1 Kg</div>
                   </div>
                 </div>
               </div>
