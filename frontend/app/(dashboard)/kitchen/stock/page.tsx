@@ -39,7 +39,7 @@ const stockList = [
     nomor: "#443241", kategori: "Bahan Pokok", nama: "Mie Mentah Spesial", stok: "15", satuan: "Kg", estimasi: "Rp. 300.000", status: "Aman", tanggal: "10-04-26", waktu: "07:30:00"
   },
   {
-    nomor: "#443242", kategori: "Lauk", nama: "Daging Ayam Bumbu", stok: "8", satuan: "Kg", estimasi: "Rp. 400.000", status: "Aman", tanggal: "10-04-26", waktu: "08:15:22"
+    nomor: "#443242", kategori: "Lauk", nama: "Daging Ayam Segar", stok: "8", satuan: "Kg", estimasi: "Rp. 400.000", status: "Aman", tanggal: "10-04-26", waktu: "08:15:22"
   },
   {
     nomor: "#443243", kategori: "Sayuran", nama: "Sawi Hijau (Caisim)", stok: "3", satuan: "Ikat", estimasi: "Rp. 15.000", status: "Menipis", tanggal: "09-04-26", waktu: "06:00:10"
