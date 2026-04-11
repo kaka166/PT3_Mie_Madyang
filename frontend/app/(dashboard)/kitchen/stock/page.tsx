@@ -40,7 +40,8 @@ export default function StockBahanPage() {
   const filterOptions = ['Penyesuaian', 'Re Stock', 'Produksi'];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 font-sans text-gray-800">
+    // Ditambahkan overflow-y-auto, w-full, dan pb-12 di div paling luar ini
+    <div className="h-full w-full overflow-y-auto bg-gray-100 p-6 pb-12 font-sans text-gray-800">
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Stock Bahan</h1>
