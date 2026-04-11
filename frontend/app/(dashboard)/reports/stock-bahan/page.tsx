@@ -1,116 +1,103 @@
-"use client";
+'use client';
 
-import React from "react";
-import { MoreHorizontal, ChevronRight } from "lucide-react";
+import React, { useState } from 'react';
+import { 
+  Search, 
+  Download, 
+  Filter, 
+  ChevronLeft, 
+  ChevronRight, 
+  PackagePlus,
+  RefreshCw,
+  Edit
+} from 'lucide-react';
 
-// --- DUMMY DATA ---
-const stockData = [
-  {
-    nama: "Tepung Terigu Segitiga Biru",
-    terakhirSuplai: "02 Apr 2026",
-    sisa: 142,
-    satuan: "KG",
-    status: "Aman",
-    statusColor: "bg-green-100 text-green-700",
-  },
-  {
-    nama: "Minyak Goreng Bimoli 5L",
-    terakhirSuplai: "05 Apr 2026",
-    sisa: 8,
-    satuan: "Jerigen",
-    status: "Menipis",
-    statusColor: "bg-yellow-100 text-yellow-700",
-  },
-  {
-    nama: "Daging Ayam Fillet",
-    terakhirSuplai: "08 Apr 2026",
-    sisa: 4,
-    satuan: "KG",
-    status: "Kritis",
-    statusColor: "bg-red-100 text-red-700",
-  },
-  {
-    nama: "Kecap Manis Bango",
-    terakhirSuplai: "28 Mar 2026",
-    sisa: 24,
-    satuan: "Pouch",
-    status: "Aman",
-    statusColor: "bg-green-100 text-green-700",
-  },
-  {
-    nama: "Bawang Merah",
-    terakhirSuplai: "06 Apr 2026",
-    sisa: 12,
-    satuan: "KG",
-    status: "Aman",
-    statusColor: "bg-green-100 text-green-700",
-  },
+// Mockup Data
+const stockListData = [
+  { id: 1, nama: 'Mie Mentah', jumlah: '10kg', status: 'Aman' },
+  { id: 2, nama: 'Ayam Mentok', jumlah: '7kg', status: 'Aman' },
+  { id: 3, nama: 'Sayur Cesim', jumlah: '13 ikat', status: 'Aman' },
+  { id: 4, nama: 'Minyak Goreng', jumlah: '1.5 L', status: 'Kritis' },
+  { id: 5, nama: 'Kulit Pangsit', jumlah: '4 pack', status: 'Aman' },
+  { id: 6, nama: 'Bakso', jumlah: '10 pack', status: 'Aman' },
+  { id: 7, nama: 'Daun Bawang', jumlah: '10 ikat', status: 'Aman' },
 ];
-// -------------------
 
-export default function LaporanStockBahan() {
+
+export default function StockBahanPage() {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedFilter, setSelectedFilter] = useState('');
+
+  const filterOptions = ['Penyesuaian', 'Re Stock', 'Produksi'];
+
   return (
-    // [KOMENTAR] DITAMBAHKAN KESELURUHAN CLASS UNTUK PENGATURAN TINGGI, BACKGROUND, DAN PADDING
-    <div className="min-h-screen bg-neutral-0 p-8 font-sans">
-      
-      {/* Header Utama (Sama seperti Laporan Pemasukan) */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-[#8B1A1A] mb-1">Laporan Stok Bahan</h1>
-        <p className="text-neutral-500">Pantau ketersediaan bahan baku operasional Mie Madyang</p>
+    <div className="min-h-screen bg-gray-100 p-6 font-sans text-gray-800">
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Laporan Stock Bahan</h1>
+        <p className="text-gray-500 text-sm">Real-time Finance Tracking</p>
       </div>
 
-      {/* Bagian Tabel Stock Inventory */}
-      <div className="mt-4">
-        <div className="flex justify-between items-end mb-4">
-          <div>
-            <h2 className="text-xl font-bold text-neutral-800">
-              Rincian Stock Bahan Baku
-            </h2>
-            <p className="text-sm text-zinc-500">
-              Pantau ketersediaan bahan real-time.
-            </p>
+      <button className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 mb-6 transition-colors">
+        <Download size={16} />
+        Download Report
+      </button>
+
+      {/* Stock List Section */}
+      <div className="bg-white rounded-xl shadow-sm mb-6 overflow-hidden">
+        <div className="p-4 flex justify-between items-center border-b">
+          <h2 className="text-lg font-bold">Stock List</h2>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input 
+              type="text" 
+              placeholder="Cari..." 
+              className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+            />
           </div>
         </div>
-
-        {/* Wrapper Tabel */}
-        <div className="bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[800px]">
-              <thead className="bg-zinc-50/50 text-[10px] uppercase font-bold text-zinc-400 tracking-widest border-b border-zinc-100">
-                <tr>
-                  <th className="px-6 py-4 text-left">Bahan Baku</th>
-                  <th className="px-6 py-4 text-left">Terakhir Suplai</th>
-                  <th className="px-6 py-4 text-center">Stok Sisa</th>
-                  <th className="px-6 py-4 text-left">Satuan</th>
-                  <th className="px-6 py-4 text-left">Status</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-center">
+            <thead className="text-gray-500 border-b">
+              <tr>
+                <th className="py-3 px-4 font-medium text-left">ID</th>
+                <th className="py-3 px-4 font-medium text-left">Nama Barang</th>
+                <th className="py-3 px-4 font-medium">Jumlah Stock</th>
+                <th className="py-3 px-4 font-medium">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stockListData.map((item) => (
+                <tr key={item.id} className="border-b last:border-0 hover:bg-gray-50">
+                  <td className="py-3 px-4 text-left">{item.id}</td>
+                  <td className="py-3 px-4 text-left">{item.nama}</td>
+                  <td className="py-3 px-4">{item.jumlah}</td>
+                  <td className="py-3 px-4 flex justify-center">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      item.status === 'Aman' ? 'bg-green-200 text-green-700' : 'bg-red-400 text-white'
+                    }`}>
+                      {item.status}
+                    </span>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-50">
-                {stockData.map((item, index) => (
-                  <tr key={index} className="hover:bg-zinc-50/80 transition-colors">
-                    <td className="px-6 py-4 font-bold text-neutral-700">
-                      {item.nama}
-                    </td>
-                    <td className="px-6 py-4 text-zinc-500">{item.terakhirSuplai}</td>
-                    <td className="px-6 py-4 text-center font-black text-neutral-800">
-                      {item.sisa}
-                    </td>
-                    <td className="px-6 py-4 text-zinc-500">{item.satuan}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase ${item.statusColor}`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {/* Pagination Dummy */}
+        <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500">
+          <span>Showing 1-9 of 2810 Transaction</span>
+          <div className="flex gap-1">
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white"><ChevronLeft size={16} /></button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white">1</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">2</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">3</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">4</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">5</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white"><ChevronRight size={16} /></button>
           </div>
         </div>
       </div>
-
     </div>
   );
 }

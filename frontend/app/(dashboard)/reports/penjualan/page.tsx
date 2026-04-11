@@ -88,16 +88,16 @@ export default function LaporanPenjualan() {
           </table>
         </div>
         {/* Pagination Table 1 */}
-        <div className="bg-neutral-300 px-6 py-3 flex items-center justify-between">
-          <span className="text-sm text-neutral-600">Showing 1-5 of 2810 Transaction</span>
+        <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500">
+          <span>Showing 1-9 of 2810 Transaction</span>
           <div className="flex gap-1">
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-500 text-white hover:bg-red-600 transition-colors"><ChevronLeft size={16} /></button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-500 text-white font-bold">1</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-white text-neutral-700 hover:bg-neutral-100 transition-colors">2</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-white text-neutral-700 hover:bg-neutral-100 transition-colors">3</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-white text-neutral-700 hover:bg-neutral-100 transition-colors">4</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-white text-neutral-700 hover:bg-neutral-100 transition-colors">5</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-500 text-white hover:bg-red-600 transition-colors"><ChevronRight size={16} /></button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white"><ChevronLeft size={16} /></button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white">1</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">2</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">3</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">4</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">5</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white"><ChevronRight size={16} /></button>
           </div>
         </div>
       </div>
@@ -131,16 +131,16 @@ export default function LaporanPenjualan() {
           </table>
         </div>
         {/* Pagination Table 2 */}
-        <div className="bg-neutral-300 px-6 py-3 flex items-center justify-between">
-          <span className="text-sm text-neutral-600">Showing 1-9 of 2810 Transaction</span>
+        <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500">
+          <span>Showing 1-9 of 2810 Transaction</span>
           <div className="flex gap-1">
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-500 text-white hover:bg-red-600 transition-colors"><ChevronLeft size={16} /></button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-500 text-white font-bold">1</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-white text-neutral-700 hover:bg-neutral-100 transition-colors">2</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-white text-neutral-700 hover:bg-neutral-100 transition-colors">3</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-white text-neutral-700 hover:bg-neutral-100 transition-colors">4</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-white text-neutral-700 hover:bg-neutral-100 transition-colors">5</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-500 text-white hover:bg-red-600 transition-colors"><ChevronRight size={16} /></button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white"><ChevronLeft size={16} /></button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white">1</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">2</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">3</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">4</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 hover:bg-gray-200">5</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white"><ChevronRight size={16} /></button>
           </div>
         </div>
       </div>
