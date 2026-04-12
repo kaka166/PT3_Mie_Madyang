@@ -18,8 +18,9 @@ const API_BASE_URL = "https://api.farelzy.my.id/api";
 
 // Helper buat ambil Token & Header
 const getAdminHeaders = (isFormData = false) => {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  const headers: HeadersInit = { "Accept": "application/json" };
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers: HeadersInit = { Accept: "application/json" };
   if (!isFormData) headers["Content-Type"] = "application/json";
   if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
@@ -28,14 +29,18 @@ const getAdminHeaders = (isFormData = false) => {
 export const menuService = {
   // GET DATA
   getCategories: async () => {
-    const res = await fetch(`${API_BASE_URL}/kategori`, { headers: getAdminHeaders() });
+    const res = await fetch(`${API_BASE_URL}/kategori`, {
+      headers: getAdminHeaders(),
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Gagal fetch kategori");
     return data;
   },
 
   getAll: async (): Promise<{ data: Menu[] }> => {
-    const res = await fetch(`${API_BASE_URL}/menu`, { headers: getAdminHeaders() });
+    const res = await fetch(`${API_BASE_URL}/menu`, {
+      headers: getAdminHeaders(),
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Gagal mengambil menu");
     return data;
