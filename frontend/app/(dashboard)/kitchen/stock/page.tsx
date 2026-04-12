@@ -13,7 +13,7 @@ import {
   X 
 } from 'lucide-react';
 
-// Mock Data
+// Mockup Data untuk Stock List
 const stockListData = [
   { id: 1, nama: 'Mie Mentah', jumlah: '10kg', status: 'Aman' },
   { id: 2, nama: 'Ayam Mentok', jumlah: '7kg', status: 'Aman' },
@@ -24,6 +24,7 @@ const stockListData = [
   { id: 7, nama: 'Daun Bawang', jumlah: '10 ikat', status: 'Aman' },
 ];
 
+// Mockup Data untuk Riwayat Perubahan Stock
 const riwayatData = [
   { id: '#443245', itemId: 1, nama: 'Mie Mentah', tipe: 'Produksi', alasan: '-', kuantiti: '10kg', waktu: '14-02-26 18:22:32', pembuat: 'Hafizh' },
   { id: '#443245', itemId: 2, nama: 'Ayam Mentok', tipe: 'Re-stock', alasan: '-', kuantiti: '7kg', waktu: '14-02-26 18:22:32', pembuat: 'Haikal' },
@@ -40,8 +41,10 @@ export default function StockBahanPage() {
 
   const filterOptions = ['Penyesuaian', 'Re Stock', 'Produksi'];
 
-  // --- STATE BARU UNTUK MODAL ---
+  // --- STATE  ---
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRestockModalOpen, setIsRestockModalOpen] = useState(false);
+  const [isBahanBaru, setIsBahanBaru] = useState(true); // untuk tombol Ya/Tidak
 
   // Mock Data untuk Riwayat di dalam Pop-up (Menampilkan 5 data)
   const riwayatModalData = [
@@ -49,6 +52,14 @@ export default function StockBahanPage() {
     { alasan: 'Kadaluwarsa', qty: '- 2.3', unit: 'Kg', pembuat: 'Hafizh', waktu: '14-02-26 18:22:32', type: 'minus' },
     { alasan: 'Salah Hitung', qty: '- 2.3', unit: 'Kg', pembuat: 'Hafizh', waktu: '14-02-26 18:22:32', type: 'minus' },
     { alasan: 'Sisa', qty: '- 1', unit: 'Kg', pembuat: 'Hafizh', waktu: '14-02-26 18:22:32', type: 'minus' },
+  ];
+
+  // Mock Data untuk Keranjang Restock
+  const keranjangData = [
+    { nama: 'Daging Ayam Segar', qty: '25', unit: 'Kg', pembuat: 'Staff Kasir Wirman', waktu: '14-02-26 18:22:32' },
+    { nama: 'Kaldu Jamur totole', qty: '1', unit: 'Pack', pembuat: 'Staff Kasir Wirman', waktu: '14-02-26 18:22:32' },
+    { nama: 'Minyak Bimoli', qty: '10', unit: 'L', pembuat: 'Staff Kasir Wirman', waktu: '14-02-26 18:22:32' },
+    { nama: 'Minyak apalahh', qty: '800', unit: 'ml', pembuat: 'Staff Kasir Wirman', waktu: '14-02-26 18:22:32' },
   ];
   
   return (
@@ -58,43 +69,6 @@ export default function StockBahanPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Stock Bahan</h1>
         <p className="text-gray-500 text-sm">Real-time Finance Tracking</p>
-      </div>
-
-      {/* Perubahan Terakhir Cards */}
-      <div className="mb-6">
-        <h2 className="text-lg font-bold mb-3">Perubahan Terakhir</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-semibold text-sm">Pembelian</span>
-              <span className="text-xs text-gray-400">Staff Kitchen</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Daging Ayam</span>
-              <span className="text-red-500 font-semibold text-sm">2 Kg</span>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-semibold text-sm">Produksi</span>
-              <span className="text-xs text-gray-400">Staff Kitchen</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">+ Mie Mentah</span>
-              <span className="text-red-500 font-semibold text-sm">1 Kg</span>
-            </div>
-          </div>
-          <div className="bg-white p-4 rounded-xl shadow-sm">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-semibold text-sm">Operasional</span>
-              <span className="text-xs text-gray-400">Staff Kitchen</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">- Tisue Meja</span>
-              <span className="text-red-500 font-semibold text-sm">2 Bungkus</span>
-            </div>
-          </div>
-        </div>
       </div>
 
       <button className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 mb-6 transition-colors">
@@ -161,7 +135,10 @@ export default function StockBahanPage() {
       {/* Action Buttons & Filter */}
       <div className="flex justify-between items-end mb-6">
         <div className="flex gap-3">
-          <button className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
+          <button 
+            onClick={() => setIsRestockModalOpen(true)} // <-- Tambahkan baris ini
+            className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2"
+          >
             <PackagePlus size={16} /> Laporkan Restock
           </button>
           <button className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
@@ -382,7 +359,115 @@ export default function StockBahanPage() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- MODAL POP-UP LAPORAN RESTOCK --- */}
+      {isRestockModalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="flex w-full max-w-4xl flex-col md:flex-row overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh]">
+            
+            {/* Bagian Kiri: Form Input Laporan Restock */}
+            <div className="flex-1 p-6 overflow-y-auto flex flex-col">
+              <h2 className="mb-6 text-2xl font-bold text-gray-900">Laporan Restock</h2>
+              
+              {/* Toggle Penambahan Bahan Baru */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold mb-3">Penambahan Bahan Baru?</label>
+                <div className="flex gap-3">
+                  <button 
+                    onClick={() => setIsBahanBaru(true)}
+                    className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${isBahanBaru ? 'bg-red-500 text-white shadow-sm' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  >
+                    Ya
+                  </button>
+                  <button 
+                    onClick={() => setIsBahanBaru(false)}
+                    className={`px-6 py-2 rounded-lg text-sm font-medium transition-colors ${!isBahanBaru ? 'bg-red-500 text-white shadow-sm' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  >
+                    Tidak
+                  </button>
+                </div>
+              </div>
 
+              {/* Input Nama Barang */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold mb-2">Nama Barang</label>
+                <select className="w-full bg-gray-100 border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-red-200 outline-none appearance-none">
+                  <option>Nama barang...</option>
+                  <option>Ayam Potong</option>
+                  <option>Mie Mentah</option>
+                </select>
+              </div>
+
+              {/* Jumlah Sekarang & Jumlah Baru */}
+              <div className="flex gap-4 mb-6">
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold mb-2">Jumlah Sekarang</label>
+                  <div className="text-lg font-bold">15 Kg</div>
+                </div>
+                <div className="flex-1">
+                  <label className="block text-sm font-semibold mb-2">Jumlah Baru</label>
+                  <div className="flex border rounded-lg overflow-hidden bg-gray-100">
+                    <input type="number" placeholder="Jumlah" className="w-full bg-transparent p-2 text-sm outline-none" />
+                    <select className="bg-gray-200 border-l px-2 text-sm outline-none font-medium">
+                      <option>Kg</option>
+                      <option>L</option>
+                      <option>Pack</option>
+                      <option>ml</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Harga per Satuan */}
+              <div className="mb-6 w-1/2 pr-2">
+                <label className="block text-sm font-semibold mb-2">Harga per satuan</label>
+                <input 
+                  type="number" 
+                  placeholder="Harga" 
+                  className="w-full bg-gray-100 border-none rounded-lg p-3 text-sm focus:ring-2 focus:ring-red-200 outline-none"
+                />
+              </div>
+
+              <button className="mt-auto w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors">
+                Tambahkan ke keranjang
+              </button>
+            </div>
+
+            {/* Bagian Kanan: Keranjang (Scrollable) */}
+            <div className="flex-1 bg-gray-100 p-6 relative flex flex-col h-full border-l border-gray-200">
+              <button 
+                onClick={() => setIsRestockModalOpen(false)}
+                className="absolute top-4 right-4 bg-red-200 text-gray-700 hover:bg-red-300 p-1 rounded-md transition-colors"
+              >
+                <X size={20} />
+              </button>
+
+              <h3 className="font-bold text-xl mb-6 text-gray-900 mt-2 md:mt-0">Keranjang</h3>
+              
+              {/* List Keranjang */}
+              <div className="flex-1 overflow-y-auto pr-2 space-y-3 pb-6">
+                {keranjangData.map((item, index) => (
+                  <div key={index} className="bg-white p-4 rounded-xl shadow-sm flex flex-col gap-2">
+                    <div className="flex justify-between items-center">
+                      <span className="font-bold text-gray-800 text-base">{item.nama}</span>
+                      <span className="font-bold text-xl text-red-600">
+                        {item.qty} <span className="text-sm text-gray-900">{item.unit}</span>
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs mt-1">
+                      <span className="text-gray-400 font-medium">{item.pembuat}</span>
+                      <span className="text-gray-500">{item.waktu}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button className="mt-auto w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl transition-colors shadow-md">
+                Simpan Data Restock
+              </button>
             </div>
           </div>
         </div>

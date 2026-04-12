@@ -1,268 +1,144 @@
-import {
-  ShoppingBag,
-  Factory,
-  Trash2,
-  MoreVertical,
-  ExternalLink,
-} from "lucide-react";
+'use client';
 
-export default function KitchenPage() {
+import React from 'react'; 
+import { 
+  Search, 
+  Calendar, 
+  MoreHorizontal, 
+  ChevronLeft, 
+  ChevronRight 
+} from 'lucide-react';
+
+// Mock Data untuk tabel pesanan
+const pesananData = [
+  { id: '#443245', waktu: '14-02-26 18:22:32', customer: 'Fishhhh', items: 10, harga: 'Rp. 500.000', kondisi: 'Makan Disini', status: 'Antri' },
+  { id: '#443245', waktu: '14-02-26 18:22:32', customer: 'Kevin', items: 10, harga: 'Rp. 500.000', kondisi: 'Bungkus', status: 'Dimasak' },
+  { id: '#443245', waktu: '14-02-26 18:22:32', customer: 'Jonson', items: 10, harga: 'Rp. 500.000', kondisi: 'Bungkus', status: 'Ready' },
+  { id: '#443245', waktu: '14-02-26 18:22:32', customer: 'Andika', items: 10, harga: 'Rp. 500.000', kondisi: 'Makan Disini', status: 'Ready' },
+  { id: '#443245', waktu: '14-02-26 18:22:32', customer: 'Rifki', items: 10, harga: 'Rp. 500.000', kondisi: 'Bungkus', status: 'Ready' },
+  { id: '#443245', waktu: '14-02-26 18:22:32', customer: 'Pratama', items: 10, harga: 'Rp. 500.000', kondisi: 'Makan Disini', status: 'Ready' },
+  { id: '#443245', waktu: '14-02-26 18:22:32', customer: 'Move it', items: 10, harga: 'Rp. 500.000', kondisi: 'Bungkus', status: 'Ready' },
+];
+
+// Fungsi bantuan untuk menentukan warna badge status
+const getStatusBadge = (status: string) => {
+  switch (status) {
+    case 'Antri':
+      return 'bg-gray-300 text-gray-600';
+    case 'Dimasak':
+      return 'bg-yellow-400 text-yellow-800';
+    case 'Ready':
+      return 'bg-green-300 text-green-800';
+    default:
+      return 'bg-gray-200 text-gray-700';
+  }
+};
+
+export default function KitchenDashboardPage() {
   return (
-    <div className="min-h-screen bg-[#f9f9f9] p-8">
-      {/* HEADER */}
-      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">Kitchen Dashboard</h1>
-          <p className="text-zinc-500">
-            Manage production output and material procurement.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <button className="bg-gradient-to-b from-red-700 to-red-500 text-white px-6 py-3 rounded-xl font-semibold">
-            Catat Pembelian Bahan
-          </button>
-
-          <button className="bg-white border border-red-300 text-red-700 px-6 py-3 rounded-xl font-semibold">
-            Input Hasil Produksi
-          </button>
-
-          <button className="bg-zinc-200 text-zinc-700 px-6 py-3 rounded-xl font-semibold">
-            Lapor Stok Tidak Layak
-          </button>
-        </div>
+    <div className="h-full w-full overflow-y-auto bg-gray-100 p-6 pb-12 font-sans text-gray-800">
+      
+      {/* Header */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-700 mb-1">Kitchen Dashboard</h1>
+        <p className="text-gray-400 text-sm font-medium">Real Time, Track Pesanan</p>
       </div>
 
-      {/* GRID */}
-      <div className="grid grid-cols-12 gap-8">
-        {/* LEFT */}
-        <div className="col-span-12 lg:col-span-4 flex flex-col gap-8">
-          {/* CARD PRODUKSI */}
-          <div className="bg-white p-8 rounded-2xl shadow">
-            <span className="text-xs uppercase text-zinc-400">
-              Daily Noodle Production
-            </span>
+      {/* Main Card */}
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        
+        {/* Toolbar Card */}
+        <div className="p-4 flex justify-between items-center border-b">
+          <h2 className="text-xl font-bold text-gray-900">Pesanan</h2>
 
-            <div className="mt-4 flex items-end gap-2">
-              <span className="text-5xl font-bold text-red-700">142.5</span>
-              <span className="text-lg text-zinc-400">KG</span>
+          <div className="flex gap-3">
+            
+            {/* Filter Tanggal Bawaan Browser */}
+            <div className="relative flex items-center">
+              <input 
+                type="date" 
+                className="bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors pl-9 pr-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-44 cursor-pointer"
+              />
             </div>
 
-            <p className="mt-3 text-green-600 text-sm font-semibold">
-              +12% from yesterday
-            </p>
-          </div>
-
-          {/* INVENTORY */}
-          <div className="bg-white p-8 rounded-2xl shadow">
-            <span className="text-xs uppercase text-zinc-400">
-              Inventory Health
-            </span>
-
-            <div className="mt-6 space-y-4">
-              <div>
-                <div className="flex justify-between">
-                  <span>Tepung Terigu</span>
-                  <span className="text-green-600 font-semibold">85%</span>
-                </div>
-                <div className="h-2 bg-zinc-200 rounded mt-2">
-                  <div className="h-2 bg-green-600 w-[85%]" />
-                </div>
-              </div>
-
-              <div>
-                <div className="flex justify-between">
-                  <span>Telur Ayam</span>
-                  <span className="text-red-600 font-semibold">12%</span>
-                </div>
-                <div className="h-2 bg-zinc-200 rounded mt-2">
-                  <div className="h-2 bg-red-600 w-[12%]" />
-                </div>
-              </div>
+            {/* Input Pencarian */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+              <input 
+                type="text" 
+                placeholder="Cari Pesanan (ID)" 
+                className="bg-gray-200 text-gray-700 placeholder-gray-500 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium"
+              />
             </div>
+
           </div>
         </div>
 
-        {/* RIGHT */}
-        <div className="col-span-12 lg:col-span-8">
-          <div className="bg-white rounded-2xl shadow overflow-hidden">
-            <div className="px-6 py-4 flex justify-between items-center">
-              <h3 className="text-lg font-semibold">
-                Purchasing & Production Activity
-              </h3>
-              <button className="text-red-700 text-sm font-semibold">
-                View All
-              </button>
-            </div>
-
-            <table className="w-full text-sm">
-              <thead className="bg-zinc-100 text-xs uppercase text-zinc-500">
-                <tr>
-                  <th className="px-6 py-3 text-left">Activity</th>
-                  <th className="px-6 py-3 text-left">Details</th>
-                  <th className="px-6 py-3 text-left">Value / Qty</th>
-                  <th className="px-6 py-3 text-left">Action</th>
-                </tr>
-              </thead>
-
-              <tbody className="text-sm">
-                {/* MATERIAL PURCHASE */}
-                <tr className="border-t border-zinc-200 hover:bg-zinc-50 transition">
-                  <td className="px-6 py-4 flex items-center gap-3">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <ShoppingBag size={18} className="text-blue-600" />
-                    </div>
-                    <span className="font-medium">Material Purchase</span>
+        {/* Tabel */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-center">
+            <thead className="text-gray-400 border-b bg-white">
+              <tr>
+                <th className="py-4 px-4 font-medium">Order ID</th>
+                <th className="py-4 px-4 font-medium">Waktu</th>
+                <th className="py-4 px-4 font-medium">Customer</th>
+                <th className="py-4 px-4 font-medium">Total Item</th>
+                <th className="py-4 px-4 font-medium">Total Harga</th>
+                <th className="py-4 px-4 font-medium">Kondisi</th>
+                <th className="py-4 px-4 font-medium">Status</th>
+                <th className="py-4 px-4 font-medium">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pesananData.map((item, index) => (
+                <tr 
+                  key={index} 
+                  className="border-b last:border-0 even:bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
+                  <td className="py-4 px-4 font-bold text-gray-800">{item.id}</td>
+                  <td className="py-4 px-4 text-gray-700">
+                    <div>{item.waktu.split(' ')[0]}</div>
+                    <div>{item.waktu.split(' ')[1]}</div>
                   </td>
-
-                  <td className="px-6 py-4">
-                    <p className="font-medium">Beli Tepung 25kg</p>
-                    <p className="text-xs text-zinc-500">
-                      Supplier: Grain Master Co.
-                    </p>
-                  </td>
-
-                  <td className="px-6 py-4 font-semibold">Rp 350.000</td>
-
-                  <td className="px-6 py-4">
-                    <button className="flex items-center gap-1 text-red-700 text-sm font-medium">
-                      View Receipt <ExternalLink size={14} />
-                    </button>
-                  </td>
-                </tr>
-
-                {/* PRODUCTION OUTPUT */}
-                <tr className="border-t border-zinc-200 hover:bg-zinc-50 transition">
-                  <td className="px-6 py-4 flex items-center gap-3">
-                    <div className="bg-green-100 p-2 rounded-lg">
-                      <Factory size={18} className="text-green-600" />
-                    </div>
-                    <span className="font-medium">Production Output</span>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <p className="font-medium">Produksi Mie Basah</p>
-                    <p className="text-xs text-zinc-500">Batch #0942</p>
-                  </td>
-
-                  <td className="px-6 py-4 font-semibold">10kg</td>
-
-                  <td className="px-6 py-4">
-                    <span className="bg-green-100 text-green-700 text-xs px-3 py-1 rounded-full font-semibold">
-                      Completed
+                  <td className="py-4 px-4 font-bold text-gray-800">{item.customer}</td>
+                  <td className="py-4 px-4 font-medium">{item.items}</td>
+                  <td className="py-4 px-4 font-bold text-gray-800">{item.harga}</td>
+                  <td className="py-4 px-4 font-bold text-gray-800">{item.kondisi}</td>
+                  <td className="py-4 px-4">
+                    <span className={`px-4 py-1.5 rounded-full text-xs font-bold inline-block w-24 text-center ${getStatusBadge(item.status)}`}>
+                      {item.status}
                     </span>
                   </td>
-                </tr>
-
-                {/* WASTE REPORT */}
-                <tr className="border-t border-zinc-200 hover:bg-zinc-50 transition">
-                  <td className="px-6 py-4 flex items-center gap-3">
-                    <div className="bg-red-100 p-2 rounded-lg">
-                      <Trash2 size={18} className="text-red-600" />
-                    </div>
-                    <span className="font-medium">Waste Report</span>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <p className="font-medium">Stok Basi: Mie</p>
-                    <p className="text-xs text-zinc-500">
-                      Reason: Humidity issue
-                    </p>
-                  </td>
-
-                  <td className="px-6 py-4 font-semibold">2kg</td>
-
-                  <td className="px-6 py-4">
-                    <button className="text-zinc-500 hover:text-black">
-                      <MoreVertical size={18} />
+                  <td className="py-4 px-4 text-gray-500 flex justify-center items-center h-full">
+                    <button className="hover:text-gray-800 p-1">
+                      <MoreHorizontal size={20} />
                     </button>
                   </td>
                 </tr>
-
-                {/* ANOTHER PURCHASE */}
-                <tr className="border-t border-zinc-200 hover:bg-zinc-50 transition">
-                  <td className="px-6 py-4 flex items-center gap-3">
-                    <div className="bg-blue-100 p-2 rounded-lg">
-                      <ShoppingBag size={18} className="text-blue-600" />
-                    </div>
-                    <span className="font-medium">Material Purchase</span>
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <p className="font-medium">Telur Ayam (Papan)</p>
-                    <p className="text-xs text-zinc-500">
-                      Supplier: Local Farm
-                    </p>
-                  </td>
-
-                  <td className="px-6 py-4 font-semibold">Rp 120.000</td>
-
-                  <td className="px-6 py-4">
-                    <button className="flex items-center gap-1 text-red-700 text-sm font-medium">
-                      View Receipt <ExternalLink size={14} />
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
-      </div>
 
-      
-
-      {/* FORM SECTION */}
-      <div className="mt-12 grid md:grid-cols-2 gap-8">
-        {/* PRODUKSI */}
-        <div className="bg-white p-8 rounded-2xl shadow">
-          <h3 className="font-bold mb-6">Log Daily Production</h3>
-
-          <div className="space-y-4">
-            <input
-              placeholder="Nama barang"
-              className="w-full p-3 rounded-xl bg-zinc-100"
-            />
-
-            <input
-              type="number"
-              placeholder="Jumlah (KG)"
-              className="w-full p-3 rounded-xl bg-zinc-100"
-            />
-
-            <button className="w-full bg-red-700 text-white py-3 rounded-xl">
-              Simpan Produksi
+        {/* Footer & Pagination */}
+        <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500 bg-white">
+          <span className="font-medium text-gray-500">Showing 1-9 of 2810 Transaction</span>
+          <div className="flex gap-1.5 font-bold">
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-500 hover:bg-red-600 text-white transition-colors">
+              <ChevronLeft size={16} />
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-400 text-white shadow-sm">1</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">2</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">3</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">4</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors">5</button>
+            <button className="w-8 h-8 flex items-center justify-center rounded bg-red-500 hover:bg-red-600 text-white transition-colors">
+              <ChevronRight size={16} />
             </button>
           </div>
         </div>
 
-        {/* PEMBELIAN */}
-        <div className="bg-white p-8 rounded-2xl shadow">
-          <h3 className="font-bold mb-6">Log Material Purchase</h3>
-
-          <div className="space-y-4">
-            <input
-              placeholder="Nama barang"
-              className="w-full p-3 rounded-xl bg-zinc-100"
-            />
-
-            <input
-              placeholder="Harga"
-              className="w-full p-3 rounded-xl bg-zinc-100"
-            />
-
-            <input
-              placeholder="Jumlah"
-              className="w-full p-3 rounded-xl bg-zinc-100"
-            />
-
-            <button className="w-full bg-red-700 text-white py-3 rounded-xl">
-              Simpan Pembelian
-            </button>
-          </div>
-        </div>
       </div>
     </div>
-
-    
   );
 }
