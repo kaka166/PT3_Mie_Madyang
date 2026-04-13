@@ -26,15 +26,18 @@ const API_BASE_URL = "https://api.farelzy.my.id/api";
 
 // Helper Headers khusus Kasir
 const getCashierHeaders = () => {
-  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-  const headers: HeadersInit = { "Accept": "application/json" };
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+  const headers: HeadersInit = { Accept: "application/json" };
   if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
 };
 
 export const getMenus = async (): Promise<MenuItem[]> => {
   try {
-    const res = await fetch(`${API_BASE_URL}/menu`, { headers: getCashierHeaders() });
+    const res = await fetch(`${API_BASE_URL}/menu`, {
+      headers: getCashierHeaders(),
+    });
 
     if (!res.ok) throw new Error("Gagal ambil data dari server");
 
@@ -57,7 +60,9 @@ export const getMenus = async (): Promise<MenuItem[]> => {
 
 export const getCategories = async (): Promise<string[]> => {
   try {
-    const res = await fetch(`${API_BASE_URL}/kategori`, { headers: getCashierHeaders() });
+    const res = await fetch(`${API_BASE_URL}/kategori`, {
+      headers: getCashierHeaders(),
+    });
     if (!res.ok) throw new Error("Gagal ambil kategori");
 
     const data: { data: ApiCategory[] } = await res.json();

@@ -25,7 +25,7 @@ export interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-  const API_URL = "https://api.farelzy.my.id/api";
+const API_URL = "https://api.farelzy.my.id/api";
 
 export const authService = {
   async login(identifier: string, password: string): Promise<LoginResponse> {
@@ -34,7 +34,7 @@ export const authService = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           login: identifier,
@@ -44,7 +44,9 @@ export const authService = {
 
       const contentType = response.headers.get("content-type");
       if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server tidak merespon dengan JSON. Cek apakah backend menyala?");
+        throw new Error(
+          "Server tidak merespon dengan JSON. Cek apakah backend menyala?",
+        );
       }
 
       const result = await response.json();
@@ -81,7 +83,7 @@ export const authService = {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Accept": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify({
           username,
@@ -96,8 +98,12 @@ export const authService = {
 
       if (!response.ok) {
         const errorData = result as ErrorResponse;
-        const firstError = errorData.errors ? Object.values(errorData.errors)[0][0] : null;
-        throw new Error(firstError || errorData.message || "Pendaftaran gagal!");
+        const firstError = errorData.errors
+          ? Object.values(errorData.errors)[0][0]
+          : null;
+        throw new Error(
+          firstError || errorData.message || "Pendaftaran gagal!",
+        );
       }
 
       return result as LoginResponse;

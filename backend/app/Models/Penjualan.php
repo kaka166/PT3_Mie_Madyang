@@ -9,9 +9,12 @@ class Penjualan extends Model
     protected $table = 'penjualan';
 
     protected $fillable = [
-        'tanggal',
-        'total',
-        'user_id'
+    'tanggal',
+    'total',
+    'user_id',
+    'customer_name',
+    'order_type',
+    'status'
     ];
 
     public function detail()

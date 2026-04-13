@@ -5,6 +5,10 @@ use App\Http\Controllers\Api\MenuController;
 use App\Http\Controllers\Api\MenuKategoriController;
 use App\Http\Controllers\Api\AuthController;
 
+use App\Http\Controllers\Api\TaxSettingController;
+use App\Http\Controllers\Api\PenjualanController;
+
+
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -31,6 +35,17 @@ Route::middleware('auth:sanctum')->group(function () {
         
         Route::get('/kategori', [MenuKategoriController::class, 'index']);
         Route::get('/kategori/{id}', [MenuKategoriController::class, 'show']);
+
+        //pengaturan pajak
+        Route::get('/tax', [TaxSettingController::class, 'get']);
+        Route::post('/tax', [TaxSettingController::class, 'update']);   
+
+        //mencatat pesanan ke kitchen
+        Route::get('/orders', [PenjualanController::class, 'index']);
+        Route::post('/orders', [PenjualanController::class, 'store']);
+        Route::patch('/orders/{id}/status', [PenjualanController::class, 'updateStatus']);
+
+        
     });
 
 });
