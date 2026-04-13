@@ -22,6 +22,8 @@ backend/node_modules/
 backend/npm-debug.log
 backend/yarn-error.log
 backend/.phpunit.result.cache
+backend/composer.lock
+backend/pakcage-lock.json
 
 
 
