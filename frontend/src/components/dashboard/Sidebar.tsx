@@ -176,7 +176,7 @@ export default function Sidebar({
                         {sub.label}
                       </LinkNext>
                     ))}
-                  </div>
+                    </div>
                 )}
               </div>
             );
@@ -184,8 +184,8 @@ export default function Sidebar({
         </nav>
 
         {/* FOOTER */}
-        <div className="px-3 border-t border-neutral-200 py-4 space-y-1">
-          <LinkNext
+        <div className="px-3 border-t border-neutral-200 py-4  space-y-1">
+            <LinkNext
             href="#"
             className="flex items-center gap-3 text-neutral-500 px-4 py-3 hover:bg-neutral-200 rounded-xl transition-all"
           >
