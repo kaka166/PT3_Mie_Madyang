@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthController;
 
 use App\Http\Controllers\Api\TaxSettingController;
 use App\Http\Controllers\Api\PenjualanController;
+use App\Http\Controllers\Api\StockController;
 
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -44,6 +45,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders', [PenjualanController::class, 'index']);
         Route::post('/orders', [PenjualanController::class, 'store']);
         Route::patch('/orders/{id}/status', [PenjualanController::class, 'updateStatus']);
+
+        //kelola stock
+        Route::get('/bahan', [StockController::class, 'bahan']);
+        Route::get('/stok-history/{bahan_id}', [StockController::class, 'history']);
+        Route::post('/stok-movement', [StockController::class, 'store']);
+        Route::post('/produksi', [StockController::class, 'produksi']);
+        Route::get('/stock-list', [StockController::class, 'stockList']);
+        Route::get('/stock-history', [StockController::class, 'stockHistory']);
 
         
     });

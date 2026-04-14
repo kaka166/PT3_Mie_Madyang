@@ -12,7 +12,6 @@ return [
         'https://pt-3-mie-madyang-gamma.vercel.app', 
         'http://localhost:3000',
         'http://127.0.0.1:3000',
-        ''
     ],
 
     'allowed_origins_patterns' => [

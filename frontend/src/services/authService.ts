@@ -32,11 +32,12 @@ export const authService = {
     try {
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
+        mode: "cors",
         headers: {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({
+        body: JSON.stringify({  
           login: identifier,
           password: password,
         }),

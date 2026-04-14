@@ -29,10 +29,10 @@ export default function Navbar() {
             Home
           </Link>
           <Link
-            href="/menu"
+            href="/catalog"
             className="text-neutral-600 dark:text-neutral-400 hover:text-[#a0383b] dark:hover:text-[#c05051] transition-colors"
           >
-            Menu
+            Catalog
           </Link>
           <Link
             href="/about"

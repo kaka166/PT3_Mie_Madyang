@@ -20,7 +20,7 @@ export default function RootLayout({
   const [authorized, setAuthorized] = useState(false);
 
   // Daftar halaman yang boleh diakses TANPA login
-  const publicPaths = ["/login", "/register"];
+  const publicPaths = ["/login", "/register", "/about", "/contact", "/", "/catalog"];
 
   useEffect(() => {
     const checkAuth = () => {
