@@ -216,7 +216,9 @@ export default function StockBahanPage() {
 
             <tbody>
               {filteredRiwayat.map((item, i) => (
-                <tr key={i} className="border-b hover:bg-gray-50">
+                <tr
+                  key={`${item.nama}-${i}`}
+                  className="border-b hover:bg-gray-50">
                   <td>{item.id}</td>
                   <td>{item.itemId}</td>
                   <td>{item.nama}</td>
