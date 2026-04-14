@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\StockController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
+
+
 Route::middleware('auth:sanctum')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -53,7 +55,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/produksi', [StockController::class, 'produksi']);
         Route::get('/stock-list', [StockController::class, 'stockList']);
         Route::get('/stock-history', [StockController::class, 'stockHistory']);
-
         
     });
 

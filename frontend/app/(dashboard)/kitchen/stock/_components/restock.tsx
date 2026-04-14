@@ -40,8 +40,12 @@ export default function RestockModal({
     if (!isOpen) return;
 
     const load = async () => {
-      const data = await getBahan();
-      setBahanMaster(data);
+      try {
+        const data = await getBahan();
+        setBahanMaster(data);
+      } catch (err) {
+        console.error("ERROR GET BAHAN:", err);
+      }
     };
 
     load();

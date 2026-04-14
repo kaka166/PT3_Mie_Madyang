@@ -30,16 +30,49 @@ export interface CreateStockPayload {
 }
 
 // ==========================
-// GET BAHAN (WAJIB 🔥)
+// AUTH HEADER HELPER 🔥
 // ==========================
-export const getBahan = async (): Promise<Bahan[]> => {
-  const res = await fetch(`${API_BASE_URL}/bahan`);
+const getAuthHeaders = () => {
+  const token = localStorage.getItem("token");
 
-  if (!res.ok) {
-    throw new Error("Gagal fetch bahan");
+  if (!token) {
+    throw new Error("Token tidak ditemukan, silakan login ulang");
   }
 
-  return res.json();
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+};
+
+// ==========================
+// HELPER FETCH (ANTI ERROR)
+// ==========================
+const handleResponse = async (res: Response) => {
+  const text = await res.text();
+
+  if (!res.ok) {
+    console.error("API ERROR:", text);
+    throw new Error("Request gagal");
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    console.error("Bukan JSON:", text);
+    throw new Error("Response bukan JSON");
+  }
+};
+
+// ==========================
+// GET BAHAN
+// ==========================
+export const getBahan = async (): Promise<Bahan[]> => {
+  const res = await fetch(`${API_BASE_URL}/bahan`, {
+    headers: getAuthHeaders(),
+  });
+
+  return handleResponse(res);
 };
 
 // ==========================
@@ -48,13 +81,11 @@ export const getBahan = async (): Promise<Bahan[]> => {
 export const getStockHistory = async (
   bahanId: number,
 ): Promise<StockHistory[]> => {
-  const res = await fetch(`${API_BASE_URL}/stok-history/${bahanId}`);
+  const res = await fetch(`${API_BASE_URL}/stok-history/${bahanId}`, {
+    headers: getAuthHeaders(),
+  });
 
-  if (!res.ok) {
-    throw new Error("Gagal fetch history");
-  }
-
-  return res.json();
+  return handleResponse(res);
 };
 
 // ==========================
@@ -63,42 +94,31 @@ export const getStockHistory = async (
 export const createStockMovement = async (payload: CreateStockPayload) => {
   const res = await fetch(`${API_BASE_URL}/stok-movement`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify(payload),
   });
 
-  if (!res.ok) {
-    const err = await res.json();
-    throw new Error(err.message || "Gagal simpan data");
-  }
-
-  return res.json();
+  return handleResponse(res);
 };
 
 // ==========================
 // GET STOCK LIST (TABLE)
 // ==========================
 export const getStockList = async () => {
-  const res = await fetch(`${API_BASE_URL}/stock-list`);
+  const res = await fetch(`${API_BASE_URL}/stock-list`, {
+    headers: getAuthHeaders(),
+  });
 
-  if (!res.ok) {
-    throw new Error("Gagal fetch stock list");
-  }
-
-  return res.json();
+  return handleResponse(res);
 };
 
 // ==========================
 // GET FULL HISTORY (TABLE)
 // ==========================
 export const getFullHistory = async () => {
-  const res = await fetch(`${API_BASE_URL}/stock-history`);
+  const res = await fetch(`${API_BASE_URL}/stock-history`, {
+    headers: getAuthHeaders(),
+  });
 
-  if (!res.ok) {
-    throw new Error("Gagal fetch history");
-  }
-
-  return res.json();
+  return handleResponse(res);
 };

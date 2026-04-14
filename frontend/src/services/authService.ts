@@ -37,7 +37,7 @@ export const authService = {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({  
+        body: JSON.stringify({
           login: identifier,
           password: password,
         }),
