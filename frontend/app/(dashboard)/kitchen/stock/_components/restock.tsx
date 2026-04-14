@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -35,44 +37,72 @@ export default function RestockModal({
 
   // ================= FETCH BAHAN =================
   useEffect(() => {
-    if (isOpen) {
-      getBahan().then(setBahanMaster);
-    }
+    if (!isOpen) return;
+
+    const load = async () => {
+      const data = await getBahan();
+      setBahanMaster(data);
+    };
+
+    load();
   }, [isOpen]);
 
   // ================= TAMBAH KE KERANJANG =================
   const handleTambah = () => {
-    if (!selectedBahan?.nama) return alert("Isi bahan dulu");
+    if (!selectedBahan || !selectedBahan.nama) {
+      return alert("Isi bahan dulu");
+    }
+    if (!jumlah || Number(jumlah) <= 0) {
+      return alert("Jumlah harus lebih dari 0");
+    }
 
-    setKeranjang([
-      ...keranjang,
-      {
-        id: selectedBahan?.id || null,
-        nama: selectedBahan.nama,
-        jumlah,
-        satuan,
-        harga,
-      },
-    ]);
+    const existingIndex = keranjang.findIndex(
+      (k) => k.nama === selectedBahan.nama,
+    );
+
+    if (existingIndex !== -1) {
+      const updated = [...keranjang];
+      updated[existingIndex].jumlah = String(
+        Number(updated[existingIndex].jumlah) + Number(jumlah),
+      );
+      setKeranjang(updated);
+    } else {
+      setKeranjang([
+        ...keranjang,
+        {
+          id: selectedBahan?.id || null,
+          nama: selectedBahan.nama,
+          jumlah,
+          satuan,
+          harga,
+        },
+      ]);
+    }
 
     setJumlah("");
     setHarga("");
     setSearch("");
+    setSelectedBahan(null);
   };
 
   // ================= SIMPAN RESTOCK =================
   const handleSubmit = async () => {
-    for (const item of keranjang) {
-      await createStockMovement({
-        bahan_id: item.id || null,
-        nama: item.nama, // 🔥 WAJIB
-        jumlah: Number(item.jumlah),
-        satuan: item.satuan,
-        tipe: "plus",
-        kategori: "restock",
-        alasan: "Restock",
-      });
+    if (keranjang.length === 0) {
+      return alert("Keranjang kosong");
     }
+    await Promise.all(
+      keranjang.map((item) =>
+        createStockMovement({
+          bahan_id: item.id || null,
+          nama: item.nama,
+          jumlah: Number(item.jumlah),
+          satuan: item.satuan,
+          tipe: "plus",
+          kategori: "restock",
+          alasan: "Restock",
+        }),
+      ),
+    );
 
     onSuccess?.();
     onClose();
@@ -148,22 +178,18 @@ export default function RestockModal({
 
                 {search && (
                   <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-40 overflow-y-auto shadow">
-                    {bahanMaster
-                      .filter((b) =>
-                        b.nama.toLowerCase().includes(search.toLowerCase()),
-                      )
-                      .map((b) => (
-                        <div
-                          key={b.id}
-                          onClick={() => {
-                            setSelectedBahan(b);
-                            setSearch(b.nama);
-                            setSatuan(b.satuan || "Kg");
-                          }}
-                          className="p-2 hover:bg-gray-100 cursor-pointer text-sm">
-                          {b.nama}
-                        </div>
-                      ))}
+                    {filteredBahan.map((b) => (
+                      <div
+                        key={b.id}
+                        onClick={() => {
+                          setSelectedBahan(b);
+                          setSearch(b.nama);
+                          setSatuan(b.satuan || "Kg");
+                        }}
+                        className="p-2 hover:bg-gray-100 cursor-pointer text-sm">
+                        {b.nama}
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
@@ -241,7 +267,9 @@ export default function RestockModal({
 
           <div className="flex-1 overflow-y-auto space-y-3">
             {keranjang.map((item, i) => (
-              <div key={i} className="bg-white p-4 rounded-xl">
+              <div
+                key={`${item.nama}-${i}`}
+                className="bg-white p-4 rounded-xl">
                 <div className="flex justify-between">
                   <span className="font-bold">{item.nama}</span>
                   <span className="text-red-600 font-bold">

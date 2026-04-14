@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -37,9 +39,16 @@ export default function KitchenDashboardPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    const load = async () => {
+      await fetchOrders();
+    };
 
-    const interval = setInterval(fetchOrders, 3000); // realtime polling
+    load();
+
+    const interval = setInterval(() => {
+      load();
+    }, 3000);
+
     return () => clearInterval(interval);
   }, []);
 

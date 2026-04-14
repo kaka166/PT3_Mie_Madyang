@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -23,9 +25,14 @@ export default function ProduksiModal({ isOpen, onClose }: ProduksiModalProps) {
 
   // ================= FETCH BAHAN =================
   useEffect(() => {
-    if (isOpen) {
-      getBahan().then(setBahanMaster);
-    }
+    if (!isOpen) return;
+
+    const load = async () => {
+      const data = await getBahan();
+      setBahanMaster(data);
+    };
+
+    load();
   }, [isOpen]);
 
   // ================= TAMBAH BAHAN =================

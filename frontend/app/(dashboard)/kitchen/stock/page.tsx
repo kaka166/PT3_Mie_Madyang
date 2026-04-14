@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -24,15 +26,19 @@ const PaginationBar = () => (
   <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500">
     <span>Showing latest data</span>
     <div className="flex gap-1">
-      {[<ChevronLeft size={16} />, 1, 2, 3, <ChevronRight size={16} />].map(
-        (item, i) => (
-          <button
-            key={i}
-            className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
-            {item}
-          </button>
-        ),
-      )}
+      {[
+        <ChevronLeft key="prev" size={16} />,
+        1,
+        2,
+        3,
+        <ChevronRight key="next" size={16} />,
+      ].map((item, i) => (
+        <button
+          key={i}
+          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+          {item}
+        </button>
+      ))}
     </div>
   </div>
 );
@@ -63,7 +69,11 @@ export default function StockBahanPage() {
   };
 
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      await fetchData();
+    };
+
+    load();
   }, []);
 
   // ================= FILTER =================
@@ -210,7 +220,9 @@ export default function StockBahanPage() {
 
             <tbody>
               {filteredRiwayat.map((item, i) => (
-                <tr key={i} className="border-b hover:bg-gray-50">
+                <tr
+                  key={`${item.nama}-${i}`}
+                  className="border-b hover:bg-gray-50">
                   <td>{item.id}</td>
                   <td>{item.itemId}</td>
                   <td>{item.nama}</td>
