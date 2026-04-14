@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { getBahan, createStockMovement } from "@/services/stockService";
 
-const unitOptions = ["Kg", "L", "Pack", "ml"];
+const unitOptions = ["Kg", "L","ml", "Pack", "Ikat"];
 
 interface RestockModalProps {
   isOpen: boolean;
