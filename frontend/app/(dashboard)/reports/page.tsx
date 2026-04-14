@@ -3,97 +3,127 @@
 import React from 'react';
 
 // --- Icons ---
-const EyeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500 cursor-pointer hover:text-gray-700">
-    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
+const SalesIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FF7067" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="7" width="20" height="14" rx="2" /><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" /><line x1="12" y1="12" x2="12" y2="16" /><line x1="10" y1="14" x2="14" y2="14" />
   </svg>
 );
 
-const FileTextIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /><polyline points="10 9 9 9 8 9" />
+const ExpenseIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4A90D9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
   </svg>
 );
 
-// --- DATA DUMMY NYA DISINI YA MAS MAS BACKEDN ---
-const transactions = [
-  { id: '#22398', name: 'Bills #1251251', time: '14/02/26 18:22:32', type: 'Masuk', amount: 'Rp. 215.000' },
-  { id: '#22398', name: 'Stok Mingguan', time: '14 Februari 2026', type: 'Keluar', amount: 'Rp. 2.215.000' },
-  { id: '#22398', name: 'Andrew', time: '14 Februari 2026', type: 'Dine-In', amount: 'Rp. 215.000' },
-  { id: '#22398', name: 'Andrew', time: '14 Februari 2026', type: 'Dine-In', amount: 'Rp. 215.000' },
-  { id: '#22398', name: 'Andrew', time: '14 Februari 2026', type: 'Dine-In', amount: 'Rp. 215.000' },
+const HppIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E67E22" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" />
+  </svg>
+);
+
+const StockIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9B59B6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+);
+
+// --- Badge komponen untuk perubahan persen ---
+const ChangeBadge = ({ value }: { value: string }) => {
+  const isPositive = value.startsWith('+');
+  const isNegative = value.startsWith('-');
+  return (
+    <span
+      className="text-xs font-bold px-2 py-0.5 rounded-full"
+      style={{
+        backgroundColor: isPositive ? '#C2FFD4' : isNegative ? '#FFC2C2' : '#E9E9E9',
+        color: isPositive ? '#2D6A4F' : isNegative ? '#A52A2A' : '#555',
+      }}
+    >
+      {value}
+    </span>
+  );
+};
+
+// --- DATA ---
+const summaryData = {
+  title: 'Ringkasan Keuntungan',
+  period: 'April 1 - April 30, 2026',
+  profitLabel: 'KEUNTUNGAN',
+  profit: 'Rp 21.750.500',
+  change: '+12.4%',
+};
+
+const statCards = [
+  {
+    icon: <SalesIcon />,
+    label: 'TOTAL PENJUALAN',
+    value: 'Rp 4.450.000',
+    change: '+8.2%',
+  },
+  {
+    icon: <ExpenseIcon />,
+    label: 'PENGELUARAN',
+    value: 'Rp 3.000.000',
+    change: null,
+  },
+  {
+    icon: <HppIcon />,
+    label: 'TOTAL HPP',
+    value: 'Rp 1.890.000',
+    change: '-2.1%',
+  },
+  {
+    icon: <StockIcon />,
+    label: 'STOCK BAHAN',
+    value: '33.4%',
+    change: '+3.4%',
+  },
 ];
 
-export default function ReportsPage() {
+export default function ReportsAnalyticsPage() {
   return (
-    // [KOMENTAR] DITAMBAHKAN bg-neutral-100 dan p-8 AGAR JARAK TEPI KONSISTEN DENGAN HALAMAN LAIN
-    <div className="min-h-screen bg-neutral-0 p-1 font-sans">
-      <div className="max-w-7xl mx-auto space-y-8">
-        
-        {/* --- Title --- */}
-        <h1 className="text-4xl font-bold text-[#424242]">Reports</h1>
+    <div className="min-h-screen bg-neutral-100 p-8 font-sans">
+      <div className="max-w-1xl mx-auto space-y-4">
 
-        {/* --- Summary Cards --- */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {[
-            { label: 'Total Penjualan Bulan Ini', value: 'Rp. 50.000.000' },
-            { label: 'Total Pengeluaran Bulan ini', value: 'Rp. 50.000.000' },
-            { label: 'Total Keuntungan Bulan ini', value: 'Rp. 50.000.000' },
-          ].map((card, idx) => (
-            <div key={idx} className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-50 min-h-[180px] flex flex-col justify-between">
-              <p className="text-xl font-bold text-[#333] leading-tight">{card.label}</p>
-              <p className="text-3xl font-extrabold text-[#333] tracking-tight">{card.value}</p>
-            </div>
-          ))}
+        {/* --- Header Title --- */}
+        <h1 className="text-3xl font-bold text-[#F53E1B]">Reports &amp; Analytics</h1>
+
+        {/* --- Ringkasan Keuntungan Card --- */}
+        <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-8">
+          <div className="mb-4">
+            <h2 className="text-2xl font-bold text-[#333]">{summaryData.title}</h2>
+            <p className="text-sm text-gray-400 mt-1">Periode: {summaryData.period}</p>
+          </div>
+          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+            {summaryData.profitLabel}
+          </p>
+          <div className="flex items-baseline gap-3">
+            <span className="text-5xl font-extrabold text-[#FF7067] tracking-tight">
+              {summaryData.profit}
+            </span>
+            <ChangeBadge value={summaryData.change} />
+          </div>
         </div>
 
-        {/* --- Transaction Table --- */}
-        <div className="bg-white rounded-[2rem] shadow-sm overflow-hidden">
-          <div className="p-8 flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-[#333]">Laporan Transaksi Terakhir</h2>
-            <button className="flex items-center bg-[#FF7067] text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg hover:bg-[#ff5c52] transition-all">
-              <FileTextIcon />
-              Lihat Laporan Lengkap
-            </button>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-gray-400 font-medium">
-                  <th className="px-8 py-4 font-semibold">Nomor Transaksi</th>
-                  <th className="px-8 py-4 font-semibold">Nama Transaksi</th>
-                  <th className="px-8 py-4 font-semibold">Waktu Transaksi</th>
-                  <th className="px-8 py-4 font-semibold text-center">Tipe</th>
-                  <th className="px-8 py-4 font-semibold text-right">Nominal</th>
-                  <th className="px-8 py-4 font-semibold text-center">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {transactions.map((tx, idx) => (
-                  <tr key={idx} className={idx % 2 === 1 ? 'bg-[#F9F9F9]' : 'bg-white'}>
-                    <td className="px-8 py-5 text-gray-700 font-medium">{tx.id}</td>
-                    <td className="px-8 py-5 text-gray-700 font-medium">{tx.name}</td>
-                    <td className="px-8 py-5 text-gray-700 font-medium">{tx.time}</td>
-                    <td className="px-8 py-5 text-center">
-                      <span className={`px-4 py-1 rounded-full text-xs font-bold ${
-                        tx.type === 'Masuk' ? 'bg-[#C2FFD4] text-[#2D6A4F]' : 
-                        tx.type === 'Keluar' ? 'bg-[#FFC2C2] text-[#A52A2A]' : 
-                        'text-gray-700'
-                      }`}>
-                        {tx.type}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5 text-right font-bold text-gray-700">{tx.amount}</td>
-                    <td className="px-8 py-5 text-center">
-                      <div className="flex justify-center">
-                        <EyeIcon />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        {/* --- Stat Cards Grid --- */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {statCards.map((card, idx) => (
+            <div
+              key={idx}
+              className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm p-5 flex flex-col justify-between min-h-[140px]"
+            >
+              <div className="flex items-start justify-between">
+                <div className="p-2 bg-gray-50 rounded-xl">{card.icon}</div>
+                {card.change && <ChangeBadge value={card.change} />}
+              </div>
+              <div className="mt-4">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                  {card.label}
+                </p>
+                <p className="text-xl font-extrabold text-[#333] leading-tight">{card.value}</p>
+              </div>
+            </div>
+          ))}
         </div>
 
       </div>

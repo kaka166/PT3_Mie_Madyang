@@ -31,7 +31,7 @@ const detailTableData = Array(5).fill({
 export default function LaporanPenjualan() {
   return (
     // Asumsi ada padding dari layout utama, bg-neutral-100 untuk background keseluruhan
-    <div className="min-h-screen bg-neutral-0 p-8 font-sans">
+    <div className="h-full overflow-y-auto bg-neutral-0 p-8 font-sans">
       
       {/* Header Section */}
       <div className="mb-8">

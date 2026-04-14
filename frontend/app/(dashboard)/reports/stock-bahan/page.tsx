@@ -31,10 +31,10 @@ export default function StockBahanPage() {
   const filterOptions = ['Penyesuaian', 'Re Stock', 'Produksi'];
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 font-sans text-gray-800">
+    <div className="min-h-screen bg-neutral-0 p-8 font-sans">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Laporan Stock Bahan</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-1">Laporan Stock Bahan</h1>
         <p className="text-gray-500 text-sm">Real-time Finance Tracking</p>
       </div>
 
