@@ -26,15 +26,19 @@ const PaginationBar = () => (
   <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500">
     <span>Showing latest data</span>
     <div className="flex gap-1">
-      {[<ChevronLeft size={16} />, 1, 2, 3, <ChevronRight size={16} />].map(
-        (item, i) => (
-          <button
-            key={i}
-            className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
-            {item}
-          </button>
-        ),
-      )}
+      {[
+        <ChevronLeft key="prev" size={16} />,
+        1,
+        2,
+        3,
+        <ChevronRight key="next" size={16} />,
+      ].map((item, i) => (
+        <button
+          key={i}
+          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+          {item}
+        </button>
+      ))}
     </div>
   </div>
 );
