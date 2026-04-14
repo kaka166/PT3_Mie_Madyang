@@ -8,10 +8,11 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://pt3-kelompok.farelzy.my.id',
-        'http://pt3-kelompok.farelzy.my.id',
+        'https://mie-madyang.farelzy.my.id',
         'https://pt-3-mie-madyang-gamma.vercel.app', 
         'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        ''
     ],
 
     'allowed_origins_patterns' => [
