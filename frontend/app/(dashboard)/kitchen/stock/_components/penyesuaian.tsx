@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -19,17 +21,17 @@ const alasanOptions = [
 
 const unitOptions = ["Kg", "G", "L", "Ml", "Pack", "Ikat"];
 
-interface penyesuaianProps {
+interface PenyesuaianProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
 }
 
-export default function penyesuaian({
+export default function Penyesuaian({
   isOpen,
   onClose,
   onSuccess,
-}: penyesuaianProps) {
+}: PenyesuaianProps) {
   const [bahanList, setBahanList] = useState<any[]>([]);
   const [selectedBahan, setSelectedBahan] = useState<any>(null);
 
@@ -42,9 +44,14 @@ export default function penyesuaian({
 
   // ================= FETCH BAHAN =================
   useEffect(() => {
-    if (isOpen) {
-      getBahan().then(setBahanList);
-    }
+    if (!isOpen) return;
+
+    const load = async () => {
+      const data = await getBahan();
+      setBahanList(data);
+    };
+
+    load();
   }, [isOpen]);
 
   // ================= FETCH RIWAYAT =================
