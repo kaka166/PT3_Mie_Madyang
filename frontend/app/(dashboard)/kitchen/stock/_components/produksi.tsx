@@ -1,7 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { getBahan } from "@/services/stockService";
 
 const unitOptions = ["Kg", "G", "L", "Ml", "Pack", "Ikat"];
 
@@ -11,12 +14,54 @@ interface ProduksiModalProps {
 }
 
 export default function ProduksiModal({ isOpen, onClose }: ProduksiModalProps) {
-    // STATENYA DISINI YA BOSSQUEEE 
-  const [isProduksiBahanBaru, setIsProduksiBahanBaru] = useState(true);
-  const [bahanList, setBahanList] = useState([1, 2]);
+  const [bahanMaster, setBahanMaster] = useState<any[]>([]);
+  const [selectedHasil, setSelectedHasil] = useState<any>(null);
+  const [jumlahHasil, setJumlahHasil] = useState("");
 
+  const [isProduksiBahanBaru, setIsProduksiBahanBaru] = useState(true);
+  const [bahanList, setBahanList] = useState([
+    { id: "", jumlah: "", satuan: "Kg" },
+  ]);
+
+  // ================= FETCH BAHAN =================
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const load = async () => {
+      const data = await getBahan();
+      setBahanMaster(data);
+    };
+
+    load();
+  }, [isOpen]);
+
+  // ================= TAMBAH BAHAN =================
   const tambahBahan = () => {
-    setBahanList([...bahanList, bahanList.length + 1]);
+    setBahanList([...bahanList, { id: "", jumlah: "", satuan: "Kg" }]);
+  };
+
+  // ================= HANDLE PRODUKSI =================
+  const handleProduksi = async () => {
+    if (!selectedHasil) return alert("Pilih hasil produksi dulu");
+
+    await fetch("http://127.0.0.1:8000/api/produksi", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        hasil_id: selectedHasil.id,
+        jumlah_hasil: Number(jumlahHasil),
+        satuan: "Kg",
+        bahan: bahanList.map((b) => ({
+          id: Number(b.id),
+          jumlah: Number(b.jumlah),
+          satuan: b.satuan,
+        })),
+      }),
+    });
+
+    onClose(); // tutup modal
   };
 
   if (!isOpen) return null;
@@ -24,118 +69,161 @@ export default function ProduksiModal({ isOpen, onClose }: ProduksiModalProps) {
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
       <div className="flex w-full max-w-5xl flex-col md:flex-row overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh]">
-        {/* Bagian Kiri: Laporan Produksi */}
+        {/* ================= LEFT ================= */}
         <div className="w-full md:w-[45%] p-8 flex flex-col overflow-y-auto">
           <h2 className="text-3xl font-bold text-gray-900 mb-8 leading-tight">
             Laporan Produksi <br /> Bahan Setengah jadi
           </h2>
 
-          {/* NAMA BARANG INI */}
+          {/* NAMA BARANG */}
           <div className="mb-6">
-            <label className="block text-base font-semibold mb-2">Nama Barang</label>
-            <select className="w-full bg-gray-100 border-none rounded-xl p-4 text-sm focus:ring-2 focus:ring-red-200 outline-none appearance-none cursor-pointer">
-              <option>Masukan nama barang</option>
-              <option>Adonan Mie</option>
-              <option>Pangsit Mentah</option>
+            <label className="block text-base font-semibold mb-2">
+              Nama Barang
+            </label>
+            <select
+              className="w-full bg-gray-100 border-none rounded-xl p-4 text-sm"
+              onChange={(e) => {
+                const id = Number(e.target.value);
+                const bahan = bahanMaster.find((b) => b.id === id);
+                setSelectedHasil(bahan);
+              }}>
+              <option value="">Masukan nama barang</option>
+              {bahanMaster.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.nama}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* Jumlah Sekarang & Jumlah Produksi */}
+          {/* JUMLAH */}
           <div className="flex gap-4 mb-6">
             <div className="flex-1">
-              <label className="block text-sm font-semibold mb-2">Jumlah Sekarang</label>
-              <div className="text-lg font-bold">15 Kg</div>
+              <label className="block text-sm font-semibold mb-2">
+                Jumlah Sekarang
+              </label>
+              <div className="text-lg font-bold">
+                {selectedHasil?.qty ?? 0} {selectedHasil?.satuan ?? ""}
+              </div>
             </div>
+
             <div className="flex-1">
-              <label className="block text-sm font-semibold mb-2">Jumlah perubahan stock</label>
+              <label className="block text-sm font-semibold mb-2">Jumlah</label>
               <div className="flex border rounded-lg overflow-hidden bg-gray-100">
                 <input
                   type="number"
+                  value={jumlahHasil}
+                  onChange={(e) => setJumlahHasil(e.target.value)}
                   placeholder="Jumlah"
                   className="w-full bg-transparent p-2 text-sm outline-none"
                 />
-                <select className="bg-gray-200 border-l px-2 text-sm outline-none font-medium">
-                  {unitOptions.map((u) => <option key={u}>{u}</option>)}
+                <select className="bg-gray-200 border-l px-2 text-sm font-medium">
+                  {unitOptions.map((u) => (
+                    <option key={u}>{u}</option>
+                  ))}
                 </select>
               </div>
             </div>
           </div>
 
-          {/* Penambahan Bahan Baru */}
+          {/* TOGGLE */}
           <div className="mb-6">
-            <label className="block text-base font-semibold mb-3">Penambahan Bahan Baru?</label>
+            <label className="block text-base font-semibold mb-3">
+              Penambahan Bahan Baru?
+            </label>
             <div className="flex gap-3">
               <button
                 onClick={() => setIsProduksiBahanBaru(true)}
-                className={`px-8 py-2.5 rounded-lg text-sm font-medium transition-colors ${isProduksiBahanBaru ? "bg-red-500 text-white shadow-sm" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
-              >
+                className={`px-8 py-2.5 rounded-lg text-sm ${
+                  isProduksiBahanBaru ? "bg-red-500 text-white" : "bg-gray-200"
+                }`}>
                 Ya
               </button>
               <button
                 onClick={() => setIsProduksiBahanBaru(false)}
-                className={`px-8 py-2.5 rounded-lg text-sm font-medium transition-colors ${!isProduksiBahanBaru ? "bg-red-500 text-white shadow-sm" : "bg-gray-200 text-gray-700 hover:bg-gray-300"}`}
-              >
+                className={`px-8 py-2.5 rounded-lg text-sm ${
+                  !isProduksiBahanBaru ? "bg-red-500 text-white" : "bg-gray-200"
+                }`}>
                 Tidak
               </button>
             </div>
           </div>
 
-          <button className="mt-auto w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-colors text-lg">
+          <button className="mt-auto w-full bg-red-500 text-white py-4 rounded-xl text-lg">
             Tambahkan
           </button>
         </div>
 
-        {/* Bagian Kanan: Masukan Bahan Baku */}
+        {/* ================= RIGHT ================= */}
         <div className="w-full md:w-[55%] bg-[#f4f4f4] p-8 relative flex flex-col">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 bg-red-300 text-gray-800 hover:bg-red-400 p-2 rounded-lg transition-colors z-10"
-          >
-            <X size={20} strokeWidth={3} />
+            className="absolute top-4 right-4 bg-red-300 p-2 rounded-lg">
+            <X size={20} />
           </button>
 
-          <h2 className="text-3xl font-bold text-gray-900 mb-6 mt-2">Masukan Bahan Baku</h2>
+          <h2 className="text-3xl font-bold text-gray-900 mb-6 mt-2">
+            Masukan Bahan Baku
+          </h2>
 
-          <div className="flex-1 overflow-y-auto pr-2 pb-4 space-y-4">
-            {bahanList.map((num, index) => (
-              <div key={index} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                <h3 className="font-bold text-lg mb-4 text-gray-800">Bahan {num}</h3>
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold mb-2 text-gray-800">Nama Bahan</label>
-                  <select className="w-full bg-[#f8f8f8] border border-gray-200 rounded-xl p-3.5 text-sm focus:ring-2 focus:ring-red-200 outline-none appearance-none cursor-pointer">
-                    <option>Masukan nama Bahan</option>
-                    <option>Tepung Terigu</option>
-                    <option>Telur Ayam</option>
+          <div className="flex-1 overflow-y-auto space-y-4">
+            {bahanList.map((b, index) => (
+              <div key={index} className="bg-white p-6 rounded-2xl">
+                <h3 className="font-bold text-lg mb-4">Bahan {index + 1}</h3>
+
+                {/* SELECT BAHAN */}
+                <select
+                  className="w-full bg-gray-100 p-3 rounded-xl mb-3"
+                  onChange={(e) => {
+                    const updated = [...bahanList];
+                    updated[index].id = e.target.value;
+                    setBahanList(updated);
+                  }}>
+                  <option>Masukan nama Bahan</option>
+                  {bahanMaster.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.nama}
+                    </option>
+                  ))}
+                </select>
+
+                {/* JUMLAH */}
+                <div className="flex border rounded-lg overflow-hidden bg-gray-100">
+                  <input
+                    type="number"
+                    onChange={(e) => {
+                      const updated = [...bahanList];
+                      updated[index].jumlah = e.target.value;
+                      setBahanList(updated);
+                    }}
+                    className="w-full p-2"
+                  />
+                  <select
+                    onChange={(e) => {
+                      const updated = [...bahanList];
+                      updated[index].satuan = e.target.value;
+                      setBahanList(updated);
+                    }}
+                    className="bg-gray-200 px-2">
+                    {unitOptions.map((u) => (
+                      <option key={u}>{u}</option>
+                    ))}
                   </select>
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-semibold mb-2">
-                    Masukan Jumlah Bahan Untuk Produksi ini
-                  </label>
-                  <div className="flex border rounded-lg overflow-hidden bg-gray-100">
-                    <input
-                      type="number"
-                      placeholder="Jumlah"
-                      className="w-full bg-transparent p-2 text-sm outline-none"
-                    />
-                    <select className="bg-gray-200 border-l px-2 text-sm outline-none font-medium">
-                      {unitOptions.map((u) => <option key={u}>{u}</option>)}
-                    </select>
-                  </div>
                 </div>
               </div>
             ))}
 
             <button
               onClick={tambahBahan}
-              className="w-full border-2 border-dashed border-gray-400 text-gray-800 font-medium py-8 rounded-2xl hover:bg-gray-200 transition-colors mt-4 bg-transparent"
-            >
-              Klik Untuk Menambahkan Bahan Tambahan
+              className="w-full border-dashed border-2 py-6">
+              Tambah Bahan
             </button>
           </div>
 
-          <div className="pt-4 mt-auto">
-            <button className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-colors shadow-md text-lg">
+          <div className="mt-4">
+            <button
+              onClick={handleProduksi}
+              className="w-full bg-red-500 text-white py-4 rounded-xl text-lg">
               Simpan Data Produksi
             </button>
           </div>

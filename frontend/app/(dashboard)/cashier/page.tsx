@@ -209,7 +209,7 @@ export default function POSPage() {
           </div>
         </div>
       )}
-
+      
       {/* ================= MODAL PEMBAYARAN ================= */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-0 md:p-4">
@@ -429,7 +429,7 @@ export default function POSPage() {
             ))}
           </div>
 
-          {/* Container Menu - Sekarang bisa di-scroll */}
+          {/* Container Menu - iso di scroll */}
           <div className="flex-1 overflow-y-auto no-scrollbar pb-32 lg:pb-8 px-1">
             {/* Grid diset 2 kolom mobile dan 4 kolom desktop sesuai permintaan */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -482,9 +482,9 @@ export default function POSPage() {
       {/* ================= ASIDE (KERANJANG) ================= */}
       <aside
         className={`
-        fixed inset-y-0 right-0 z-[150] 
+        fixed inset-y-0 right-0 z-[40] 
         w-[85%] max-w-[320px] lg:max-w-[26rem] lg:w-full 
-        bg-white lg:bg-gray-100 shadow-2xl lg:shadow-none 
+        bg-white lg:bg-gray-100 backdrop-blur-md
         transform transition-transform duration-500 ease-in-out lg:relative lg:translate-x-0 lg:flex lg:flex-col
         ${isCartOpenMobile ? "translate-x-0" : "translate-x-full lg:translate-x-0"}
         `}
@@ -664,7 +664,7 @@ export default function POSPage() {
       {isCartOpenMobile && (
         <div
           onClick={() => setIsCartOpenMobile(false)}
-          className="lg:hidden fixed inset-0 bg-black/50 z-[140] animate-in fade-in duration-300"
+          className="lg:hidden fixed inset-0 bg-black/50  z-[140] animate-in fade-in duration-300"
         />
       )}
     </div>

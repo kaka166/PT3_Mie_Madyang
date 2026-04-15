@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getOrders, updateOrderStatus } from "@/services/penjualanService";
 import {
   Search,
@@ -8,7 +10,148 @@ import {
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
+  X,
 } from "lucide-react";
+
+// --- KOMPONEN CALENDAR PICKER (KUSTOM) ---
+function CalendarPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [viewDate, setViewDate] = useState(() => {
+    const d = value ? new Date(value) : new Date();
+    return { year: d.getFullYear(), month: d.getMonth() };
+  });
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const daysInMonth = new Date(viewDate.year, viewDate.month + 1, 0).getDate();
+  const firstDay = new Date(viewDate.year, viewDate.month, 1).getDay();
+  const monthNames = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  const selectedDay = value ? new Date(value).getDate() : null;
+  const selectedMonth = value ? new Date(value).getMonth() : null;
+  const selectedYear = value ? new Date(value).getFullYear() : null;
+
+  const prevMonth = () => setViewDate((v) => {
+    const m = v.month === 0 ? 11 : v.month - 1;
+    const y = v.month === 0 ? v.year - 1 : v.year;
+    return { year: y, month: m };
+  });
+  const nextMonth = () => setViewDate((v) => {
+    const m = v.month === 11 ? 0 : v.month + 1;
+    const y = v.month === 11 ? v.year + 1 : v.year;
+    return { year: y, month: m };
+  });
+
+  const selectDay = (day: number) => {
+    // Penyesuaian agar zona waktu lokal tidak membuat tanggal mundur 1 hari saat di-parse ke ISO
+    const d = new Date(viewDate.year, viewDate.month, day);
+    const offset = d.getTimezoneOffset();
+    const adjustedDate = new Date(d.getTime() - (offset * 60 * 1000));
+    const iso = adjustedDate.toISOString().split("T")[0];
+    
+    onChange(iso);
+    setOpen(false);
+  };
+
+  const displayLabel = value
+    ? new Date(value).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
+    : "Hari/Bulan/Tahun";
+
+  return (
+    <div ref={ref} className="relative z-50">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex items-center justify-between gap-3 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-48 cursor-pointer"
+      >
+        <div className="flex items-center gap-2">
+          <Calendar size={16} className="text-gray-500" />
+          <span className="truncate">{displayLabel}</span>
+        </div>
+        {value && (
+          <span
+            onClick={(e) => { e.stopPropagation(); onChange(""); }}
+            className="text-gray-400 hover:text-red-500 transition-colors"
+            title="Hapus Tanggal"
+          >
+            <X size={14} />
+          </span>
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-gray-200 shadow-xl p-4">
+          {/* Nav */}
+          <div className="flex items-center justify-between mb-3">
+            <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+              <ChevronLeft size={16} className="text-gray-600" />
+            </button>
+            <span className="text-sm font-bold text-gray-700">
+              {monthNames[viewDate.month]} {viewDate.year}
+            </span>
+            <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+              <ChevronRight size={16} className="text-gray-600" />
+            </button>
+          </div>
+
+          {/* Day labels */}
+          <div className="grid grid-cols-7 mb-1">
+            {["Min","Sen","Sel","Rab","Kam","Jum","Sab"].map((d) => (
+              <div key={d} className="text-center text-[10px] font-bold text-gray-400 py-1">{d}</div>
+            ))}
+          </div>
+
+          {/* Days grid */}
+          <div className="grid grid-cols-7 gap-y-1">
+            {Array(firstDay).fill(null).map((_, i) => <div key={`e-${i}`} />)}
+            {Array(daysInMonth).fill(null).map((_, i) => {
+              const day = i + 1;
+              const isSelected =
+                day === selectedDay &&
+                viewDate.month === selectedMonth &&
+                viewDate.year === selectedYear;
+              const isToday =
+                day === new Date().getDate() &&
+                viewDate.month === new Date().getMonth() &&
+                viewDate.year === new Date().getFullYear();
+                
+              return (
+                <button
+                  key={day}
+                  onClick={() => selectDay(day)}
+                  className={`text-center text-sm h-8 w-full rounded-lg font-medium transition-colors
+                    ${isSelected ? "bg-red-500 text-white" : ""}
+                    ${isToday && !isSelected ? "border border-red-500 text-red-500" : ""}
+                    ${!isSelected && !isToday ? "text-gray-700 hover:bg-gray-100" : ""}
+                  `}
+                >
+                  {day}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+// --- END KOMPONEN KUSTOM ---
+
 
 // Fungsi bantuan untuk menentukan warna badge status
 const getStatusBadge = (status: string) => {
@@ -37,9 +180,16 @@ export default function KitchenDashboardPage() {
   };
 
   useEffect(() => {
-    fetchOrders();
+    const load = async () => {
+      await fetchOrders();
+    };
 
-    const interval = setInterval(fetchOrders, 3000); // realtime polling
+    load();
+
+    const interval = setInterval(() => {
+      load();
+    }, 3000);
+
     return () => clearInterval(interval);
   }, []);
 
@@ -66,6 +216,7 @@ export default function KitchenDashboardPage() {
     startIndex,
     startIndex + itemsPerPage,
   );
+  
   return (
     <div className="h-full w-full overflow-y-auto bg-gray-100 p-6 pb-12 font-sans text-gray-800">
       {/* Header */}
@@ -79,21 +230,18 @@ export default function KitchenDashboardPage() {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm">
         {/* Toolbar Card */}
-        <div className="p-4 flex justify-between items-center border-b">
+        <div className="p-4 flex justify-between items-center border-b relative-z[20]">
           <h2 className="text-xl font-bold text-gray-900">Pesanan</h2>
 
           <div className="flex gap-3">
-            {/* Filter Tanggal Bawaan Browser */}
-            <div className="relative flex items-center">
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors pl-9 pr-3 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-44 cursor-pointer"
-              />
-            </div>
+            
+            {/* Filter Tanggal KUSTOM (Menggantikan input bawaan browser) */}
+            <CalendarPicker 
+              value={selectedDate} 
+              onChange={setSelectedDate} 
+            />
 
             {/* Input Pencarian */}
             <div className="relative">
@@ -106,7 +254,7 @@ export default function KitchenDashboardPage() {
                 placeholder="Cari Pesanan (ID)"
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
-                className="bg-gray-200 text-gray-700 placeholder-gray-500 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium"
+                className="bg-gray-200 text-gray-700 placeholder-gray-500 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-44"
               />
             </div>
           </div>
@@ -193,7 +341,7 @@ export default function KitchenDashboardPage() {
         {/* Footer & Pagination */}
         <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500 bg-white">
           <span className="font-medium text-gray-500">
-            Showing {startIndex + 1}-
+            Showing {totalItems === 0 ? 0 : startIndex + 1}-
             {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems}{" "}
             Transaction
           </span>
@@ -205,7 +353,7 @@ export default function KitchenDashboardPage() {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="px-2 py-1 border rounded text-sm">
+              className="px-2 py-1 border rounded text-sm outline-none">
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={30}>30</option>
@@ -249,9 +397,9 @@ export default function KitchenDashboardPage() {
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || totalPages === 0}
               className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${
-                currentPage === totalPages
+                currentPage === totalPages || totalPages === 0
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-red-500 hover:bg-red-600 text-white"
               }`}>

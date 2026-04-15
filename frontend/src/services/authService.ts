@@ -25,7 +25,7 @@ export interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-const API_URL = "https://api.farelzy.my.id/api";
+const API_URL = "http://127.0.0.1:8000/api";
 
 export const authService = {
   async login(identifier: string, password: string): Promise<LoginResponse> {
@@ -37,7 +37,7 @@ export const authService = {
           "Content-Type": "application/json",
           Accept: "application/json",
         },
-        body: JSON.stringify({  
+        body: JSON.stringify({
           login: identifier,
           password: password,
         }),
