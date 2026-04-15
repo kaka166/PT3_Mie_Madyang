@@ -52,7 +52,7 @@ export default function StockBahanPage() {
             <input 
               type="text" 
               placeholder="Cari..." 
-              className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+              className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200"
             />
           </div>
         </div>

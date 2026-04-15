@@ -106,7 +106,7 @@ export default function StockBahanPage() {
               size={16}
             />
             <input
-              className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm"
+              className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200"
               placeholder="Cari..."
             />
           </div>
