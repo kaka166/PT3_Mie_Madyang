@@ -128,13 +128,18 @@ export default function StockBahanPage() {
                 <tr key={item.id} className="border-b hover:bg-gray-50">
                   <td className="py-3 px-4 text-left">{item.id}</td>
                   <td className="py-3 px-4 text-left">{item.nama}</td>
-                  <td className="py-3 px-4">{item.jumlah}</td>
+                  <td className="py-3 px-4">
+                    {item.jumlah}
+                    <div className="text-xs text-gray-400">
+                      Limit: {item.stock_limit}
+                    </div>
+                  </td>
                   <td className="py-3 px-4 flex justify-center">
                     <span
                       className={`px-3 py-1 rounded-full text-xs ${
                         item.status === "Aman"
                           ? "bg-green-200 text-green-700"
-                          : "bg-red-400 text-white"
+                          : "bg-red-500 text-white"
                       }`}>
                       {item.status}
                     </span>

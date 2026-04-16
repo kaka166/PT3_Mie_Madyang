@@ -27,6 +27,8 @@ export interface CreateStockPayload {
   tipe: "plus" | "minus";
   kategori: "penyesuaian" | "restock" | "produksi";
   alasan?: string;
+  stock_limit?: number;
+  harga?: number;
 }
 
 // ==========================

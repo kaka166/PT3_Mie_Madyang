@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { getBahan, createStockMovement } from "@/services/stockService";
 
-const unitOptions = ["Kg", "L","ml", "Pack", "Ikat"];
+const unitOptions = ["Kg", "L", "ml", "Pack", "Ikat"];
 
 interface RestockModalProps {
   isOpen: boolean;
@@ -27,6 +27,7 @@ export default function RestockModal({
   const [jumlah, setJumlah] = useState("");
   const [satuan, setSatuan] = useState("Kg");
   const [harga, setHarga] = useState("");
+  const [stockLimit, setStockLimit] = useState("");
 
   const [search, setSearch] = useState("");
   const filteredBahan = bahanMaster.filter((b) =>
@@ -91,9 +92,14 @@ export default function RestockModal({
 
   // ================= SIMPAN RESTOCK =================
   const handleSubmit = async () => {
+    if (isBahanBaru && !stockLimit) {
+      return alert("Stock limit wajib diisi");
+    }
+
     if (keranjang.length === 0) {
       return alert("Keranjang kosong");
     }
+    console.log("DEBUG stockLimit:", stockLimit);
     await Promise.all(
       keranjang.map((item) =>
         createStockMovement({
@@ -104,11 +110,22 @@ export default function RestockModal({
           tipe: "plus",
           kategori: "restock",
           alasan: "Restock",
+          stock_limit: Number(stockLimit || 5),
+          harga: Number(item.harga || 0),
         }),
       ),
     );
 
     onSuccess?.();
+
+    setKeranjang([]);
+    setStockLimit("");
+    setJumlah("");
+    setHarga("");
+    setSearch("");
+    setSelectedBahan(null);
+    setIsBahanBaru(true);
+
     onClose();
   };
 
@@ -175,8 +192,11 @@ export default function RestockModal({
                 <input
                   type="text"
                   placeholder="Cari bahan..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  value={selectedBahan ? selectedBahan.nama : search}
+                  onChange={(e) => {
+                    setSelectedBahan(null);
+                    setSearch(e.target.value);
+                  }}
                   className="w-full bg-gray-100 rounded-lg p-3 text-sm"
                 />
 
@@ -187,8 +207,14 @@ export default function RestockModal({
                         key={b.id}
                         onClick={() => {
                           setSelectedBahan(b);
-                          setSearch(b.nama);
+
                           setSatuan(b.satuan || "Kg");
+                          setHarga(b.harga ? String(b.harga) : "");
+                          setStockLimit(
+                            b.stock_limit ? String(b.stock_limit) : "",
+                          );
+
+                          setSearch("");
                         }}
                         className="p-2 hover:bg-gray-100 cursor-pointer text-sm">
                         {b.nama}
@@ -239,17 +265,32 @@ export default function RestockModal({
             </div>
           </div>
 
-          {/* HARGA */}
-          <div className="mb-6 w-1/2 pr-2">
-            <label className="text-sm font-semibold mb-2">
-              Harga per satuan
-            </label>
-            <input
-              type="number"
-              value={harga}
-              onChange={(e) => setHarga(e.target.value)}
-              className="w-full bg-gray-100 p-3 rounded-lg"
-            />
+          <div className="flex gap-4 mb-6">
+            {/* HARGA */}
+            <div className="flex-1">
+              <label className="text-sm font-semibold mb-2">
+                Harga per satuan
+              </label>
+              <input
+                type="number"
+                value={harga}
+                onChange={(e) => setHarga(e.target.value)}
+                className="w-full bg-gray-100 p-3 rounded-lg"
+              />
+            </div>
+
+            {/* STOCK LIMIT */}
+            <div className="flex-1">
+              <label className="text-sm font-semibold mb-2">
+                Stock Limit (Kritis)
+              </label>
+              <input
+                type="number"
+                value={stockLimit}
+                onChange={(e) => setStockLimit(e.target.value)}
+                className="w-full bg-gray-100 p-3 rounded-lg"
+              />
+            </div>
           </div>
 
           <button
