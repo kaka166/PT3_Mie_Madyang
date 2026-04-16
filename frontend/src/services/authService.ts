@@ -25,7 +25,7 @@ export interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-const API_URL = "http://127.0.0.1:8000/api";
+const API_URL = "https://api.farelzy.my.id/api";
 
 export const authService = {
   async login(identifier: string, password: string): Promise<LoginResponse> {
