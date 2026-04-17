@@ -15,14 +15,22 @@ import {
 import { getStockList } from "@/services/stockService";
 
 export default function StockBahanPage() {
-  const [stockListData, setStockListData] = useState<any[]>([]);
+  type StockItem = {
+    id: number;
+    nama: string;
+    jumlah: number;
+    stock_limit: number;
+    status: string;
+  };
+
+  const [stockListData, setStockListData] = useState<StockItem[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const pageSizeOptions = [10, 20, 30, 40];
 
   const filteredData = stockListData.filter((item) =>
-    item.nama.toLowerCase().includes(search.toLowerCase()),
+    item.nama?.toLowerCase().includes(search.toLowerCase()),
   );
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -37,12 +45,16 @@ export default function StockBahanPage() {
       const stock = await getStockList();
       setStockListData(stock);
     } catch (err) {
-      console.error(err);
+      console.error("Gagal ambil stock:", err);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      await fetchData();
+    };
+
+    load();
   }, []);
 
   const filterOptions = ["Penyesuaian", "Re Stock", "Produksi"];

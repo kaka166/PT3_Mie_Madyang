@@ -11,6 +11,8 @@ use App\Models\StokPorsi;
 use App\Models\TaxSetting;
 use App\Models\Pemasukan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PenjualanController extends Controller
 {
@@ -52,19 +54,27 @@ class PenjualanController extends Controller
         $request->validate([
             'items' => 'required|array|min:1',
             'items.*.menu_id' => 'required|exists:menu,id',
-            'items.*.qty' => 'required|integer|min:1',
+            'items.*.qty' => 'required|integer|min:1|max:100',
             'customer_name' => 'nullable|string',
-            'order_type' => 'required|string',
+            'order_type' => 'required|in:Dine In,Take Away',
             'metode_pembayaran' => 'required|in:QRIS,Tunai',
         ]);
 
         DB::beginTransaction();
 
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json([
+                'error' => 'Unauthorized'
+            ], 401);
+        }
+
         try {
             $penjualan = Penjualan::create([
                 'tanggal' => now(),
                 'total' => 0,
-                'user_id' => 1,
+                'user_id' => Auth::user()->id,
                 'customer_name' => $request->customer_name,
                 'order_type' => $request->order_type,
                 'status' => 'pending',
@@ -77,14 +87,26 @@ class PenjualanController extends Controller
 
                 $menu = Menu::find($item['menu_id']);
 
-                if (!$menu) {
+                if (!$menu || !$menu->is_active) {
                     DB::rollBack();
                     return response()->json([
-                        'error' => 'Menu tidak ditemukan'
+                        'error' => 'Menu tidak valid'
                     ], 400);
                 }
 
                 $qty = $item['qty'];
+
+                $stok = StokPorsi::where('menu_id', $menu->id)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($stok && $stok->qty < $qty) {
+                    DB::rollBack();
+                    return response()->json([
+                        'error' => 'Stok tidak cukup untuk ' . $menu->nama_menu
+                    ], 400);
+                }
+
                 $subtotal = $menu->harga_jual * $qty;
                 $grand_total += $subtotal;
 
@@ -96,11 +118,11 @@ class PenjualanController extends Controller
                     'subtotal' => $subtotal
                 ]);
 
-                // 🔥 Update stok (kalau ada)
-                $stok = StokPorsi::where('menu_id', $menu->id)->first();
-                if ($stok) {
-                    $stok->qty -= $qty;
-                    $stok->save();
+                if (!$stok) {
+                    DB::rollBack();
+                    return response()->json([
+                        'error' => 'Stok tidak ditemukan untuk ' . $menu->nama_menu
+                    ], 400);
                 }
             }
 
@@ -113,7 +135,7 @@ class PenjualanController extends Controller
 
             if ($setting && $setting->is_enabled) {
                 $taxPercent = (int) $setting->tax_percent;
-                $tax = $grand_total * ($taxPercent / 100);
+                $tax = round($grand_total * ($taxPercent / 100));
             }
 
             $totalFinal = $grand_total + $tax;
@@ -131,8 +153,10 @@ class PenjualanController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            Log::error($e);
+
             return response()->json([
-                'error' => $e->getMessage()
+                'error' => 'Terjadi kesalahan pada server'
             ], 500);
         }
     }

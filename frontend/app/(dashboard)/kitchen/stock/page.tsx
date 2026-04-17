@@ -21,26 +21,70 @@ import { getStockList, getFullHistory } from "@/services/stockService";
 
 const filterOptions = ["Penyesuaian", "Restock"];
 
-const PaginationBar = () => (
-  <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500">
-    <span>Showing latest data</span>
-    <div className="flex gap-1">
-      {[
-        <ChevronLeft key="prev" size={16} />,
-        1,
-        2,
-        3,
-        <ChevronRight key="next" size={16} />,
-      ].map((item, i) => (
+const PaginationBar = ({
+  totalItems,
+  currentPage,
+  itemsPerPage,
+  setCurrentPage,
+  setItemsPerPage,
+}: any) => {
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+
+  return (
+    <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500 bg-white">
+      {/* LEFT */}
+      <div className="flex items-center gap-3">
+        <span>
+          Showing {totalItems === 0 ? 0 : startIndex + 1}-
+          {Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems}
+        </span>
+
+        <select
+          value={itemsPerPage}
+          onChange={(e) => {
+            setItemsPerPage(Number(e.target.value));
+            setCurrentPage(1);
+          }}
+          className="bg-gray-100 px-2 py-1 rounded text-sm">
+          {[10, 20, 30, 40].map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* RIGHT */}
+      <div className="flex gap-1">
         <button
-          key={i}
+          onClick={() => setCurrentPage((p: number) => Math.max(p - 1, 1))}
           className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
-          {item}
+          ‹
         </button>
-      ))}
+
+        {Array.from({ length: Math.min(totalPages || 1, 5) }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`w-8 h-8 flex items-center justify-center rounded ${
+              currentPage === i + 1 ? "bg-red-400 text-white" : "bg-gray-100"
+            }`}>
+            {i + 1}
+          </button>
+        ))}
+
+        <button
+          onClick={() =>
+            setCurrentPage((p: number) => Math.min(p + 1, totalPages || 1))
+          }
+          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+          ›
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function StockBahanPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -48,7 +92,6 @@ export default function StockBahanPage() {
 
   const [isPenyesuaianOpen, setIsPenyesuaianOpen] = useState(false);
   const [isRestockOpen, setIsRestockOpen] = useState(false);
-  const [isProduksiOpen, setIsProduksiOpen] = useState(false);
 
   // ================= STATE DATA =================
   const [stockListData, setStockListData] = useState<any[]>([]);
@@ -81,6 +124,30 @@ export default function StockBahanPage() {
         r.tipe.toLowerCase().includes(selectedFilter.toLowerCase()),
       )
     : riwayatData;
+
+  const [stockPage, setStockPage] = useState(1);
+  const [stockLimit, setStockLimit] = useState(10);
+
+  const [riwayatPage, setRiwayatPage] = useState(1);
+  const [riwayatLimit, setRiwayatLimit] = useState(10);
+
+  // STOCK
+  const stockTotal = stockListData.length;
+  const stockStart = (stockPage - 1) * stockLimit;
+
+  const paginatedStock = stockListData.slice(
+    stockStart,
+    stockStart + stockLimit,
+  );
+
+  // RIWAYAT
+  const riwayatTotal = filteredRiwayat.length;
+  const riwayatStart = (riwayatPage - 1) * riwayatLimit;
+
+  const paginatedRiwayat = filteredRiwayat.slice(
+    riwayatStart,
+    riwayatStart + riwayatLimit,
+  );
 
   return (
     <div className="h-full w-full overflow-y-auto bg-gray-100 p-6 pb-12 font-sans text-gray-800">
@@ -123,7 +190,7 @@ export default function StockBahanPage() {
             </thead>
 
             <tbody>
-              {stockListData.map((item) => (
+              {paginatedStock.map((item) => (
                 <tr key={item.id} className="border-b hover:bg-gray-50">
                   <td className="py-3 px-4 text-left">{item.id}</td>
                   <td className="py-3 px-4 text-left">{item.nama}</td>
@@ -148,8 +215,13 @@ export default function StockBahanPage() {
             </tbody>
           </table>
         </div>
-
-        <PaginationBar />
+        <PaginationBar
+          totalItems={stockTotal}
+          currentPage={stockPage}
+          itemsPerPage={stockLimit}
+          setCurrentPage={setStockPage}
+          setItemsPerPage={setStockLimit}
+        />
       </div>
 
       {/* ================= ACTION ================= */}
@@ -159,12 +231,6 @@ export default function StockBahanPage() {
             onClick={() => setIsRestockOpen(true)}
             className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2">
             <PackagePlus size={16} /> Laporkan Restock
-          </button>
-
-          <button
-            onClick={() => setIsProduksiOpen(true)}
-            className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2">
-            <RefreshCw size={16} /> Laporkan Produksi
           </button>
 
           <button
@@ -208,40 +274,64 @@ export default function StockBahanPage() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-center">
-            <thead className="text-gray-500 border-b">
-              <tr>
-                <th>ID</th>
-                <th>Item ID</th>
-                <th>Nama Barang</th>
-                <th>Tipe</th>
-                <th>Alasan</th>
-                <th>Kuantiti</th>
-                <th>Perubahan Terakhir</th>
-                <th>Dibuat Oleh</th>
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
+                <th className="px-6 py-3">ID</th>
+                <th className="px-6 py-3">Item ID</th>
+                <th className="px-6 py-3">Nama Barang</th>
+                <th className="px-6 py-3">Tipe</th>
+                <th className="px-6 py-3">Alasan</th>
+                <th className="px-6 py-3">Kuantiti</th>
+                <th className="px-6 py-3">Perubahan</th>
+                <th className="px-6 py-3">Dibuat Oleh</th>
               </tr>
             </thead>
 
             <tbody>
-              {filteredRiwayat.map((item, i) => (
+              {(paginatedRiwayat || []).map((item, i) => (
                 <tr
                   key={`${item.nama}-${i}`}
-                  className="border-b hover:bg-gray-50">
-                  <td>{item.id}</td>
-                  <td>{item.itemId}</td>
-                  <td>{item.nama}</td>
-                  <td>{item.tipe}</td>
-                  <td>{item.alasan}</td>
-                  <td>{item.kuantiti}</td>
-                  <td>{new Date(item.waktu).toLocaleString("id-ID")}</td>
-                  <td>{item.pembuat}</td>
+                  className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
+                  <td className="px-6 py-4 font-semibold text-neutral-700">
+                    {item.id}
+                  </td>
+
+                  <td className="px-6 py-4 text-neutral-600">{item.itemId}</td>
+
+                  <td className="px-6 py-4 font-bold text-neutral-800">
+                    {item.nama}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">
+                      {item.tipe}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4 text-neutral-600">{item.alasan}</td>
+
+                  <td className="px-6 py-4 font-semibold text-neutral-800">
+                    {item.kuantiti}
+                  </td>
+
+                  <td className="px-6 py-4 text-neutral-500">
+                    {new Date(item.waktu).toLocaleString("id-ID")}
+                  </td>
+
+                  <td className="px-6 py-4 text-neutral-600">{item.pembuat}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-
-        <PaginationBar />
+        <PaginationBar
+          totalItems={riwayatTotal}
+          currentPage={riwayatPage}
+          itemsPerPage={riwayatLimit}
+          setCurrentPage={setRiwayatPage}
+          setItemsPerPage={setRiwayatLimit}
+        />
       </div>
 
       {/* MODAL */}

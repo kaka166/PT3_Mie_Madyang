@@ -335,32 +335,42 @@ export default function KitchenDashboardPage() {
                     </span>
                   </td>
                   <td className="py-4 px-4 text-gray-500 flex justify-center items-center h-full">
-                    <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={async () => {
-                          await updateOrderStatus(
-                            Number(item.id.replace("#", "")),
-                            "cooking",
-                          );
+                    <div className="flex justify-center">
+                      <div className="flex bg-gray-100 rounded-full p-1 text-xs font-bold">
+                        {/* MASAK */}
+                        <button
+                          onClick={async () => {
+                            await updateOrderStatus(
+                              Number(item.id.replace("#", "")),
+                              "cooking",
+                            );
+                            fetchOrders();
+                          }}
+                          className={`px-3 py-1 rounded-full transition-all ${
+                            item.status === "Dimasak"
+                              ? "bg-yellow-400 text-white"
+                              : "text-gray-500"
+                          }`}>
+                          Masak
+                        </button>
 
-                          fetchOrders();
-                        }}
-                        className="text-yellow-600 text-xs font-bold">
-                        Masak
-                      </button>
-
-                      <button
-                        onClick={async () => {
-                          await updateOrderStatus(
-                            Number(item.id.replace("#", "")),
-                            "done",
-                          );
-
-                          fetchOrders();
-                        }}
-                        className="text-green-600 text-xs font-bold">
-                        Selesai
-                      </button>
+                        {/* SELESAI */}
+                        <button
+                          onClick={async () => {
+                            await updateOrderStatus(
+                              Number(item.id.replace("#", "")),
+                              "done",
+                            );
+                            fetchOrders();
+                          }}
+                          className={`px-3 py-1 rounded-full transition-all ${
+                            item.status === "Ready"
+                              ? "bg-green-500 text-white"
+                              : "text-gray-500"
+                          }`}>
+                          Selesai
+                        </button>
+                      </div>
                     </div>
                   </td>
                 </tr>
