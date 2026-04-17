@@ -14,7 +14,7 @@ export interface Category {
   is_active: number;
 }
 
-const API_BASE_URL = "https://api.farelzy.my.id/api";
+const API_BASE_URL = "http://127.0.0.1:8000/api";
 
 // Helper buat ambil Token & Header
 const getAdminHeaders = (isFormData = false) => {

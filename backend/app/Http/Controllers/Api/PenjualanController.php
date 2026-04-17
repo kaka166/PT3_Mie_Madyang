@@ -9,6 +9,7 @@ use App\Models\PenjualanDetail;
 use App\Models\Menu;
 use App\Models\StokPorsi;
 use App\Models\TaxSetting;
+use App\Models\Pemasukan;
 use Illuminate\Support\Facades\DB;
 
 class PenjualanController extends Controller
@@ -53,7 +54,8 @@ class PenjualanController extends Controller
             'items.*.menu_id' => 'required|exists:menu,id',
             'items.*.qty' => 'required|integer|min:1',
             'customer_name' => 'nullable|string',
-            'order_type' => 'required|string'
+            'order_type' => 'required|string',
+            'metode_pembayaran' => 'required|in:QRIS,Tunai',
         ]);
 
         DB::beginTransaction();
@@ -65,7 +67,8 @@ class PenjualanController extends Controller
                 'user_id' => 1,
                 'customer_name' => $request->customer_name,
                 'order_type' => $request->order_type,
-                'status' => 'pending'
+                'status' => 'pending',
+                'metode_pembayaran' => $request->metode_pembayaran
             ]);
 
             $grand_total = 0;
@@ -143,13 +146,47 @@ class PenjualanController extends Controller
             'status' => 'required|in:pending,cooking,done'
         ]);
 
-        $penjualan = Penjualan::findOrFail($id);
+        $penjualan = Penjualan::with('detail.menu', 'user')->findOrFail($id);
 
         $penjualan->status = $request->status;
         $penjualan->save();
 
+        // 🔥 TAMBAH INI (KUNCI UTAMA)
+        if ($request->status === 'done') {
+
+            // 🔥 CEK biar gak double insert
+            $already = Pemasukan::where('penjualan_id', $penjualan->id)->exists();
+
+            if (!$already) {
+                Pemasukan::create([
+                    'penjualan_id' => $penjualan->id,
+                    'nama' => 'Order #' . $penjualan->id,
+                    'total' => $penjualan->total,
+                    'kasir' => $penjualan->user->name ?? 'Unknown',
+                    'metode' => $penjualan->metode_pembayaran ?? 'Tidak diketahui',
+                    'waktu' => $penjualan->tanggal
+                ]);
+            }
+        }
+
         return response()->json([
             'message' => 'Status updated'
         ]);
+    }
+
+    public function getPemasukan()
+    {
+        $data = Pemasukan::latest()->get()->map(function ($p) {
+            return [
+                'no' => '#' . $p->penjualan_id,
+                'nama' => $p->nama,
+                'waktu' => $p->waktu,
+                'kasir' => $p->kasir,
+                'metode' => $p->metode,
+                'jumlah' => $p->total
+            ];
+        });
+
+        return response()->json($data);
     }
 }

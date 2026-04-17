@@ -14,6 +14,8 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 
+//test fitur
+Route::get('/pemasukan', [PenjualanController::class, 'getPemasukan']);
 
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -55,6 +57,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/produksi', [StockController::class, 'produksi']);
         Route::get('/stock-list', [StockController::class, 'stockList']);
         Route::get('/stock-history', [StockController::class, 'stockHistory']);
+
+        
         
     });
 

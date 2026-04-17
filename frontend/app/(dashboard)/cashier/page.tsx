@@ -26,7 +26,7 @@ export default function POSPage() {
 
   const [isCartOpenMobile, setIsCartOpenMobile] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState("QRIS");
+  const [paymentMethod, setPaymentMethod] = useState<"QRIS" | "Tunai">("QRIS");
   const [customerName, setCustomerName] = useState("");
   const [tableNumber, setTableNumber] = useState("");
 
@@ -333,6 +333,7 @@ export default function POSPage() {
                     const result = await createOrder({
                       customer_name: customerName,
                       order_type: orderType,
+                      metode_pembayaran: paymentMethod,
                       items: cart.map((item) => ({
                         menu_id: item.id,
                         qty: item.qty,
