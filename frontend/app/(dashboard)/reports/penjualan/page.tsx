@@ -376,7 +376,11 @@ export default function LaporanPemasukan() {
   }, []);
 
   useEffect(() => {
-    setCurrentPage(1);
+    const resetPage = () => {
+      setCurrentPage(1);
+    };
+
+    resetPage();
   }, [dateRange, search, rekapFilter]);
 
   const filteredRiwayat = riwayatData.filter((item) => {
@@ -463,46 +467,59 @@ export default function LaporanPemasukan() {
   });
 
   const groupedRekap = Object.values(
-    filteredRekap.reduce((acc: Record<string, any>, item: Pemasukan) => {
-      const date = new Date(item.waktu);
+    filteredRekap.reduce(
+      (
+        acc: Record<
+          string,
+          {
+            rentang: string;
+            total: number;
+            transaksi: number;
+          }
+        >,
+        item: Pemasukan,
+      ) => {
+        const date = new Date(item.waktu);
 
-      let key = "";
+        let key = "";
 
-      if (rekapFilter === "Minggu") {
-        const start = new Date(date);
-        start.setDate(date.getDate() - date.getDay());
-        const end = new Date(start);
-        end.setDate(start.getDate() + 6);
+        if (rekapFilter === "Minggu") {
+          const start = new Date(date);
+          start.setDate(date.getDate() - date.getDay());
+          const end = new Date(start);
+          end.setDate(start.getDate() + 6);
 
-        key = `${start.toLocaleDateString("id-ID")} - ${end.toLocaleDateString(
-          "id-ID",
-        )}`;
-      }
+          key = `${start.toLocaleDateString("id-ID")} - ${end.toLocaleDateString(
+            "id-ID",
+          )}`;
+        }
 
-      if (rekapFilter === "Bulan") {
-        key = date.toLocaleDateString("id-ID", {
-          month: "long",
-          year: "numeric",
-        });
-      }
+        if (rekapFilter === "Bulan") {
+          key = date.toLocaleDateString("id-ID", {
+            month: "long",
+            year: "numeric",
+          });
+        }
 
-      if (rekapFilter === "Tahun") {
-        key = date.getFullYear().toString();
-      }
+        if (rekapFilter === "Tahun") {
+          key = date.getFullYear().toString();
+        }
 
-      if (!acc[key]) {
-        acc[key] = {
-          rentang: key,
-          total: 0,
-          transaksi: 0,
-        };
-      }
+        if (!acc[key]) {
+          acc[key] = {
+            rentang: key,
+            total: 0,
+            transaksi: 0,
+          };
+        }
 
-      acc[key].total += Number(item.jumlah || 0);
-      acc[key].transaksi += 1;
+        acc[key].total += Number(item.jumlah || 0);
+        acc[key].transaksi += 1;
 
-      return acc;
-    }, {}),
+        return acc;
+      },
+      {},
+    ),
   );
 
   const totalPemasukan = filteredRekap.reduce(
