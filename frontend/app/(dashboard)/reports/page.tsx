@@ -119,7 +119,7 @@ const statCards = [
   },
   {
     icon: <HppIcon />,
-    label: "TOTAL HPP",
+    label: "Laba Rugi",
     value: "Rp 1.890.000",
     change: "-2.1%",
   },
