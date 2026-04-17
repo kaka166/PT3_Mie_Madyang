@@ -9,7 +9,7 @@ type StatCardProps = {
 
 function StatCard({ title, value, change, subValue }: StatCardProps) {
   return (
-    <div className="bg-white rounded-xl p-5 md:p-8 shadow-sm relative overflow-hidden flex flex-col justify-between">
+    <div className=" bg-white rounded-xl p-5 md:p-8 shadow-sm relative overflow-hidden flex flex-col justify-between">
       <div className="flex justify-between items-start mb-4">
         <span className="text-[10px] md:text-xs font-medium uppercase tracking-widest text-neutral-500">
           {title}
@@ -31,9 +31,10 @@ function StatCard({ title, value, change, subValue }: StatCardProps) {
   );
 }
 
+// INI MAINNYA DISINI
 export default function AdminPage() {
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8">
+    <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24 md:p-8 max-w-1xl mx-auto space-y-6 md:space-y-8">
       {/* HEADER */}
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl md:text-3xl font-bold text-neutral-900">Business Performance</h1>

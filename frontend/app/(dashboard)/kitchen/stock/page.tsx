@@ -16,11 +16,10 @@ import {
 
 import Penyesuaian from "./_components/penyesuaian";
 import Restock from "./_components/restock";
-import Produksi from "./_components/produksi";
 
 import { getStockList, getFullHistory } from "@/services/stockService";
 
-const filterOptions = ["Penyesuaian", "Restock", "Produksi"];
+const filterOptions = ["Penyesuaian", "Restock"];
 
 const PaginationBar = () => (
   <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500">
@@ -255,10 +254,6 @@ export default function StockBahanPage() {
         isOpen={isRestockOpen}
         onClose={() => setIsRestockOpen(false)}
         onSuccess={fetchData}
-      />
-      <Produksi
-        isOpen={isProduksiOpen}
-        onClose={() => setIsProduksiOpen(false)}
       />
     </div>
   );
