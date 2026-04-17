@@ -403,8 +403,8 @@ export default function LaporanPemasukan() {
         {/* ── Rekap Table ── */}
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
           {/* table header bar */}
-          <div className="px-6 py-4 flex justify-between items-center border-b border-neutral-100">
-            <h2 className="text-base font-bold text-neutral-800">Rekap</h2>
+          <div className="p-6 flex flex-wrap justify-between items-center border-b border-neutral-100 relative z-20">
+            <h2 className="text-xl font-bold text-neutral-900">Ringkasan Pemasukan</h2>
             <FilterDropdown value={rekapFilter} onChange={setRekapFilter} />
           </div>
 
@@ -447,10 +447,8 @@ export default function LaporanPemasukan() {
         {/* ── Riwayat Pemasukan Table ── */}
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
           {/* table header bar */}
-          <div className="px-6 py-4 flex flex-wrap gap-3 justify-between items-center border-b border-neutral-100">
-            <h2 className="text-base font-bold text-neutral-800">
-              Riwayat Pemasukan
-            </h2>
+          <div className="p-6 flex flex-wrap justify-between items-center border-b border-neutral-100 relative z-20">
+            <h2 className="text-xl font-bold text-neutral-900">Detail Pemasukan</h2>
             <div className="flex flex-wrap gap-2 items-center">
               {/* Calendar date picker */}
               <CalendarPicker value={selectedDate} onChange={setSelectedDate} />
