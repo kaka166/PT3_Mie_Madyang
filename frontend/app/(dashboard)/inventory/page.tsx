@@ -306,7 +306,7 @@ export default function InventoryPage() {
                   key={item.id}
                   className="hover:bg-zinc-50/30 transition-colors group"
                 >
-                  <td className="px-6 py-4 font-bold text-neutral-700">
+                  <td className="px-6 py-4 text-neutral-700">
                     {item.nama_menu}
                   </td>
                   <td className="px-6 py-4">
@@ -314,7 +314,7 @@ export default function InventoryPage() {
                       {item.kategori?.nama_kategori}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-black text-neutral-800">
+                  <td className="px-6 py-4 text-neutral-800">
                     {new Intl.NumberFormat("id-ID", {
                       style: "currency",
                       currency: "IDR",
