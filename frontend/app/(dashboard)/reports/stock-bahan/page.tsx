@@ -97,19 +97,22 @@ export default function StockBahanPage() {
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-center">
-            <thead className="text-gray-500 border-b">
-              <tr>
-                <th className="py-3 px-4 font-medium text-left">ID</th>
-                <th className="py-3 px-4 font-medium text-left">Nama Barang</th>
-                <th className="py-3 px-4 font-medium">Jumlah Stock</th>
-                <th className="py-3 px-4 font-medium">Status</th>
+            <thead>
+              <tr className="text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-neutral-100">
+                <th className="py-3 px-4 text-left">ID</th>
+                <th className="py-3 px-4 text-left">Nama Barang</th>
+                <th className="py-3 px-4">Jumlah Stock</th>
+                <th className="py-3 px-4">Status</th>
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((item) => (
+              {paginatedData.map((item, index) => (
                 <tr
                   key={item.id}
-                  className="border-b last:border-0 hover:bg-gray-50">
+                  className={`border border-neutral-200 transition-colors ${
+                    index % 2 === 0 ? "bg-white" : "bg-gray-100"
+                  }`}
+                >
                   <td className="py-3 px-4 text-left">{item.id}</td>
                   <td className="py-3 px-4 text-left">{item.nama}</td>
                   <td className="py-3 px-4">
@@ -124,7 +127,8 @@ export default function StockBahanPage() {
                         item.status === "Aman"
                           ? "bg-green-200 text-green-700"
                           : "bg-red-500 text-white"
-                      }`}>
+                      }`}
+                    >
                       {item.status}
                     </span>
                   </td>
@@ -148,7 +152,8 @@ export default function StockBahanPage() {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="bg-gray-100 px-2 py-1 rounded text-sm focus:outline-none">
+              className="bg-gray-100 px-2 py-1 rounded text-sm focus:outline-none"
+            >
               {pageSizeOptions.map((size) => (
                 <option key={size} value={size}>
                   {size}
@@ -159,7 +164,8 @@ export default function StockBahanPage() {
           <div className="flex gap-1">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+              className="w-8 h-8 flex items-center justify-center rounded bg-gray-100"
+            >
               <ChevronLeft size={16} />
             </button>
 
@@ -171,7 +177,8 @@ export default function StockBahanPage() {
                   currentPage === i + 1
                     ? "bg-red-400 text-white"
                     : "bg-gray-100"
-                }`}>
+                }`}
+              >
                 {i + 1}
               </button>
             ))}
@@ -180,7 +187,8 @@ export default function StockBahanPage() {
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
-              className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+              className="w-8 h-8 flex items-center justify-center rounded bg-gray-100"
+            >
               <ChevronRight size={16} />
             </button>
           </div>

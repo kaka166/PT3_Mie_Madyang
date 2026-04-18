@@ -323,7 +323,7 @@ export default function KitchenDashboardPage() {
         {/* Tabel */}
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-center">
-            <thead className="text-gray-400 border-b bg-white">
+            <thead className="text-gray-400 border border-neutral-100 bg-white">
               <tr>
                 <th className="py-4 px-4 font-medium">Order ID</th>
                 <th className="py-4 px-4 font-medium">Waktu</th>
@@ -339,7 +339,7 @@ export default function KitchenDashboardPage() {
               {currentData.map((item, index) => (
                 <tr
                   key={index}
-                  className="border-b last:border-0 even:bg-gray-50 hover:bg-gray-100 transition-colors">
+                  className="border border-neutral-100 even:bg-gray-50 hover:bg-gray-100 transition-colors">
                   <td className="py-4 px-4 font-bold text-gray-800">
                     {item.id}
                   </td>

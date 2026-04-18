@@ -46,7 +46,8 @@ const PaginationBar = ({
             setItemsPerPage(Number(e.target.value));
             setCurrentPage(1);
           }}
-          className="bg-gray-100 px-2 py-1 rounded text-sm">
+          className="bg-gray-100 px-2 py-1 rounded text-sm"
+        >
           {[10, 20, 30, 40].map((n) => (
             <option key={n} value={n}>
               {n}
@@ -59,7 +60,8 @@ const PaginationBar = ({
       <div className="flex gap-1">
         <button
           onClick={() => setCurrentPage((p: number) => Math.max(p - 1, 1))}
-          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100"
+        >
           ‹
         </button>
 
@@ -69,7 +71,8 @@ const PaginationBar = ({
             onClick={() => setCurrentPage(i + 1)}
             className={`w-8 h-8 flex items-center justify-center rounded ${
               currentPage === i + 1 ? "bg-red-400 text-white" : "bg-gray-100"
-            }`}>
+            }`}
+          >
             {i + 1}
           </button>
         ))}
@@ -78,7 +81,8 @@ const PaginationBar = ({
           onClick={() =>
             setCurrentPage((p: number) => Math.min(p + 1, totalPages || 1))
           }
-          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100"
+        >
           ›
         </button>
       </div>
@@ -180,7 +184,7 @@ export default function StockBahanPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-center">
-            <thead className="text-gray-500 border-b">
+            <thead className="text-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
               <tr>
                 <th className="py-3 px-4 text-left">ID</th>
                 <th className="py-3 px-4 text-left">Nama Barang</th>
@@ -190,8 +194,11 @@ export default function StockBahanPage() {
             </thead>
 
             <tbody>
-              {paginatedStock.map((item) => (
-                <tr key={item.id} className="border-b hover:bg-gray-50">
+              {(paginatedRiwayat || []).map((item, i) => (
+                <tr
+                  key={`${item.nama}-${i}`}
+                  className={i % 2 === 0 ? "bg-white" : "bg-gray-100"}
+                >
                   <td className="py-3 px-4 text-left">{item.id}</td>
                   <td className="py-3 px-4 text-left">{item.nama}</td>
                   <td className="py-3 px-4">
@@ -206,7 +213,8 @@ export default function StockBahanPage() {
                         item.status === "Aman"
                           ? "bg-green-200 text-green-700"
                           : "bg-red-500 text-white"
-                      }`}>
+                      }`}
+                    >
                       {item.status}
                     </span>
                   </td>
@@ -229,13 +237,15 @@ export default function StockBahanPage() {
         <div className="flex gap-3">
           <button
             onClick={() => setIsRestockOpen(true)}
-            className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2">
+            className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2"
+          >
             <PackagePlus size={16} /> Laporkan Restock
           </button>
 
           <button
             onClick={() => setIsPenyesuaianOpen(true)}
-            className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2">
+            className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2"
+          >
             <Edit size={16} /> Laporkan Penyesuaian
           </button>
         </div>
@@ -244,7 +254,8 @@ export default function StockBahanPage() {
         <div className="relative">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="bg-gray-200 px-4 py-2 rounded-lg flex gap-2">
+            className="bg-gray-200 px-4 py-2 rounded-lg flex gap-2"
+          >
             <Filter size={16} />
             {selectedFilter || "Filter"}
           </button>
@@ -258,7 +269,8 @@ export default function StockBahanPage() {
                     setSelectedFilter(opt);
                     setIsFilterOpen(false);
                   }}
-                  className="block px-4 py-2 text-sm hover:bg-gray-100">
+                  className="block px-4 py-2 text-sm hover:bg-gray-100"
+                >
                   {opt}
                 </button>
               ))}
@@ -276,7 +288,7 @@ export default function StockBahanPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead>
-              <tr className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
+              <tr className="text-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
                 <th className="px-6 py-3">ID</th>
                 <th className="px-6 py-3">Item ID</th>
                 <th className="px-6 py-3">Nama Barang</th>
@@ -292,16 +304,13 @@ export default function StockBahanPage() {
               {(paginatedRiwayat || []).map((item, i) => (
                 <tr
                   key={`${item.nama}-${i}`}
-                  className={i % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
-                  <td className="px-6 py-4 font-semibold text-neutral-700">
-                    {item.id}
-                  </td>
+                  className={i % 2 === 0 ? "bg-white" : "bg-gray-100"}
+                >
+                  <td className="px-6 py-4 text-neutral-700">{item.id}</td>
 
                   <td className="px-6 py-4 text-neutral-600">{item.itemId}</td>
 
-                  <td className="px-6 py-4 font-bold text-neutral-800">
-                    {item.nama}
-                  </td>
+                  <td className="px-6 py-4 text-neutral-700">{item.nama}</td>
 
                   <td className="px-6 py-4">
                     <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">
@@ -311,11 +320,11 @@ export default function StockBahanPage() {
 
                   <td className="px-6 py-4 text-neutral-600">{item.alasan}</td>
 
-                  <td className="px-6 py-4 font-semibold text-neutral-800">
+                  <td className="px-6 py-4 text-neutral-700">
                     {item.kuantiti}
                   </td>
 
-                  <td className="px-6 py-4 text-neutral-500">
+                  <td className="px-6 py-4 text-neutral-700">
                     {new Date(item.waktu).toLocaleString("id-ID")}
                   </td>
 

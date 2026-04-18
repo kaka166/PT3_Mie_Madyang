@@ -553,7 +553,7 @@ export default function LaporanPemasukan() {
             Laporan Penjualan
           </h1>
           <p className="text-sm text-neutral-500 mt-1">
-            Laporan Penjualan Mi Madyang
+            Laporan Pemasukan Mi Madyang
           </p>
         </div>
 
@@ -600,9 +600,9 @@ export default function LaporanPemasukan() {
         {/* ── Rekap Table ── */}
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
           {/* header */}
-          <div className="p-6 flex flex-wrap justify-between items-center border-b border-neutral-100 relative z-20">
+          <div className="p-6 flex flex-wrap justify-between items-center border-b relative z-20">
             <h2 className="text-xl font-bold text-neutral-900">
-              Ringkasan Pemasukan
+              Ringkasan Penjualan
             </h2>
             <FilterDropdown value={rekapFilter} onChange={setRekapFilter} />
           </div>
@@ -624,7 +624,7 @@ export default function LaporanPemasukan() {
                   ) => (
                     <tr
                       key={idx}
-                      className={idx % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
+                      className={idx % 2 === 0 ? "bg-white" : "bg-gray-100"}>
                       <td className="px-6 py-4 text-neutral-600">
                         {row.rentang}
                       </td>
@@ -706,7 +706,7 @@ export default function LaporanPemasukan() {
         {/* ── Riwayat Pemasukan Table ── */}
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-visible">
           {/* table header bar */}
-          <div className="p-6 flex flex-wrap justify-between items-center border-b border-neutral-100 relative z-20">
+          <div className="p-6 flex flex-wrap justify-between items-center border-b  relative z-20">
             <h2 className="text-xl font-bold text-neutral-900">
               Detail Pemasukan
             </h2>
@@ -747,7 +747,7 @@ export default function LaporanPemasukan() {
                 {(paginatedData || []).map((row, idx) => (
                   <tr
                     key={idx}
-                    className={idx % 2 === 0 ? "bg-white" : "bg-neutral-50"}>
+                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-100"}>
                     <td className="px-6 py-4 font-semibold text-neutral-700">
                       {row.no}
                     </td>
