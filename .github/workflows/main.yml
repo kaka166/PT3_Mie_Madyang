@@ -17,7 +17,8 @@ jobs:
           password: ${{ 'farelzy@!VPS' }}
           script: |
             cd /home/relz/kuliah/PT3_Mie_Madyang/backend
-            git pull origin develop
+            git checkout main
+            git pull origin main
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
             php artisan config:cache
