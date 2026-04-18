@@ -93,7 +93,8 @@ function CalendarPicker({
     <div ref={ref} className="relative z-50">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between gap-3 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-48 cursor-pointer">
+        className="flex items-center justify-between gap-3 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-48 cursor-pointer"
+      >
         <div className="flex items-center gap-2">
           <Calendar size={16} className="text-gray-500" />
           <span className="truncate">{displayLabel}</span>
@@ -105,7 +106,8 @@ function CalendarPicker({
               onChange("");
             }}
             className="text-gray-400 hover:text-red-500 transition-colors"
-            title="Hapus Tanggal">
+            title="Hapus Tanggal"
+          >
             <X size={14} />
           </span>
         )}
@@ -116,7 +118,8 @@ function CalendarPicker({
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={prevMonth}
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+              className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+            >
               <ChevronLeft size={16} className="text-gray-600" />
             </button>
             <span className="text-sm font-bold text-gray-700">
@@ -124,7 +127,8 @@ function CalendarPicker({
             </span>
             <button
               onClick={nextMonth}
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
+              className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
+            >
               <ChevronRight size={16} className="text-gray-600" />
             </button>
           </div>
@@ -133,7 +137,8 @@ function CalendarPicker({
             {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
               <div
                 key={d}
-                className="text-center text-[10px] font-bold text-gray-400 py-1">
+                className="text-center text-[10px] font-bold text-gray-400 py-1"
+              >
                 {d}
               </div>
             ))}
@@ -166,7 +171,8 @@ function CalendarPicker({
                     ${isSelected ? "bg-red-500 text-white" : ""}
                     ${isToday && !isSelected ? "border border-red-500 text-red-500" : ""}
                     ${!isSelected && !isToday ? "text-gray-700 hover:bg-gray-100" : ""}
-                  `}>
+                  `}
+                  >
                     {day}
                   </button>
                 );
@@ -236,7 +242,10 @@ export default function KitchenDashboardPage() {
   const totalItems = filteredOrders.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = filteredOrders.slice(startIndex, startIndex + itemsPerPage);
+  const currentData = filteredOrders.slice(
+    startIndex,
+    startIndex + itemsPerPage,
+  );
 
   // --- FUNGSI MODAL ---
   const handleOpenModal = (order: any) => {
@@ -252,18 +261,27 @@ export default function KitchenDashboardPage() {
 
   const handleSimpanStatus = async () => {
     if (!selectedOrder) return;
-    
-    // Mapping status bahasa Indonesia ke format backend yang diharapkan ('cooking' atau 'done')
-    let statusBackend = "";
-    if (modalStatus === "Dimasak") statusBackend = "cooking";
-    else if (modalStatus === "Ready") statusBackend = "done";
-    else statusBackend = modalStatus; 
 
-    if (statusBackend) {
-      await updateOrderStatus(Number(selectedOrder.id.replace("#", "")), statusBackend);
-      fetchOrders();
+    // Deklarasikan tipe secara eksplisit sesuai yang diminta backend
+    let statusBackend: "cooking" | "done" | "pending";
+
+    // Mapping status dari bahasa Indonesia ke format backend
+    if (modalStatus === "Dimasak") {
+      statusBackend = "cooking";
+    } else if (modalStatus === "Ready") {
+      statusBackend = "done";
+    } else {
+      // Jika statusnya "Antri" atau belum diubah, kita jadikan "pending"
+      statusBackend = "pending";
     }
-    
+
+    // Eksekusi fungsi update
+    await updateOrderStatus(
+      Number(selectedOrder.id.replace("#", "")),
+      statusBackend,
+    );
+
+    fetchOrders();
     handleCloseModal();
   };
 
@@ -322,7 +340,8 @@ export default function KitchenDashboardPage() {
               {currentData.map((item, index) => (
                 <tr
                   key={index}
-                  className="border-b last:border-0 even:bg-gray-50 hover:bg-gray-100 transition-colors">
+                  className="border-b last:border-0 even:bg-gray-50 hover:bg-gray-100 transition-colors"
+                >
                   <td className="py-4 px-4 font-bold text-gray-800">
                     {item.id}
                   </td>
@@ -347,13 +366,14 @@ export default function KitchenDashboardPage() {
                   </td>
                   <td className="py-4 px-4">
                     <span
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold inline-block w-24 text-center ${getStatusBadge(item.status)}`}>
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold inline-block w-24 text-center ${getStatusBadge(item.status)}`}
+                    >
                       {item.status}
                     </span>
                   </td>
                   <td className="py-4 px-4 text-gray-500 flex justify-center items-center h-full">
                     {/* BUTTON AKSI DIGANTI MENJADI TITIK TIGA */}
-                    <button 
+                    <button
                       onClick={() => handleOpenModal(item)}
                       className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-gray-800"
                     >
@@ -380,7 +400,8 @@ export default function KitchenDashboardPage() {
                 setItemsPerPage(Number(e.target.value));
                 setCurrentPage(1);
               }}
-              className="bg-gray-100 px-2 py-1 rounded text-sm focus:outline-none">
+              className="bg-gray-100 px-2 py-1 rounded text-sm focus:outline-none"
+            >
               <option value={10}>10</option>
               <option value={20}>20</option>
               <option value={30}>30</option>
@@ -395,7 +416,8 @@ export default function KitchenDashboardPage() {
                 currentPage === 1
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-red-500 hover:bg-red-600 text-white"
-              }`}>
+              }`}
+            >
               <ChevronLeft size={16} />
             </button>
 
@@ -409,7 +431,8 @@ export default function KitchenDashboardPage() {
                     currentPage === page
                       ? "bg-red-500 text-white shadow-sm"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                  }`}>
+                  }`}
+                >
                   {page}
                 </button>
               );
@@ -424,7 +447,8 @@ export default function KitchenDashboardPage() {
                 currentPage === totalPages || totalPages === 0
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-red-500 hover:bg-red-600 text-white"
-              }`}>
+              }`}
+            >
               <ChevronRight size={16} />
             </button>
           </div>
@@ -435,23 +459,30 @@ export default function KitchenDashboardPage() {
       {selectedOrder && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
           <div className="bg-white rounded-2xl shadow-2xl flex w-full max-w-4xl h-[550px] overflow-hidden relative">
-            
             {/* PANEL KIRI - Info Pesanan */}
             <div className="w-[35%] bg-white p-8 flex flex-col border-r border-gray-200">
               <h2 className="text-2xl font-bold mb-6 text-black">Pesanan</h2>
-              
+
               <div className="bg-[#f0f0f0] rounded-xl p-5 mb-8">
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 font-medium">ID</p>
-                  <p className="text-xl font-bold text-black">{selectedOrder.id}</p>
+                  <p className="text-xl font-bold text-black">
+                    {selectedOrder.id}
+                  </p>
                 </div>
                 <div className="mb-4">
                   <p className="text-sm text-gray-500 font-medium">Kondisi:</p>
-                  <p className="font-semibold text-black">{selectedOrder.kondisi}</p>
+                  <p className="font-semibold text-black">
+                    {selectedOrder.kondisi}
+                  </p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 font-medium">Total Item:</p>
-                  <p className="font-semibold text-black">{selectedOrder.items}</p>
+                  <p className="text-sm text-gray-500 font-medium">
+                    Total Item:
+                  </p>
+                  <p className="font-semibold text-black">
+                    {selectedOrder.items}
+                  </p>
                 </div>
               </div>
 
@@ -488,7 +519,7 @@ export default function KitchenDashboardPage() {
               >
                 <X size={20} strokeWidth={3} />
               </button>
-              
+
               <h2 className="text-2xl font-bold mb-6 text-black">Item</h2>
 
               <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
@@ -496,17 +527,25 @@ export default function KitchenDashboardPage() {
                   saya menggunakan dummy data yang di-fallback ke `selectedOrder.details`. 
                   Pastikan API backend kamu mengembalikan array `details` jika ingin itemnya dinamis! 
                 */}
-                {(selectedOrder.details || [
-                  { nama: "Mie Madyang Original", qty: 3, note: "" },
-                  { nama: "Pangsit", qty: 3, note: "" },
-                  { nama: "Bakso", qty: 3, note: "" },
-                ]).map((detail: any, idx: number) => (
+                {(
+                  selectedOrder.details || [
+                    { nama: "Mie Madyang Original", qty: 3, note: "" },
+                    { nama: "Pangsit", qty: 3, note: "" },
+                    { nama: "Bakso", qty: 3, note: "" },
+                  ]
+                ).map((detail: any, idx: number) => (
                   <div key={idx} className="bg-white p-5 rounded-2xl shadow-sm">
                     <div className="flex justify-between items-center mb-3">
-                      <h4 className="text-lg font-bold text-black">{detail.nama}</h4>
-                      <span className="text-[#e11d48] font-bold text-lg">x {detail.qty}</span>
+                      <h4 className="text-lg font-bold text-black">
+                        {detail.nama}
+                      </h4>
+                      <span className="text-[#e11d48] font-bold text-lg">
+                        x {detail.qty}
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-400 font-medium">Note: {detail.note}</p>
+                    <p className="text-sm text-gray-400 font-medium">
+                      Note: {detail.note}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -520,11 +559,9 @@ export default function KitchenDashboardPage() {
                 </button>
               </div>
             </div>
-            
           </div>
         </div>
       )}
-
     </div>
   );
 }
