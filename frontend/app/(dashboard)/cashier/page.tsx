@@ -41,7 +41,10 @@ export default function POSPage() {
 
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
   const [closingCash, setClosingCash] = useState("");
-  const [sessionResult, setSessionResult] = useState<any>(null);
+  const [sessionResult, setSessionResult] = useState<Record<
+    string,
+    any
+  > | null>(null);
 
   const [sessionActive, setSessionActive] = useState(false);
   const [openingCash, setOpeningCash] = useState("");
@@ -58,8 +61,12 @@ export default function POSPage() {
       await startSession(cash);
       setSessionActive(true);
       alert("Sesi dimulai!");
-    } catch (err: any) {
-      alert(err.message || "Gagal mulai sesi");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("Gagal memulai sesi");
+      }
     }
   };
 
@@ -79,12 +86,16 @@ export default function POSPage() {
       const res = await endSession(cash);
       const data = res.data ?? res;
 
-      setSessionResult(data); // 🔥 simpan hasil
+      setSessionResult(data);
       setShowEndSessionModal(false);
       setSessionActive(false);
       setClosingCash("");
-    } catch (err: any) {
-      alert(err.message || "Gagal end session");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(err.message);
+      } else {
+        alert("Gagal mengakhiri sesi");
+      }
     }
   };
 

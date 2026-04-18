@@ -32,12 +32,54 @@ type Pengeluaran = {
 const getPengeluaran = async (): Promise<Pengeluaran[]> => {
   // Dummy data untuk sementara agar UI bisa di-test
   return [
-    { id: "#22398", nama: "Terigu", kategori: "Bahan Baku", pembuat: "Kevin", waktu: "2026-02-14T18:22:32", jumlah: 60000 },
-    { id: "#22399", nama: "Listrik Bulan Februari", kategori: "Operasional", pembuat: "Kevin", waktu: "2026-02-15T10:00:00", jumlah: 500000 },
-    { id: "#22400", nama: "Dada Ayam", kategori: "Bahan Baku", pembuat: "Kevin", waktu: "2026-02-16T08:30:00", jumlah: 60000 },
-    { id: "#22401", nama: "Plastik & Kardus", kategori: "Packaging", pembuat: "Kevin", waktu: "2026-02-16T09:15:00", jumlah: 120000 },
-    { id: "#22402", nama: "Sayur Cesim", kategori: "Bahan Baku", pembuat: "Kevin", waktu: "2026-02-17T07:45:00", jumlah: 60000 },
-    { id: "#22403", nama: "Minyak Goreng", kategori: "Bahan Baku", pembuat: "Kevin", waktu: "2026-02-18T18:22:32", jumlah: 60000 },
+    {
+      id: "#22398",
+      nama: "Terigu",
+      kategori: "Bahan Baku",
+      pembuat: "Kevin",
+      waktu: "2026-02-14T18:22:32",
+      jumlah: 60000,
+    },
+    {
+      id: "#22399",
+      nama: "Listrik Bulan Februari",
+      kategori: "Operasional",
+      pembuat: "Kevin",
+      waktu: "2026-02-15T10:00:00",
+      jumlah: 500000,
+    },
+    {
+      id: "#22400",
+      nama: "Dada Ayam",
+      kategori: "Bahan Baku",
+      pembuat: "Kevin",
+      waktu: "2026-02-16T08:30:00",
+      jumlah: 60000,
+    },
+    {
+      id: "#22401",
+      nama: "Plastik & Kardus",
+      kategori: "Packaging",
+      pembuat: "Kevin",
+      waktu: "2026-02-16T09:15:00",
+      jumlah: 120000,
+    },
+    {
+      id: "#22402",
+      nama: "Sayur Cesim",
+      kategori: "Bahan Baku",
+      pembuat: "Kevin",
+      waktu: "2026-02-17T07:45:00",
+      jumlah: 60000,
+    },
+    {
+      id: "#22403",
+      nama: "Minyak Goreng",
+      kategori: "Bahan Baku",
+      pembuat: "Kevin",
+      waktu: "2026-02-18T18:22:32",
+      jumlah: 60000,
+    },
   ];
 };
 
@@ -358,7 +400,7 @@ export default function LaporanPengeluaran() {
   }, []);
 
   useEffect(() => {
-    setCurrentPage(1);
+    setCurrentPage((prev) => (prev !== 1 ? 1 : prev));
   }, [dateRange, search, rekapFilter]);
 
   // ── FILTERING DATA UNTUK TABEL DETAIL PENGELUARAN ──
@@ -368,8 +410,8 @@ export default function LaporanPengeluaran() {
     const date = new Date(item.waktu);
     const now = new Date();
 
-    const matchSearch = 
-      item.id?.toLowerCase().includes(search.toLowerCase()) || 
+    const matchSearch =
+      item.id?.toLowerCase().includes(search.toLowerCase()) ||
       item.nama?.toLowerCase().includes(search.toLowerCase());
 
     const matchDate =
@@ -453,7 +495,10 @@ export default function LaporanPengeluaran() {
         key = `${start.toLocaleDateString("id-ID")} - ${end.toLocaleDateString("id-ID")}`;
       }
       if (rekapFilter === "Bulan") {
-        key = date.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+        key = date.toLocaleDateString("id-ID", {
+          month: "long",
+          year: "numeric",
+        });
       }
       if (rekapFilter === "Tahun") {
         key = date.getFullYear().toString();
@@ -470,7 +515,10 @@ export default function LaporanPengeluaran() {
     }, {}),
   );
 
-  const totalPengeluaran = filteredRekap.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
+  const totalPengeluaran = filteredRekap.reduce(
+    (acc, item) => acc + Number(item.jumlah || 0),
+    0,
+  );
   const totalTransaksi = filteredRekap.length;
   const rataRata = totalTransaksi > 0 ? totalPengeluaran / totalTransaksi : 0;
 
@@ -478,14 +526,16 @@ export default function LaporanPengeluaran() {
   const [rekapLimit, setRekapLimit] = useState(10);
   const totalRekap = groupedRekap.length;
   const startRekap = (rekapPage - 1) * rekapLimit;
-  const paginatedRekap = groupedRekap.slice(startRekap, startRekap + rekapLimit);
+  const paginatedRekap = groupedRekap.slice(
+    startRekap,
+    startRekap + rekapLimit,
+  );
   const totalRekapPages = Math.ceil(totalRekap / rekapLimit);
 
   // ── RENDER COMPONENT ──
   return (
     <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24">
       <div className="max-w-1xl mx-auto space-y-6">
-        
         {/* ── Header ── */}
         <div>
           <h1 className="text-3xl font-bold text-[#8B1A1A]">
@@ -711,7 +761,7 @@ export default function LaporanPengeluaran() {
               </tbody>
             </table>
           </div>
-          
+
           {/* pagination detail */}
           <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500 bg-white">
             <div className="flex items-center gap-3">
@@ -766,7 +816,6 @@ export default function LaporanPengeluaran() {
             </div>
           </div>
         </div>
-
       </div>
     </div>
   );
