@@ -2,7 +2,7 @@ name: Deploy Ma-Dyang Backend
 
 on:
   push:
-    branches: [ develop ] # CI/CD jalan setiap kamu push ke branch main
+    branches: [ main ] # CI/CD jalan setiap kamu push ke branch main
 
 jobs:
   deploy:
