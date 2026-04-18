@@ -399,10 +399,6 @@ export default function LaporanPengeluaran() {
     return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    setCurrentPage((prev) => (prev !== 1 ? 1 : prev));
-  }, [dateRange, search, rekapFilter]);
-
   // ── FILTERING DATA UNTUK TABEL DETAIL PENGELUARAN ──
   const filteredRiwayat = riwayatData.filter((item) => {
     if (!item.waktu) return true;
@@ -483,36 +479,45 @@ export default function LaporanPengeluaran() {
   });
 
   const groupedRekap = Object.values(
-    filteredRekap.reduce((acc: Record<string, any>, item: Pengeluaran) => {
-      const date = new Date(item.waktu);
-      let key = "";
+    filteredRekap.reduce(
+      (
+        acc: Record<
+          string,
+          { rentang: string; total: number; transaksi: number }
+        >,
+        item: Pengeluaran,
+      ) => {
+        const date = new Date(item.waktu);
+        let key = "";
 
-      if (rekapFilter === "Minggu") {
-        const start = new Date(date);
-        start.setDate(date.getDate() - date.getDay());
-        const end = new Date(start);
-        end.setDate(start.getDate() + 6);
-        key = `${start.toLocaleDateString("id-ID")} - ${end.toLocaleDateString("id-ID")}`;
-      }
-      if (rekapFilter === "Bulan") {
-        key = date.toLocaleDateString("id-ID", {
-          month: "long",
-          year: "numeric",
-        });
-      }
-      if (rekapFilter === "Tahun") {
-        key = date.getFullYear().toString();
-      }
+        if (rekapFilter === "Minggu") {
+          const start = new Date(date);
+          start.setDate(date.getDate() - date.getDay());
+          const end = new Date(start);
+          end.setDate(start.getDate() + 6);
+          key = `${start.toLocaleDateString("id-ID")} - ${end.toLocaleDateString("id-ID")}`;
+        }
+        if (rekapFilter === "Bulan") {
+          key = date.toLocaleDateString("id-ID", {
+            month: "long",
+            year: "numeric",
+          });
+        }
+        if (rekapFilter === "Tahun") {
+          key = date.getFullYear().toString();
+        }
 
-      if (!acc[key]) {
-        acc[key] = { rentang: key, total: 0, transaksi: 0 };
-      }
+        if (!acc[key]) {
+          acc[key] = { rentang: key, total: 0, transaksi: 0 };
+        }
 
-      acc[key].total += Number(item.jumlah || 0);
-      acc[key].transaksi += 1;
+        acc[key].total += Number(item.jumlah || 0);
+        acc[key].transaksi += 1;
 
-      return acc;
-    }, {}),
+        return acc;
+      },
+      {},
+    ),
   );
 
   const totalPengeluaran = filteredRekap.reduce(
@@ -593,7 +598,13 @@ export default function LaporanPengeluaran() {
             <h2 className="text-xl font-bold text-neutral-900">
               Ringkasan Pengeluaran
             </h2>
-            <FilterDropdown value={rekapFilter} onChange={setRekapFilter} />
+            <FilterDropdown
+              value={rekapFilter}
+              onChange={(v) => {
+                setRekapFilter(v);
+                setCurrentPage(1);
+              }}
+            />
           </div>
 
           <div className="overflow-x-auto">
@@ -698,7 +709,13 @@ export default function LaporanPengeluaran() {
               Detail Pengeluaran
             </h2>
             <div className="flex flex-wrap gap-2 items-center">
-              <CalendarPicker value={dateRange} onChange={setDateRange} />
+              <CalendarPicker
+                value={dateRange}
+                onChange={(v) => {
+                  setDateRange(v);
+                  setCurrentPage(1);
+                }}
+              />
 
               <div className="relative">
                 <Search
@@ -709,7 +726,10 @@ export default function LaporanPengeluaran() {
                   type="text"
                   placeholder="Cari transaksi..."
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => {
+                    setSearch(e.target.value);
+                    setCurrentPage(1);
+                  }}
                   className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200"
                 />
               </div>

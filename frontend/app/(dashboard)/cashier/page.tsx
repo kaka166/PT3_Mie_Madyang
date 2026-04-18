@@ -39,12 +39,19 @@ export default function POSPage() {
   const [taxPercent, setTaxPercent] = useState(0);
   const [showTaxModal, setShowTaxModal] = useState(false);
 
+  type SessionResult = {
+    opening_cash: number;
+    total_pemasukan: number;
+    expected_cash: number;
+    closing_cash: number;
+    selisih: number;
+  };
+
   const [showEndSessionModal, setShowEndSessionModal] = useState(false);
   const [closingCash, setClosingCash] = useState("");
-  const [sessionResult, setSessionResult] = useState<Record<
-    string,
-    any
-  > | null>(null);
+  const [sessionResult, setSessionResult] = useState<SessionResult | null>(
+    null,
+  );
 
   const [sessionActive, setSessionActive] = useState(false);
   const [openingCash, setOpeningCash] = useState("");
