@@ -8,12 +8,11 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\TaxSettingController;
 use App\Http\Controllers\Api\PenjualanController;
 use App\Http\Controllers\Api\StockController;
+use App\Http\Controllers\Api\SessionController;
 
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-
-
 
 Route::middleware('auth:sanctum')->group(function () {
     
@@ -48,14 +47,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/orders', [PenjualanController::class, 'store']);
         Route::patch('/orders/{id}/status', [PenjualanController::class, 'updateStatus']);
 
-        //kelola stock
+        //kelola stock bahan mentah
         Route::get('/bahan', [StockController::class, 'bahan']);
         Route::get('/stok-history/{bahan_id}', [StockController::class, 'history']);
         Route::post('/stok-movement', [StockController::class, 'store']);
         Route::post('/produksi', [StockController::class, 'produksi']);
         Route::get('/stock-list', [StockController::class, 'stockList']);
         Route::get('/stock-history', [StockController::class, 'stockHistory']);
-        
+
+        //laporan pemasukan
+        Route::get('/pemasukan', [PenjualanController::class, 'getPemasukan']);
+
+        //kelola stok menu
+        Route::patch('/menu/{id}/stock', [MenuController::class, 'updateStock']);
+
+        //kelola sesi
+        Route::post('/session/start', [SessionController::class, 'startSession']);
+        Route::post('/session/end', [SessionController::class, 'endSession']);
+        Route::get('/session/active', [SessionController::class, 'active']);
     });
 
 });

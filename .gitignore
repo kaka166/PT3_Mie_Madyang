@@ -24,6 +24,8 @@ backend/yarn-error.log
 backend/.phpunit.result.cache
 backend/composer.lock
 backend/pakcage-lock.json
+backend/bootstrap/app.php
+backend/config/cors.php
 
 
 

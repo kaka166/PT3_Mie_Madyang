@@ -20,7 +20,9 @@ class StockController extends Controller
                 'bahan.id',
                 'bahan.nama_bahan as nama',
                 'bahan.satuan',
-                'stok_bahan.qty'
+                'stok_bahan.qty',
+                'bahan.stock_limit',
+                'bahan.harga'
             )
             ->get()
             ->map(function ($item) {
@@ -28,7 +30,9 @@ class StockController extends Controller
                     'id' => $item->id,
                     'nama' => $item->nama,
                     'satuan' => $item->satuan,
-                    'qty' => $item->qty ?? 0
+                    'qty' => $item->qty ?? 0,
+                    'stock_limit' => $item->stock_limit ?? 5,
+                    'harga' => $item->harga ?? 0,
                 ];
             });
 
@@ -60,10 +64,25 @@ class StockController extends Controller
         if (!$bahanId) {
             $bahan = \App\Models\Bahan::create([
                 'nama_bahan' => $request->nama,
-                'satuan' => $request->satuan ?? 'Kg'
+                'satuan' => $request->satuan ?? 'Kg',
+                'stock_limit' => $request->stock_limit ?? 5,
+                'harga' => $request->harga ?? 0,
             ]);
 
             $bahanId = $bahan->id;
+        }
+
+        // ✅ TAMBAHAN DI SINI (WAJIB)
+        if ($bahanId && $request->stock_limit !== null) {
+            \App\Models\Bahan::where('id', $bahanId)->update([
+                'stock_limit' => $request->stock_limit
+            ]);
+        }
+
+        if ($bahanId && $request->harga !== null) {
+            \App\Models\Bahan::where('id', $bahanId)->update([
+                'harga' => $request->harga
+            ]);
         }
 
         // ==========================
@@ -107,9 +126,6 @@ class StockController extends Controller
 
         $stok->save();
 
-        // ==========================
-        // RESPONSE
-        // ==========================
         return response()->json([
             'message' => 'Berhasil disimpan',
             'data' => $movement
@@ -181,7 +197,8 @@ class StockController extends Controller
                 'bahan.id',
                 'bahan.nama_bahan as nama',
                 'bahan.satuan',
-                'stok_bahan.qty'
+                'stok_bahan.qty',
+                'bahan.stock_limit'
             )
             ->get()
             ->map(function ($item) {
@@ -192,7 +209,8 @@ class StockController extends Controller
                     'id' => $item->id,
                     'nama' => $item->nama,
                     'jumlah' => $qty . ' ' . $item->satuan,
-                    'status' => $qty <= 5 ? 'Kritis' : 'Aman',
+                    'stock_limit' => $item->stock_limit ?? 5,
+                    'status' => $qty <= ($item->stock_limit ?? 5) ? 'Kritis' : 'Aman',
                 ];
             });
 

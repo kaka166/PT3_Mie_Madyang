@@ -25,6 +25,7 @@ export type OrderItemPayload = {
 export type CreateOrderPayload = {
   customer_name?: string;
   order_type: string;
+  metode_pembayaran: "QRIS" | "Tunai";
   items: OrderItemPayload[];
 };
 
@@ -101,5 +102,20 @@ export const updateOrderStatus = async (
   } catch (error) {
     console.error("Error updateStatus:", error);
     return false;
+  }
+};
+
+export const getPemasukan = async () => {
+  try {
+    const res = await fetch(`${API_BASE_URL}/pemasukan`, {
+      headers: getHeaders(),
+    });
+
+    if (!res.ok) throw new Error("Gagal ambil pemasukan");
+
+    return await res.json();
+  } catch (err) {
+    console.error(err);
+    return [];
   }
 };
