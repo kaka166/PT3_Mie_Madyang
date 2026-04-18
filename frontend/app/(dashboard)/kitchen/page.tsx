@@ -72,7 +72,6 @@ function CalendarPicker({
     });
 
   const selectDay = (day: number) => {
-    // Penyesuaian agar zona waktu lokal tidak membuat tanggal mundur 1 hari saat di-parse ke ISO
     const d = new Date(viewDate.year, viewDate.month, day);
     const offset = d.getTimezoneOffset();
     const adjustedDate = new Date(d.getTime() - offset * 60 * 1000);
@@ -114,7 +113,6 @@ function CalendarPicker({
 
       {open && (
         <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-gray-200 shadow-xl p-4">
-          {/* Nav */}
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={prevMonth}
@@ -131,7 +129,6 @@ function CalendarPicker({
             </button>
           </div>
 
-          {/* Day labels */}
           <div className="grid grid-cols-7 mb-1">
             {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
               <div
@@ -142,7 +139,6 @@ function CalendarPicker({
             ))}
           </div>
 
-          {/* Days grid */}
           <div className="grid grid-cols-7 gap-y-1">
             {Array(firstDay)
               .fill(null)
@@ -183,7 +179,6 @@ function CalendarPicker({
 }
 // --- END KOMPONEN KUSTOM ---
 
-// Fungsi bantuan untuk menentukan warna badge status
 const getStatusBadge = (status: string) => {
   switch (status) {
     case "Antri":
@@ -203,6 +198,10 @@ export default function KitchenDashboardPage() {
   const [searchId, setSearchId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+
+  // --- STATE UNTUK MODAL ---
+  const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
+  const [modalStatus, setModalStatus] = useState<string>("");
 
   const fetchOrders = async () => {
     const data = await getOrders();
@@ -227,25 +226,46 @@ export default function KitchenDashboardPage() {
     .sort((a, b) => new Date(b.waktu).getTime() - new Date(a.waktu).getTime())
     .filter((item) => {
       const orderDate = new Date(item.waktu).toISOString().split("T")[0];
-
       const matchDate = selectedDate ? orderDate === selectedDate : true;
-
       const matchSearch = searchId
         ? item.id.replace("#", "").includes(searchId)
         : true;
-
       return matchDate && matchSearch;
     });
 
   const totalItems = filteredOrders.length;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
-
   const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentData = filteredOrders.slice(startIndex, startIndex + itemsPerPage);
 
-  const currentData = filteredOrders.slice(
-    startIndex,
-    startIndex + itemsPerPage,
-  );
+  // --- FUNGSI MODAL ---
+  const handleOpenModal = (order: any) => {
+    setSelectedOrder(order);
+    // Atur default status di modal sesuai dengan status order saat ini
+    setModalStatus(order.status === "Antri" ? "Dimasak" : order.status);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedOrder(null);
+    setModalStatus("");
+  };
+
+  const handleSimpanStatus = async () => {
+    if (!selectedOrder) return;
+    
+    // Mapping status bahasa Indonesia ke format backend yang diharapkan ('cooking' atau 'done')
+    let statusBackend = "";
+    if (modalStatus === "Dimasak") statusBackend = "cooking";
+    else if (modalStatus === "Ready") statusBackend = "done";
+    else statusBackend = modalStatus; 
+
+    if (statusBackend) {
+      await updateOrderStatus(Number(selectedOrder.id.replace("#", "")), statusBackend);
+      fetchOrders();
+    }
+    
+    handleCloseModal();
+  };
 
   return (
     <div className="h-full w-full overflow-y-auto bg-gray-100 p-6 pb-12 font-sans text-gray-800">
@@ -262,14 +282,11 @@ export default function KitchenDashboardPage() {
       {/* Main Card */}
       <div className="bg-white rounded-xl shadow-sm">
         {/* Toolbar Card */}
-        <div className="p-4 flex justify-between items-center border-b relative-z[20]">
+        <div className="p-4 flex justify-between items-center border-b relative z-20">
           <h2 className="text-xl font-bold text-gray-900">Pesanan</h2>
 
           <div className="flex gap-3">
-            {/* Filter Tanggal KUSTOM (Menggantikan input bawaan browser) */}
             <CalendarPicker value={selectedDate} onChange={setSelectedDate} />
-
-            {/* Input Pencarian */}
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
@@ -335,43 +352,13 @@ export default function KitchenDashboardPage() {
                     </span>
                   </td>
                   <td className="py-4 px-4 text-gray-500 flex justify-center items-center h-full">
-                    <div className="flex justify-center">
-                      <div className="flex bg-gray-100 rounded-full p-1 text-xs font-bold">
-                        {/* MASAK */}
-                        <button
-                          onClick={async () => {
-                            await updateOrderStatus(
-                              Number(item.id.replace("#", "")),
-                              "cooking",
-                            );
-                            fetchOrders();
-                          }}
-                          className={`px-3 py-1 rounded-full transition-all ${
-                            item.status === "Dimasak"
-                              ? "bg-yellow-400 text-white"
-                              : "text-gray-500"
-                          }`}>
-                          Masak
-                        </button>
-
-                        {/* SELESAI */}
-                        <button
-                          onClick={async () => {
-                            await updateOrderStatus(
-                              Number(item.id.replace("#", "")),
-                              "done",
-                            );
-                            fetchOrders();
-                          }}
-                          className={`px-3 py-1 rounded-full transition-all ${
-                            item.status === "Ready"
-                              ? "bg-green-500 text-white"
-                              : "text-gray-500"
-                          }`}>
-                          Selesai
-                        </button>
-                      </div>
-                    </div>
+                    {/* BUTTON AKSI DIGANTI MENJADI TITIK TIGA */}
+                    <button 
+                      onClick={() => handleOpenModal(item)}
+                      className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-gray-800"
+                    >
+                      <MoreHorizontal size={20} />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -401,7 +388,6 @@ export default function KitchenDashboardPage() {
             </select>
           </div>
           <div className="flex items-center gap-1.5 font-bold">
-            {/* LEFT */}
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
@@ -413,10 +399,8 @@ export default function KitchenDashboardPage() {
               <ChevronLeft size={16} />
             </button>
 
-            {/* NUMBER */}
             {Array.from({ length: totalPages }, (_, i) => {
               const page = i + 1;
-
               return (
                 <button
                   key={i}
@@ -431,7 +415,6 @@ export default function KitchenDashboardPage() {
               );
             })}
 
-            {/* RIGHT */}
             <button
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
@@ -447,6 +430,101 @@ export default function KitchenDashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* --- KOMPONEN POP UP MODAL --- */}
+      {selectedOrder && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl flex w-full max-w-4xl h-[550px] overflow-hidden relative">
+            
+            {/* PANEL KIRI - Info Pesanan */}
+            <div className="w-[35%] bg-white p-8 flex flex-col border-r border-gray-200">
+              <h2 className="text-2xl font-bold mb-6 text-black">Pesanan</h2>
+              
+              <div className="bg-[#f0f0f0] rounded-xl p-5 mb-8">
+                <div className="mb-4">
+                  <p className="text-sm text-gray-500 font-medium">ID</p>
+                  <p className="text-xl font-bold text-black">{selectedOrder.id}</p>
+                </div>
+                <div className="mb-4">
+                  <p className="text-sm text-gray-500 font-medium">Kondisi:</p>
+                  <p className="font-semibold text-black">{selectedOrder.kondisi}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-500 font-medium">Total Item:</p>
+                  <p className="font-semibold text-black">{selectedOrder.items}</p>
+                </div>
+              </div>
+
+              <h3 className="font-bold text-lg mb-3 text-black">Status:</h3>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => setModalStatus("Dimasak")}
+                  className={`py-2.5 rounded-lg font-semibold transition-colors ${
+                    modalStatus === "Dimasak"
+                      ? "bg-[#e5e5e5] text-black"
+                      : "bg-[#f5f5f5] text-gray-500 hover:bg-[#e5e5e5]"
+                  }`}
+                >
+                  Dimasak
+                </button>
+                <button
+                  onClick={() => setModalStatus("Ready")}
+                  className={`py-2.5 rounded-lg font-semibold transition-colors ${
+                    modalStatus === "Ready"
+                      ? "bg-[#e5e5e5] text-black"
+                      : "bg-[#f5f5f5] text-gray-500 hover:bg-[#e5e5e5]"
+                  }`}
+                >
+                  Ready
+                </button>
+              </div>
+            </div>
+
+            {/* PANEL KANAN - Detail Item */}
+            <div className="w-[65%] bg-[#f3f4f6] p-8 flex flex-col relative">
+              <button
+                onClick={handleCloseModal}
+                className="absolute top-6 right-6 bg-[#fca5a5] hover:bg-[#f87171] text-red-900 rounded-lg p-1.5 transition-colors"
+              >
+                <X size={20} strokeWidth={3} />
+              </button>
+              
+              <h2 className="text-2xl font-bold mb-6 text-black">Item</h2>
+
+              <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+                {/* CATATAN: Karena saya tidak melihat array list pesanan spesifik di struktur 'orders' kode asli, 
+                  saya menggunakan dummy data yang di-fallback ke `selectedOrder.details`. 
+                  Pastikan API backend kamu mengembalikan array `details` jika ingin itemnya dinamis! 
+                */}
+                {(selectedOrder.details || [
+                  { nama: "Mie Madyang Original", qty: 3, note: "" },
+                  { nama: "Pangsit", qty: 3, note: "" },
+                  { nama: "Bakso", qty: 3, note: "" },
+                ]).map((detail: any, idx: number) => (
+                  <div key={idx} className="bg-white p-5 rounded-2xl shadow-sm">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="text-lg font-bold text-black">{detail.nama}</h4>
+                      <span className="text-[#e11d48] font-bold text-lg">x {detail.qty}</span>
+                    </div>
+                    <p className="text-sm text-gray-400 font-medium">Note: {detail.note}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 pt-2">
+                <button
+                  onClick={handleSimpanStatus}
+                  className="w-full bg-[#f85656] hover:bg-[#e04545] text-white py-3.5 rounded-xl font-bold text-lg transition-colors shadow-sm"
+                >
+                  Simpan
+                </button>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
