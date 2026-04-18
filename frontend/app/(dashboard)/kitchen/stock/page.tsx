@@ -153,7 +153,7 @@ export default function StockBahanPage() {
     <div className="h-full w-full overflow-y-auto bg-gray-100 p-6 pb-12 font-sans text-gray-800">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Stock Bahan</h1>
+        <h1 className="text-2xl font-bold text-[#F53E1B]">Stock Bahan</h1>
         <p className="text-gray-500 text-sm">Real-time Finance Tracking</p>
       </div>
 

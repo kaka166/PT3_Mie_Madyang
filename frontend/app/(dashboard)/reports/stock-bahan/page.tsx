@@ -63,7 +63,7 @@ export default function StockBahanPage() {
     <div className="min-h-screen bg-neutral-0 p-8 font-sans">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-1">
+        <h1 className="text-3xl font-bold text-[#F53E1B] mb-1">
           Laporan Stock Bahan
         </h1>
         <p className="text-gray-500 text-sm">Real-time Finance Tracking</p>

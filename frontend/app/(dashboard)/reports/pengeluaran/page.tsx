@@ -543,7 +543,7 @@ export default function LaporanPengeluaran() {
       <div className="max-w-1xl mx-auto space-y-6">
         {/* ── Header ── */}
         <div>
-          <h1 className="text-3xl font-bold text-[#8B1A1A]">
+          <h1 className="text-3xl font-bold text-[#F53E1B]">
             Laporan Pengeluaran
           </h1>
           <p className="text-sm text-neutral-500 mt-1">

@@ -218,11 +218,11 @@ export default function InventoryPage() {
       {/* 1. HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-800 tracking-tight">
-            Menu & Inventory Controls
+          <h1 className="text-2xl font-bold text-[#F53E1B] tracking-tight">
+            Menu
           </h1>
           <p className="text-sm text-zinc-500">
-            Kelola menu, strategi harga, dan pantau stok bahan baku.
+            Kelola menu dan strategi harga
           </p>
         </div>
 
