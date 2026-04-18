@@ -6,6 +6,7 @@ export interface Menu {
   is_active: number;
   gambar?: string;
   kategori?: { nama_kategori: string };
+  stock: number;
 }
 
 export interface Category {
@@ -132,5 +133,15 @@ export const menuService = {
       const data = await res.json();
       throw new Error(data.message || "Gagal hapus menu");
     }
+  },
+
+  updateStock: async (id: number, stock: number) => {
+    const res = await fetch(`${API_BASE_URL}/menu/${id}/stock`, {
+      method: "PATCH",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ stock }),
+    });
+
+    if (!res.ok) throw new Error("Gagal update stok");
   },
 };

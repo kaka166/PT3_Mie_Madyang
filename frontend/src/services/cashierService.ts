@@ -5,6 +5,7 @@ export type ApiMenu = {
   is_active: number;
   gambar?: string | null;
   kategori?: { nama_kategori: string };
+  stock?: number;
 };
 
 export type MenuItem = {
@@ -48,7 +49,7 @@ export const getMenus = async (): Promise<MenuItem[]> => {
         id: item.id,
         name: item.nama_menu,
         price: parseFloat(item.harga_jual),
-        stock: 50, // Dummy stock
+        stock: item.stock ?? 0,
         kategori: item.kategori?.nama_kategori || "Umum",
         gambar: item.gambar || "",
       }));

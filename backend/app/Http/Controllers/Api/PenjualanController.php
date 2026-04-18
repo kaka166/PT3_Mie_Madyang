@@ -39,7 +39,15 @@ class PenjualanController extends Controller
                         'cooking' => 'Dimasak',
                         'done' => 'Ready',
                         default => 'Antri'
-                    }
+                    },
+
+                    'details' => $p->detail->map(function ($d) {
+                        return [
+                            'nama' => $d->menu->nama_menu ?? '-',
+                            'qty' => $d->qty,
+                            'note' => $d->note ?? ''
+                        ];
+                    }),
                 ];
             });
 
@@ -58,6 +66,7 @@ class PenjualanController extends Controller
             'customer_name' => 'nullable|string',
             'order_type' => 'required|in:Dine In,Take Away',
             'metode_pembayaran' => 'required|in:QRIS,Tunai',
+            'items.*.note' => 'nullable|string'
         ]);
 
         DB::beginTransaction();
@@ -71,10 +80,22 @@ class PenjualanController extends Controller
         }
 
         try {
+            $session = \App\Models\PosSession::where('user_id', Auth::id())
+                ->whereNull('ended_at')
+                ->latest()
+                ->first();
+
+            if (!$session) {
+                DB::rollBack();
+                return response()->json([
+                    'error' => 'Tidak ada sesi aktif. Silakan mulai sesi terlebih dahulu.'
+                ], 400);
+            }
             $penjualan = Penjualan::create([
                 'tanggal' => now(),
                 'total' => 0,
                 'user_id' => Auth::user()->id,
+                'session_id' => $session->id,
                 'customer_name' => $request->customer_name,
                 'order_type' => $request->order_type,
                 'status' => 'pending',
@@ -100,12 +121,22 @@ class PenjualanController extends Controller
                     ->lockForUpdate()
                     ->first();
 
-                if ($stok && $stok->qty < $qty) {
+                if (!$stok) {
+                    DB::rollBack();
+                    return response()->json([
+                        'error' => 'Stok tidak ditemukan untuk ' . $menu->nama_menu
+                    ], 400);
+                }
+
+                if ($stok->qty < $qty) {
                     DB::rollBack();
                     return response()->json([
                         'error' => 'Stok tidak cukup untuk ' . $menu->nama_menu
                     ], 400);
                 }
+
+                $stok->qty -= $qty;
+                $stok->save();
 
                 $subtotal = $menu->harga_jual * $qty;
                 $grand_total += $subtotal;
@@ -115,15 +146,9 @@ class PenjualanController extends Controller
                     'menu_id' => $menu->id,
                     'qty' => $qty,
                     'harga' => $menu->harga_jual,
-                    'subtotal' => $subtotal
+                    'subtotal' => $subtotal,
+                    'note' => $item['note'] ?? null,
                 ]);
-
-                if (!$stok) {
-                    DB::rollBack();
-                    return response()->json([
-                        'error' => 'Stok tidak ditemukan untuk ' . $menu->nama_menu
-                    ], 400);
-                }
             }
 
             // ===============================
@@ -146,6 +171,7 @@ class PenjualanController extends Controller
             DB::commit();
 
             return response()->json([
+                'success' => true,
                 'message' => 'Pesanan berhasil dibuat',
                 'data' => $penjualan->load('detail.menu')
             ], 201);

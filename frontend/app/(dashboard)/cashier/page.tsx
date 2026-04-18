@@ -4,6 +4,11 @@ import { formatRupiah } from "@/utils/formatCurrency";
 import { getMenus, getCategories, MenuItem } from "@/services/cashierService";
 import { getTax, updateTax } from "@/services/taxService";
 import { createOrder } from "@/services/penjualanService";
+import {
+  startSession,
+  endSession,
+  getActiveSession,
+} from "@/services/sessionService";
 import { X } from "lucide-react";
 
 /* ================= TYPES ================= */
@@ -33,6 +38,55 @@ export default function POSPage() {
   const [isTaxEnabled, setIsTaxEnabled] = useState(true);
   const [taxPercent, setTaxPercent] = useState(0);
   const [showTaxModal, setShowTaxModal] = useState(false);
+
+  const [showEndSessionModal, setShowEndSessionModal] = useState(false);
+  const [closingCash, setClosingCash] = useState("");
+  const [sessionResult, setSessionResult] = useState<any>(null);
+
+  const [sessionActive, setSessionActive] = useState(false);
+  const [openingCash, setOpeningCash] = useState("");
+
+  const handleStartSession = async () => {
+    const cash = Number(openingCash);
+
+    if (!cash || cash < 0) {
+      alert("Masukkan uang awal dulu!");
+      return;
+    }
+
+    try {
+      await startSession(cash);
+      setSessionActive(true);
+      alert("Sesi dimulai!");
+    } catch (err: any) {
+      alert(err.message || "Gagal mulai sesi");
+    }
+  };
+
+  const handleEndSession = () => {
+    setShowEndSessionModal(true);
+  };
+
+  const handleConfirmEndSession = async () => {
+    const cash = Number(closingCash);
+
+    if (!cash || cash < 0) {
+      alert("Masukkan uang akhir yang valid!");
+      return;
+    }
+
+    try {
+      const res = await endSession(cash);
+      const data = res.data ?? res;
+
+      setSessionResult(data); // 🔥 simpan hasil
+      setShowEndSessionModal(false);
+      setSessionActive(false);
+      setClosingCash("");
+    } catch (err: any) {
+      alert(err.message || "Gagal end session");
+    }
+  };
 
   /* ================= FETCH LOGIC ================= */
   const fetchMenu = async () => {
@@ -71,6 +125,14 @@ export default function POSPage() {
     const init = async () => {
       await fetchTax();
       await loadInitialData();
+
+      const session = await getActiveSession();
+
+      if (session?.data?.id) {
+        setSessionActive(true);
+      } else {
+        setSessionActive(false);
+      }
     };
     init();
     const intervalId = setInterval(fetchMenu, 5000);
@@ -93,9 +155,6 @@ export default function POSPage() {
         { id: menu.id, name: menu.name, price: menu.price, qty: 1, note: "" },
       ];
     });
-    setMenus((prev) =>
-      prev.map((m) => (m.id === menu.id ? { ...m, stock: m.stock - 1 } : m)),
-    );
   };
 
   const increaseQty = (id: number) => {
@@ -103,11 +162,6 @@ export default function POSPage() {
       prev.map((item) => {
         const menu = menus.find((m) => m.id === id);
         if (!menu || menu.stock === 0) return item;
-        setMenus((prevMenus) =>
-          prevMenus.map((m) =>
-            m.id === id ? { ...m, stock: m.stock - 1 } : m,
-          ),
-        );
         return item.id === id ? { ...item, qty: item.qty + 1 } : item;
       }),
     );
@@ -118,11 +172,6 @@ export default function POSPage() {
       prev
         .map((item) => {
           if (item.id === id) {
-            setMenus((prevMenus) =>
-              prevMenus.map((m) =>
-                m.id === id ? { ...m, stock: m.stock + 1 } : m,
-              ),
-            );
             return { ...item, qty: item.qty - 1 };
           }
           return item;
@@ -135,11 +184,6 @@ export default function POSPage() {
     setCart((prev) => {
       const itemToRemove = prev.find((i) => i.id === id);
       if (itemToRemove) {
-        setMenus((prevMenus) =>
-          prevMenus.map((m) =>
-            m.id === id ? { ...m, stock: m.stock + itemToRemove.qty } : m,
-          ),
-        );
       }
       return prev.filter((item) => item.id !== id);
     });
@@ -337,11 +381,29 @@ export default function POSPage() {
                       items: cart.map((item) => ({
                         menu_id: item.id,
                         qty: item.qty,
+                        note: item.note || "",
                       })),
                     });
 
                     if (result) {
                       alert("Pesanan masuk kitchen!");
+
+                      setMenus((prevMenus) =>
+                        prevMenus.map((menu) => {
+                          const orderedItem = cart.find(
+                            (c) => c.id === menu.id,
+                          );
+
+                          if (!orderedItem) return menu;
+
+                          return {
+                            ...menu,
+                            stock: Math.max(0, menu.stock - orderedItem.qty),
+                          };
+                        }),
+                      );
+
+                      await fetchMenu();
 
                       setShowPaymentModal(false);
                       setCart([]);
@@ -365,9 +427,63 @@ export default function POSPage() {
         </div>
       )}
 
+      {showEndSessionModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+            <h2 className="text-lg font-bold mb-4">Tutup Sesi</h2>
+
+            <input
+              type="number"
+              placeholder="Masukkan uang akhir"
+              value={closingCash}
+              onChange={(e) => setClosingCash(e.target.value)}
+              className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 mb-4 outline-none"
+            />
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowEndSessionModal(false)}
+                className="flex-1 py-3 text-gray-500 font-bold">
+                Batal
+              </button>
+
+              <button
+                onClick={handleConfirmEndSession}
+                className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {sessionResult && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
+            <h2 className="text-lg font-bold mb-4">Ringkasan Sesi</h2>
+
+            <div className="space-y-2 text-sm">
+              <p>Opening: {formatRupiah(sessionResult.opening_cash)}</p>
+              <p>Penjualan: {formatRupiah(sessionResult.total_pemasukan)}</p>
+              <p>Seharusnya: {formatRupiah(sessionResult.expected_cash)}</p>
+              <p>Uang Akhir: {formatRupiah(sessionResult.closing_cash)}</p>
+              <p className="font-bold text-red-500">
+                Selisih: {formatRupiah(sessionResult.selisih)}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setSessionResult(null)}
+              className="mt-4 w-full py-3 bg-[#ff6b6b] text-white rounded-xl font-bold">
+              Tutup
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* ================= MAIN CONTENT ================= */}
       <main className="flex-1 flex flex-col min-w-0 bg-white lg:bg-transparent relative z-10 overflow-hidden">
-        <header className="bg-white px-6 py-5 flex flex-col sm:flex-row justify-between items-center gap-4 border-b border-gray-100 shadow-sm">
+        <header className="bg-white px-6 py-5 flex flex-col lg:flex-row justify-between items-center gap-4 border-b border-gray-100 shadow-sm">
           <div className="flex items-center justify-between w-full sm:w-auto">
             <h1 className="text-xl font-black text-[#a0383b] tracking-tighter uppercase italic">
               Ma-Dyang <span className="text-gray-300 not-italic">POS</span>
@@ -395,13 +511,48 @@ export default function POSPage() {
               )}
             </button>
           </div>
-          <div className="w-full sm:w-80 relative group">
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-5 pr-5 py-3 bg-gray-50 border-2 border-transparent focus:border-red-100 focus:bg-white rounded-2xl text-sm font-bold outline-none transition-all shadow-inner"
-              placeholder="Cari menu..."
-            />
+          <div className="flex flex-col lg:flex-row items-center gap-3 w-full lg:w-auto">
+            {/* SEARCH */}
+            <div className="w-full sm:w-80 relative group">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-5 pr-5 py-3 bg-gray-50 border-2 border-transparent focus:border-red-100 focus:bg-white rounded-2xl text-sm font-bold outline-none transition-all shadow-inner"
+                placeholder="Cari menu..."
+              />
+            </div>
+
+            {/* SESSION */}
+            <div className="flex gap-2 items-center">
+              {!sessionActive ? (
+                <>
+                  <input
+                    type="number"
+                    placeholder="Uang awal"
+                    value={openingCash}
+                    onChange={(e) => setOpeningCash(e.target.value)}
+                    className="px-3 py-2 border rounded-lg text-xs w-28"
+                  />
+                  <button
+                    onClick={handleStartSession}
+                    className="bg-green-500 text-white px-3 py-2 rounded-lg text-xs font-bold">
+                    Mulai Sesi
+                  </button>
+                </>
+              ) : (
+                <>
+                  <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
+                    Sesi Aktif
+                  </span>
+
+                  <button
+                    onClick={handleEndSession}
+                    className="bg-red-500 text-white px-3 py-2 rounded-lg text-xs font-bold">
+                    Tutup Sesi
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </header>
 
@@ -625,7 +776,13 @@ export default function POSPage() {
                 </option>
               </select>
               <button
-                onClick={() => setShowPaymentModal(true)}
+                onClick={() => {
+                  if (!sessionActive) {
+                    alert("Mulai sesi dulu!");
+                    return;
+                  }
+                  setShowPaymentModal(true);
+                }}
                 disabled={cart.length === 0}
                 className="w-full text-white py-4 lg:py-5 font-black text-xs lg:text-sm uppercase tracking-[0.2em] disabled:opacity-50 active:scale-95 transition-all cursor-pointer relative z-40">
                 Bayar Sekarang

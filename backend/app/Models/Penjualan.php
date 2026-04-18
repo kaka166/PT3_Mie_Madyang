@@ -14,6 +14,7 @@ class Penjualan extends Model
         'tanggal',
         'total',
         'user_id',
+        'session_id',
         'customer_name',
         'order_type',
         'status',
@@ -28,5 +29,10 @@ class Penjualan extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function session()
+    {
+        return $this->belongsTo(PosSession::class);
     }
 }
