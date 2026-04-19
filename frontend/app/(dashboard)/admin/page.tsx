@@ -11,6 +11,7 @@ import {
   ChevronRight,
   X,
   FileText,
+  Pencil,
 } from "lucide-react";
 
 // --- KOMPONEN CALENDAR PICKER (KUSTOM) ---
@@ -287,7 +288,7 @@ export default function AdminDashboardPage() {
     <div className="h-full w-full overflow-y-auto bg-[#efefef] p-8 pb-12 font-sans text-gray-800 relative">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-[#8b1818] mb-2">
+        <h1 className="text-4xl font-bold text-[#F53E1B] mb-2">
           Admin - Dashboard
         </h1>
         <p className="text-gray-500 font-medium">
@@ -341,11 +342,11 @@ export default function AdminDashboardPage() {
                     </span>
                   </td>
                   <td className="py-4 px-6 text-center text-gray-400">
-                    <button
-                      onClick={() => handleOpenUserModal(user)}
-                      className="hover:text-gray-700 hover:bg-gray-200 p-2 rounded-full transition-colors"
+                    <button 
+                      onClick={() => handleOpenModal(item)}
+                      className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-200 p-2 rounded-lg transition-colors inline-flex justify-center items-center"
                     >
-                      <MoreHorizontal size={20} />
+                      <Pencil size={18} />
                     </button>
                   </td>
                 </tr>

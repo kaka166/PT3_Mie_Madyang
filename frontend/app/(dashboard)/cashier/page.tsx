@@ -503,7 +503,7 @@ export default function POSPage() {
       <main className="flex-1 flex flex-col min-w-0 bg-white lg:bg-transparent relative z-10 overflow-hidden">
         <header className="bg-white px-6 py-5 flex flex-col lg:flex-row justify-between items-center gap-4 border-b border-gray-100 shadow-sm">
           <div className="flex items-center justify-between w-full sm:w-auto">
-            <h1 className="text-xl font-black text-[#a0383b] tracking-tighter uppercase italic">
+            <h1 className="text-xl font-black text-[#F53E1B] tracking-tighter uppercase italic">
               Ma-Dyang <span className="text-gray-300 not-italic">POS</span>
             </h1>
             <button
@@ -580,7 +580,7 @@ export default function POSPage() {
               <button
                 key={i}
                 onClick={() => setFilter(c)}
-                className={`whitespace-nowrap px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${filter === c ? "bg-[#a0383b] text-white shadow-xl shadow-red-100 scale-105" : "bg-white border-2 border-gray-100 text-gray-400 hover:border-[#a0383b] hover:text-[#a0383b]"}`}>
+                className={`whitespace-nowrap px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${filter === c ? "bg-[#F53E1B] text-white shadow-xl shadow-red-100 scale-105" : "bg-white border-2 border-gray-100 text-gray-400  hover:text-[#F53E1B]"}`}>
                 {c}
               </button>
             ))}
@@ -617,13 +617,13 @@ export default function POSPage() {
                     {item.name}
                   </h3>
                   <div className="flex justify-between items-center pt-3 border-t-2 border-gray-50">
-                    <span className="text-[#a0383b] font-black text-base">
+                    <span className="text-[#F53E1B] font-black text-base">
                       {formatRupiah(item.price)}
                     </span>
                     <button
                       onClick={() => addToCart(item)}
                       disabled={item.stock === 0}
-                      className="w-10 h-10 rounded-2xl bg-red-50 text-[#a0383b] flex items-center justify-center font-black text-xl hover:bg-[#a0383b] hover:text-white transition-all shadow-sm active:scale-90">
+                      className="w-10 h-10 rounded-2xl bg-red-50 text-[#a0383b] flex items-center justify-center font-black text-xl hover:bg-[#F53E1B] hover:text-white transition-all shadow-sm active:scale-90">
                       +
                     </button>
                   </div>
@@ -688,7 +688,7 @@ export default function POSPage() {
                       <X size={14} strokeWidth={3} />
                     </button>
                   </div>
-                  <p className="text-[10px] lg:text-xs font-black text-[#a0383b] mb-3">
+                  <p className="text-[10px] lg:text-xs font-black text-[#F53E1B] mb-3">
                     {formatRupiah(item.price * item.qty)}
                   </p>
 
@@ -724,7 +724,7 @@ export default function POSPage() {
                       ) : (
                         <button
                           onClick={() => setEditingNoteId(item.id)}
-                          className="text-[9px] text-gray-400 hover:text-[#a0383b] flex items-center gap-1 font-bold italic truncate">
+                          className="text-[9px] text-gray-400 hover:text-[#F53E1B] flex items-center gap-1 font-bold italic truncate">
                           {item.note ? `"${item.note}"` : "+ Catatan"}
                         </button>
                       )}
@@ -775,7 +775,7 @@ export default function POSPage() {
                 <span className="text-sm font-black text-gray-900 tracking-tight">
                   TOTAL
                 </span>
-                <span className="text-xl font-black text-[#a0383b] tracking-tighter">
+                <span className="text-xl font-black text-[#F53E1B] tracking-tighter">
                   {formatRupiah(total)}
                 </span>
               </div>
