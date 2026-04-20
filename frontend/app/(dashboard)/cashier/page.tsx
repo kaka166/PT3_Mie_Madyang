@@ -91,7 +91,7 @@ export default function POSPage() {
     setShowEndSessionModal(true);
   };
 
-  const handleConfirmEndSession = async (): Promise<any> => {
+  const handleConfirmEndSession = async (): Promise<SessionResult | null> => {
     const cash = Number(closingCash);
 
     if (!cash || cash < 0) {
