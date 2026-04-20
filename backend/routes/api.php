@@ -8,12 +8,9 @@ use App\Http\Controllers\Api\TaxSettingController;
 use App\Http\Controllers\Api\PenjualanController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\SessionController;
-<<<<<<< HEAD
-use App\Http\Controllers\Api\HppCalculatorController;
-=======
 use App\Http\Controllers\Api\ProduksiController;
 use App\Http\Controllers\Api\PengeluaranController;
->>>>>>> 855574c8c35012ed8ff5b26dadacf00174bbbaa3
+use App\Http\Controllers\Api\HppCalculatorController;
 
 /*
 |--------------------------------------------------------------------------
@@ -24,21 +21,6 @@ use App\Http\Controllers\Api\PengeluaranController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// 🔥 HPP / PRODUKSI (sementara tanpa auth biar bisa test Postman)
-Route::prefix('hpp')->group(function () {
-    Route::get('/produksi', [ProduksiController::class, 'index']);
-    Route::get('/produksi/{id}', [ProduksiController::class, 'show']);
-    Route::post('/produksi', [ProduksiController::class, 'store']);
-
-    Route::get('/menu', [ProduksiController::class, 'getMenu']);
-    Route::get('/bahan', [ProduksiController::class, 'getBahan']);
-});
-
-/*
-|--------------------------------------------------------------------------
-| AUTH ROUTES
-|--------------------------------------------------------------------------
-*/
 
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -77,10 +59,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/menu', [MenuController::class, 'index']);
         Route::get('/menu/{id}', [MenuController::class, 'show']);
 
-<<<<<<< HEAD
-=======
         // Kategori
->>>>>>> 855574c8c35012ed8ff5b26dadacf00174bbbaa3
         Route::get('/kategori', [MenuKategoriController::class, 'index']);
         Route::get('/kategori/{id}', [MenuKategoriController::class, 'show']);
 
@@ -115,8 +94,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/session/end', [SessionController::class, 'endSession']);
         Route::get('/session/active', [SessionController::class, 'active']);
     });
-<<<<<<< HEAD
 });
-=======
-});
->>>>>>> 855574c8c35012ed8ff5b26dadacf00174bbbaa3
