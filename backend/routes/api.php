@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\TaxSettingController;
 use App\Http\Controllers\Api\PenjualanController;
 use App\Http\Controllers\Api\StockController;
 use App\Http\Controllers\Api\SessionController;
+use App\Http\Controllers\Api\HppCalculatorController;
 
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -17,7 +18,7 @@ Route::post('/login', [AuthController::class, 'login']);
 //test
 
 Route::middleware('auth:sanctum')->group(function () {
-    
+
     Route::post('/logout', [AuthController::class, 'logout']);
 
     Route::middleware('role:1')->group(function () {
@@ -31,18 +32,20 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/kategori/{id}', [MenuKategoriController::class, 'update']);
         Route::delete('/kategori/{id}', [MenuKategoriController::class, 'destroy']);
         Route::put('/kategori/{id}/toggle', [MenuKategoriController::class, 'toggleStatus']);
+        Route::get('/hpp-history', [HppCalculatorController::class, 'index']);
+        Route::post('/calculate-hpp', [HppCalculatorController::class, 'store']);
     });
 
     Route::middleware('role:1,2,3')->group(function () {
         Route::get('/menu', [MenuController::class, 'index']);
         Route::get('/menu/{id}', [MenuController::class, 'show']);
-        
+
         Route::get('/kategori', [MenuKategoriController::class, 'index']);
         Route::get('/kategori/{id}', [MenuKategoriController::class, 'show']);
 
         //pengaturan pajak
         Route::get('/tax', [TaxSettingController::class, 'get']);
-        Route::post('/tax', [TaxSettingController::class, 'update']);   
+        Route::post('/tax', [TaxSettingController::class, 'update']);
 
         //mencatat pesanan ke kitchen
         Route::get('/orders', [PenjualanController::class, 'index']);
@@ -68,5 +71,4 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/session/end', [SessionController::class, 'endSession']);
         Route::get('/session/active', [SessionController::class, 'active']);
     });
-
 });

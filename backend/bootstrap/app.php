@@ -19,7 +19,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         //$middleware->append(HandleCors::class);
-        $middleware->remove(HandleCors::class);
+        // $middleware->remove(HandleCors::class);
+        $middleware->prepend(\Illuminate\Http\Middleware\HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
