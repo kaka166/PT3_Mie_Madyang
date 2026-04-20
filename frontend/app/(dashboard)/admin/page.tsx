@@ -94,8 +94,7 @@ function CalendarPicker({
     <div ref={ref} className="relative z-50">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between gap-3 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-48 cursor-pointer"
-      >
+        className="flex items-center justify-between gap-3 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-48 cursor-pointer">
         <div className="flex items-center gap-2">
           <Calendar size={16} className="text-gray-500" />
           <span className="truncate">{displayLabel}</span>
@@ -107,8 +106,7 @@ function CalendarPicker({
               onChange("");
             }}
             className="text-gray-400 hover:text-red-500 transition-colors"
-            title="Hapus Tanggal"
-          >
+            title="Hapus Tanggal">
             <X size={14} />
           </span>
         )}
@@ -119,8 +117,7 @@ function CalendarPicker({
           <div className="flex items-center justify-between mb-3">
             <button
               onClick={prevMonth}
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-            >
+              className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
               <ChevronLeft size={16} className="text-gray-600" />
             </button>
             <span className="text-sm font-bold text-gray-700">
@@ -128,8 +125,7 @@ function CalendarPicker({
             </span>
             <button
               onClick={nextMonth}
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors"
-            >
+              className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
               <ChevronRight size={16} className="text-gray-600" />
             </button>
           </div>
@@ -138,8 +134,7 @@ function CalendarPicker({
             {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
               <div
                 key={d}
-                className="text-center text-[10px] font-bold text-gray-400 py-1"
-              >
+                className="text-center text-[10px] font-bold text-gray-400 py-1">
                 {d}
               </div>
             ))}
@@ -172,8 +167,7 @@ function CalendarPicker({
                     ${isSelected ? "bg-red-500 text-white" : ""}
                     ${isToday && !isSelected ? "border border-red-500 text-red-500" : ""}
                     ${!isSelected && !isToday ? "text-gray-700 hover:bg-gray-100" : ""}
-                  `}
-                  >
+                  `}>
                     {day}
                   </button>
                 );
@@ -318,8 +312,7 @@ export default function AdminDashboardPage() {
                   key={index}
                   className={`border border-neutral-100 transition-colors ${
                     index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                  }`}
-                >
+                  }`}>
                   <td className="py-4 px-6 font-bold text-gray-800">
                     {user.id}
                   </td>
@@ -333,19 +326,16 @@ export default function AdminDashboardPage() {
                         user.status === "Online"
                           ? "bg-green-200 text-green-800"
                           : "bg-red-200 text-red-800"
-                      }`}
-                    >
+                      }`}>
                       <span
-                        className={`w-2 h-2 rounded-full ${user.status === "Online" ? "bg-green-600" : "bg-red-600"}`}
-                      ></span>
+                        className={`w-2 h-2 rounded-full ${user.status === "Online" ? "bg-green-600" : "bg-red-600"}`}></span>
                       {user.status}
                     </span>
                   </td>
                   <td className="py-4 px-6 text-center text-gray-400">
-                    <button 
-                      onClick={() => handleOpenModal(item)}
-                      className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-200 p-2 rounded-lg transition-colors inline-flex justify-center items-center"
-                    >
+                    <button
+                      onClick={() => handleOpenUserModal(user)}
+                      className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-200 p-2 rounded-lg transition-colors inline-flex justify-center items-center">
                       <Pencil size={18} />
                     </button>
                   </td>
@@ -405,8 +395,7 @@ export default function AdminDashboardPage() {
                   key={index}
                   className={`border border-neutral-100 transition-colors ${
                     index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                  }`}
-                >
+                  }`}>
                   <td className="py-4 px-6 font-bold text-gray-800">
                     {shift.id}
                   </td>
@@ -505,8 +494,7 @@ export default function AdminDashboardPage() {
                     key={index}
                     className={`border border-neutral-100 transition-colors ${
                       index % 2 === 0 ? "bg-white" : "bg-gray-100"
-                    }`}
-                  >
+                    }`}>
                     <td className="py-4 px-6 font-bold text-gray-800">
                       {expense.id}
                     </td>
@@ -581,8 +569,7 @@ export default function AdminDashboardPage() {
                         modalRole === role
                           ? "bg-[#e2e2e2] text-black"
                           : "bg-[#f0f0f0] text-gray-600 hover:bg-[#e8e8e8]"
-                      }`}
-                    >
+                      }`}>
                       {role}
                     </button>
                   ))}
@@ -636,8 +623,7 @@ export default function AdminDashboardPage() {
               <div className="mt-6">
                 <button
                   onClick={handleCloseUserModal} // Nantinya bisa diubah jadi fungsi update() ke backend
-                  className="w-full bg-[#cecece] hover:bg-[#b0b0b0] text-gray-800 py-3 rounded-lg font-semibold transition-colors"
-                >
+                  className="w-full bg-[#cecece] hover:bg-[#b0b0b0] text-gray-800 py-3 rounded-lg font-semibold transition-colors">
                   Simpan Perubahan
                 </button>
               </div>

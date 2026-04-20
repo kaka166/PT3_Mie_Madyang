@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { menuService, Menu, Category } from "@/services/menuService";
+import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
 
 export default function InventoryPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
@@ -55,11 +56,6 @@ export default function InventoryPage() {
   const [editingCatId, setEditingCatId] = useState<number | null>(null);
   const [editingCatName, setEditingCatName] = useState("");
   const [newCatName, setNewCatName] = useState("");
-
-  const formatRupiah = (value: string | number) => {
-    if (!value) return "";
-    return new Intl.NumberFormat("id-ID").format(Number(value));
-  };
 
   // --- DATA FETCHING ---
   const fetchData = useCallback(async () => {
@@ -316,11 +312,7 @@ export default function InventoryPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-neutral-800">
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                      minimumFractionDigits: 0,
-                    }).format(item.harga_jual)}
+                    {formatRupiah(item.harga_jual)}
                   </td>
                   <td className="px-6 py-4 text-center">
                     <input
@@ -572,13 +564,21 @@ export default function InventoryPage() {
                     <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
                       HPP (Modal)
                     </label>
-                    <input
-                      type="number"
-                      placeholder="Modal bahan..."
-                      className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm focus:ring-2 ring-red-500/10 transition-all"
-                      value={calc.hpp}
-                      onChange={(e) => handleCalcChange("hpp", e.target.value)}
-                    />
+                    <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-3 py-2.5 shadow-sm focus-within:ring-2 ring-red-500/10">
+                      <span className="text-sm font-semibold text-zinc-500 mr-2">
+                        Rp
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="0"
+                        className="w-full bg-transparent outline-none text-sm"
+                        value={formatRupiah(calc.hpp).replace("Rp", "").trim()}
+                        onChange={(e) => {
+                          const raw = parseRupiah(e.target.value);
+                          handleCalcChange("hpp", raw);
+                        }}
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
@@ -622,13 +622,12 @@ export default function InventoryPage() {
                     Hasil Harga Jual Akhir
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-zinc-400">Rp</span>
                     <input
-                      type="text" // ⬅️ ganti dari number ke text
+                      type="text"
                       value={formatRupiah(form.harga_jual)}
                       readOnly={calc.mode !== "manual"}
                       onChange={(e) => {
-                        const raw = e.target.value.replace(/\D/g, ""); // ambil angka saja
+                        const raw = parseRupiah(e.target.value);
                         setForm({ ...form, harga_jual: raw });
                       }}
                       className={`text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${

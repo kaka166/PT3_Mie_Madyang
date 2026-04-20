@@ -455,11 +455,17 @@ export default function POSPage() {
                 </h3>
 
                 {sessionResult.selisih === 0 ? (
-                  <p className="text-green-600 font-bold">✅ Uang sesuai</p>
+                  <p className="text-green-600 font-bold">
+                    Saldo sesuai dengan modal awal
+                  </p>
                 ) : sessionResult.selisih < 0 ? (
-                  <p className="text-red-500 font-bold">⚠️ Kekurangan uang</p>
+                  <p className="text-red-500 font-bold">
+                    Terdapat selisih kekurangan
+                  </p>
                 ) : (
-                  <p className="text-yellow-500 font-bold">⚠️ Kelebihan uang</p>
+                  <p className="text-yellow-500 font-bold">
+                    Terdapat selisih kelebihan
+                  </p>
                 )}
               </div>
 

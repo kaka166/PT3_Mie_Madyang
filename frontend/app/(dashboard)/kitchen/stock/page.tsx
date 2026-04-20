@@ -186,6 +186,7 @@ export default function StockBahanPage() {
                 <th className="py-3 px-4 text-left">ID</th>
                 <th className="py-3 px-4 text-left">Nama Barang</th>
                 <th className="py-3 px-4">Jumlah Stock</th>
+                <th className="py-3 px-4">Stock Limit</th>
                 <th className="py-3 px-4">Status</th>
               </tr>
             </thead>
@@ -197,11 +198,9 @@ export default function StockBahanPage() {
                   className={i % 2 === 0 ? "bg-white" : "bg-gray-100"}>
                   <td className="py-3 px-4 text-left">{item.id}</td>
                   <td className="py-3 px-4 text-left">{item.nama}</td>
-                  <td className="py-3 px-4">
-                    {item.jumlah}
-                    <div className="text-xs text-gray-400">
-                      Limit: {item.stock_limit}
-                    </div>
+                  <td className="py-3 px-4">{item.jumlah}</td>
+                  <td className="py-3 px-4 text-gray-500">
+                    {item.stock_limit}
                   </td>
                   <td className="py-3 px-4 flex justify-center">
                     <span
@@ -247,13 +246,19 @@ export default function StockBahanPage() {
         <div className="relative">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className="bg-gray-200 px-4 py-2 rounded-lg flex gap-2">
+            className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all
+              ${
+                selectedFilter
+                  ? "bg-red-100 text-red-600"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}>
             <Filter size={16} />
             {selectedFilter || "Filter"}
           </button>
 
           {isFilterOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow border">
+            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border p-2 space-y-1 z-50">
+              {/* OPTION */}
               {filterOptions.map((opt) => (
                 <button
                   key={opt}
@@ -261,10 +266,27 @@ export default function StockBahanPage() {
                     setSelectedFilter(opt);
                     setIsFilterOpen(false);
                   }}
-                  className="block px-4 py-2 text-sm hover:bg-gray-100">
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
+                    selectedFilter === opt
+                      ? "bg-red-100 text-red-600 font-medium"
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}>
                   {opt}
                 </button>
               ))}
+
+              {/* DIVIDER */}
+              <div className="border-t my-1"></div>
+
+              {/* RESET BUTTON */}
+              <button
+                onClick={() => {
+                  setSelectedFilter("");
+                  setIsFilterOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-100">
+                Reset Filter
+              </button>
             </div>
           )}
         </div>
@@ -303,7 +325,12 @@ export default function StockBahanPage() {
                   <td className="px-6 py-4 text-neutral-700">{item.nama}</td>
 
                   <td className="px-6 py-4">
-                    <span className="px-2 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-bold ${
+                        item.tipe.toLowerCase() === "restock"
+                          ? "bg-green-100 text-green-600"
+                          : "bg-red-100 text-red-600"
+                      }`}>
                       {item.tipe}
                     </span>
                   </td>

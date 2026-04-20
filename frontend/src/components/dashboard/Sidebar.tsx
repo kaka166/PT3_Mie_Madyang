@@ -50,7 +50,7 @@ export default function Sidebar({
     {
       icon: Package2,
       label: "Menu",
-      href: "/inventory",
+      href: "/menu",
       allowedRoles: [1],
     },
     {

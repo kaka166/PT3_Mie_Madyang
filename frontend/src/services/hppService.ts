@@ -40,7 +40,8 @@ export interface CalculateHppRequest {
 
 const getHeaders = () => {
   // Ambil token dari localStorage (sesuaikan key 'token' dengan yang kamu pakai saat login)
-  const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
   return {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -57,7 +58,11 @@ export const hppService = {
   },
 
   calculateAndSave: async (data: CalculateHppRequest): Promise<HppHistory> => {
-    const response = await axios.post(`${API_URL}/calculate-hpp`, data, getHeaders());
+    const response = await axios.post(
+      `${API_URL}/calculate-hpp`,
+      data,
+      getHeaders(),
+    );
     return response.data.data;
   },
 };
