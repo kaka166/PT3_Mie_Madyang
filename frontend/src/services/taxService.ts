@@ -12,10 +12,16 @@ export const getTax = async (): Promise<TaxSetting> => {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE_URL}/tax`, {
-    headers: {
-      Authorization: token ? `Bearer ${token}` : "",
-    },
+    headers,
   });
 
   if (!res.ok) {

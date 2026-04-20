@@ -18,8 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \App\Http\Middleware\CheckRole::class,
         ]);
 
-        $middleware->append(\Illuminate\Http\Middleware\HandleCors::class);
-        //$middleware->remove(\Illuminate\Http\Middleware\HandleCors::class);
+        //$middleware->append(HandleCors::class);
+        $middleware->remove(HandleCors::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
