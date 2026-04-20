@@ -12,6 +12,7 @@ import {
   ChevronRight,
   X,
 } from "lucide-react";
+import { formatTanggal } from "@/utils/formatTanggal";
 
 // --- KOMPONEN CALENDAR PICKER (KUSTOM) ---
 function CalendarPicker({
@@ -344,16 +345,7 @@ export default function KitchenDashboardPage() {
                     {item.id}
                   </td>
                   <td className="py-4 px-4 text-gray-700">
-                    <div>
-                      {new Date(item.waktu).toLocaleDateString("id-ID", {
-                        timeZone: "Asia/Jakarta",
-                      })}
-                    </div>
-                    <div>
-                      {new Date(item.waktu).toLocaleTimeString("id-ID", {
-                        timeZone: "Asia/Jakarta",
-                      })}
-                    </div>
+                    {formatTanggal(item.waktu)}
                   </td>
                   <td className="py-4 px-4 font-bold text-gray-800">
                     {item.customer}

@@ -10,7 +10,8 @@ class Bahan extends Model
 
     protected $fillable = [
         'nama_bahan',
-        'satuan'
+        'satuan',
+        'harga'
     ];
 
     public function resep()

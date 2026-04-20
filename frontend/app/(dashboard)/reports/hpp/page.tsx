@@ -330,8 +330,7 @@ export default function HPPPage() {
             <div className="w-[60%] bg-[#f4f4f5] p-8 flex flex-col relative overflow-y-auto custom-scrollbar">
               <button
                 onClick={handleCloseModal}
-                className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 transition-colors z-10"
-              >
+                className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 transition-colors z-10">
                 <X size={24} />
               </button>
               <h2 className="text-3xl font-bold mb-8 text-black">Masukan Bahan Baku</h2>

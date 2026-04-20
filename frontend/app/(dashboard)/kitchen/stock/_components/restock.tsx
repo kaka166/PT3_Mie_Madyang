@@ -5,6 +5,7 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { getBahan, createStockMovement } from "@/services/stockService";
+import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
 
 const unitOptions = ["Kg", "L", "ml", "Pack", "Ikat"];
 
@@ -88,6 +89,11 @@ export default function RestockModal({
     setHarga("");
     setSearch("");
     setSelectedBahan(null);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    const updated = keranjang.filter((_, i) => i !== index);
+    setKeranjang(updated);
   };
 
   // ================= SIMPAN RESTOCK =================
@@ -272,9 +278,13 @@ export default function RestockModal({
                 Harga per satuan
               </label>
               <input
-                type="number"
-                value={harga}
-                onChange={(e) => setHarga(e.target.value)}
+                type="text"
+                value={harga ? formatRupiah(harga) : ""}
+                onChange={(e) => {
+                  const raw = parseRupiah(e.target.value);
+                  setHarga(raw);
+                }}
+                placeholder="Masukkan harga"
                 className="w-full bg-gray-100 p-3 rounded-lg"
               />
             </div>
@@ -309,25 +319,30 @@ export default function RestockModal({
           </button>
 
           <h3 className="font-bold text-xl mb-6 mt-2">Keranjang</h3>
-
           <div className="flex-1 overflow-y-auto space-y-3">
             {keranjang.map((item, i) => (
               <div
                 key={`${item.nama}-${i}`}
-                className="bg-white p-4 rounded-xl">
+                className="bg-white p-4 rounded-xl relative">
+                <button
+                  onClick={() => handleRemoveItem(i)}
+                  className="absolute top-0 right-0 m-2 text-gray-400 hover:text-red-500">
+                  <X size={16} />
+                </button>
+
                 <div className="flex justify-between">
                   <span className="font-bold">{item.nama}</span>
                   <span className="text-red-600 font-bold">
                     {item.jumlah} {item.satuan}
                   </span>
                 </div>
+
                 <div className="text-xs text-gray-400 mt-1">
-                  Rp {item.harga}
+                  {item.harga ? formatRupiah(item.harga) : "-"}
                 </div>
               </div>
             ))}
           </div>
-
           <button
             onClick={handleSubmit}
             className="mt-auto w-full bg-red-500 text-white py-3 rounded-xl">
