@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import { formatRupiah } from "@/utils/formatCurrency";
+import { formatRupiah } from "@/utils/formatRupiah";
 import { getMenus, getCategories, MenuItem } from "@/services/cashierService";
 import { getTax, updateTax } from "@/services/taxService";
 import { createOrder } from "@/services/penjualanService";
@@ -39,9 +39,12 @@ export default function POSPage() {
   const [taxPercent, setTaxPercent] = useState(0);
   const [showTaxModal, setShowTaxModal] = useState(false);
 
+  const [isNavigating, setIsNavigating] = useState(false);
+
   type SessionResult = {
     opening_cash: number;
     total_pemasukan: number;
+    total_pengeluaran: number;
     expected_cash: number;
     closing_cash: number;
     selisih: number;
@@ -52,28 +55,35 @@ export default function POSPage() {
   const [sessionResult, setSessionResult] = useState<SessionResult | null>(
     null,
   );
+  const [loadingEnd, setLoadingEnd] = useState(false);
 
   const [sessionActive, setSessionActive] = useState(false);
   const [openingCash, setOpeningCash] = useState("");
+  const [showStartSessionModal, setShowStartSessionModal] = useState(false);
+  const [loadingStart, setLoadingStart] = useState(false);
+
+  const [showSessionWarning, setShowSessionWarning] = useState(false);
 
   const handleStartSession = async () => {
     const cash = Number(openingCash);
 
     if (!cash || cash < 0) {
       alert("Masukkan uang awal dulu!");
-      return;
+      return false;
     }
 
     try {
       await startSession(cash);
       setSessionActive(true);
-      alert("Sesi dimulai!");
+      setOpeningCash("");
+      return true;
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message);
       } else {
         alert("Gagal memulai sesi");
       }
+      return false;
     }
   };
 
@@ -81,28 +91,24 @@ export default function POSPage() {
     setShowEndSessionModal(true);
   };
 
-  const handleConfirmEndSession = async () => {
+  const handleConfirmEndSession = async (): Promise<any> => {
     const cash = Number(closingCash);
 
     if (!cash || cash < 0) {
       alert("Masukkan uang akhir yang valid!");
-      return;
+      return null;
     }
 
     try {
       const res = await endSession(cash);
-      const data = res.data ?? res;
-
-      setSessionResult(data);
-      setShowEndSessionModal(false);
-      setSessionActive(false);
-      setClosingCash("");
+      return res.data ?? res;
     } catch (err: unknown) {
       if (err instanceof Error) {
         alert(err.message);
       } else {
         alert("Gagal mengakhiri sesi");
       }
+      return null;
     }
   };
 
@@ -140,6 +146,13 @@ export default function POSPage() {
   };
 
   useEffect(() => {
+    const isFirstVisit = sessionStorage.getItem("first_visit");
+
+    if (!isFirstVisit) {
+      localStorage.removeItem("hasSeenStartSession");
+      sessionStorage.setItem("first_visit", "true");
+    }
+
     const init = async () => {
       await fetchTax();
       await loadInitialData();
@@ -150,12 +163,34 @@ export default function POSPage() {
         setSessionActive(true);
       } else {
         setSessionActive(false);
+
+        const hasSeenModal = localStorage.getItem("hasSeenStartSession");
+
+        if (!hasSeenModal) {
+          setShowStartSessionModal(true);
+          localStorage.setItem("hasSeenStartSession", "true");
+        }
       }
     };
     init();
     const intervalId = setInterval(fetchMenu, 5000);
     return () => clearInterval(intervalId);
   }, [loadInitialData]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (sessionActive && !isNavigating) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [sessionActive]);
 
   /* ================= LOGIC CART ================= */
   const addToCart = (menu: MenuItem) => {
@@ -269,6 +304,175 @@ export default function POSPage() {
         </div>
       )}
 
+      {showStartSessionModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60">
+          <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex overflow-hidden relative">
+            {/* 🔥 TOMBOL CLOSE */}
+            <button
+              onClick={() => {
+                setShowStartSessionModal(false);
+                localStorage.setItem("hasSeenStartSession", "true");
+              }}
+              className="absolute top-4 right-4 bg-red-100 hover:bg-red-200 text-red-500 w-8 h-8 flex items-center justify-center rounded-full font-bold">
+              ×
+            </button>
+            {/* LEFT */}
+            <div className="flex-1 p-8">
+              <h2 className="text-2xl font-black mb-6">Mulai Sesi Kasir</h2>
+
+              <label className="text-sm font-bold text-gray-500">
+                Uang Modal Awal
+              </label>
+
+              <input
+                type="text"
+                value={formatRupiah(openingCash)}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, "");
+                  setOpeningCash(raw);
+                }}
+                placeholder="Masukkan uang awal"
+                className="w-full mt-2 border-2 border-gray-100 rounded-2xl px-4 py-3 outline-none focus:border-[#ff6b6b]"
+              />
+            </div>
+
+            {/* RIGHT */}
+            <div className="w-[40%] bg-gray-50 p-8 flex flex-col justify-between">
+              <div>
+                <h3 className="font-black text-gray-400 uppercase text-sm mb-4">
+                  Status
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Silakan masukkan uang awal untuk memulai sesi kasir hari ini.
+                </p>
+              </div>
+
+              <button
+                onClick={async () => {
+                  setLoadingStart(true);
+
+                  const success = await handleStartSession();
+
+                  setLoadingStart(false);
+
+                  if (success) {
+                    setShowStartSessionModal(false);
+                    localStorage.setItem("hasSeenStartSession", "true");
+                  }
+                }}
+                disabled={loadingStart}
+                className="w-full bg-[#ff6b6b] text-white py-4 rounded-2xl font-black shadow-xl disabled:opacity-50">
+                {loadingStart ? "Memproses..." : "Mulai Sesi"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showSessionWarning && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm text-center shadow-2xl">
+            <h2 className="text-lg font-black mb-2">Sesi Belum Dimulai</h2>
+
+            <p className="text-sm text-gray-500 mb-6">
+              Silakan mulai sesi kasir terlebih dahulu.
+            </p>
+
+            <button
+              onClick={() => {
+                setShowSessionWarning(false);
+                setShowStartSessionModal(true);
+              }}
+              className="w-full bg-[#ff6b6b] text-white py-3 rounded-xl font-bold">
+              Mulai Sesi
+            </button>
+          </div>
+        </div>
+      )}
+
+      {sessionResult && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60">
+          <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex overflow-hidden">
+            {/* LEFT - DATA */}
+            <div className="flex-1 p-8">
+              <h2 className="text-2xl font-black mb-6">Ringkasan Sesi</h2>
+
+              <div className="space-y-4 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Uang Awal</span>
+                  <span className="font-bold">
+                    {formatRupiah(sessionResult.opening_cash)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Total Penjualan</span>
+                  <span className="font-bold text-green-600">
+                    + {formatRupiah(sessionResult.total_pemasukan)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Pengeluaran</span>
+                  <span className="font-bold text-red-500">
+                    - {formatRupiah(sessionResult.total_pengeluaran || 0)}
+                  </span>
+                </div>
+
+                <div className="border-t pt-3 flex justify-between">
+                  <span className="font-bold">Seharusnya</span>
+                  <span className="font-black">
+                    {formatRupiah(sessionResult.expected_cash)}
+                  </span>
+                </div>
+
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Uang Aktual</span>
+                  <span className="font-bold">
+                    {formatRupiah(sessionResult.closing_cash)}
+                  </span>
+                </div>
+
+                <div className="border-t pt-3 flex justify-between items-center">
+                  <span className="font-bold">Selisih</span>
+                  <span
+                    className={`font-black text-lg ${
+                      sessionResult.selisih < 0
+                        ? "text-red-500"
+                        : "text-green-600"
+                    }`}>
+                    {formatRupiah(sessionResult.selisih)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT - STATUS */}
+            <div className="w-[40%] bg-gray-50 p-8 flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-black text-gray-400 uppercase mb-4">
+                  Status
+                </h3>
+
+                {sessionResult.selisih === 0 ? (
+                  <p className="text-green-600 font-bold">✅ Uang sesuai</p>
+                ) : sessionResult.selisih < 0 ? (
+                  <p className="text-red-500 font-bold">⚠️ Kekurangan uang</p>
+                ) : (
+                  <p className="text-yellow-500 font-bold">⚠️ Kelebihan uang</p>
+                )}
+              </div>
+
+              <button
+                onClick={() => setSessionResult(null)}
+                className="w-full bg-[#ff6b6b] text-white py-4 rounded-2xl font-black shadow-xl">
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ================= MODAL PEMBAYARAN ================= */}
       {showPaymentModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-0 md:p-4">
@@ -322,13 +526,26 @@ export default function POSPage() {
               </div>
 
               <div className="space-y-3 pt-6 border-t-2 border-dashed border-gray-100">
-                <div className="flex justify-between text-gray-400 font-bold text-xs uppercase">
+                <div className="flex justify-between text-xs font-bold text-gray-600">
                   <span>Subtotal</span>
-                  <span>{formatRupiah(subtotal)}</span>
+                  <span className="font-bold text-gray-800">
+                    {formatRupiah(subtotal)}
+                  </span>
                 </div>
-                <div className="flex justify-between text-gray-400 font-bold text-xs uppercase">
-                  <span>Pajak ({taxPercent}%)</span>
-                  <span>{formatRupiah(tax)}</span>
+
+                <div className="flex justify-between text-xs font-bold">
+                  <span
+                    className={
+                      isTaxEnabled ? "text-gray-600" : "text-gray-400"
+                    }>
+                    Pajak ({taxPercent}%)
+                  </span>
+                  <span
+                    className={
+                      isTaxEnabled ? "text-gray-800 font-bold" : "text-gray-400"
+                    }>
+                    {formatRupiah(tax)}
+                  </span>
                 </div>
                 <div className="flex justify-between items-center pt-2">
                   <span className="text-lg font-black text-[#ff6b6b]">
@@ -404,6 +621,7 @@ export default function POSPage() {
                     });
 
                     if (result) {
+                      setIsNavigating(true);
                       alert("Pesanan masuk kitchen!");
 
                       setMenus((prevMenus) =>
@@ -435,7 +653,10 @@ export default function POSPage() {
                   Selesaikan Pesanan
                 </button>
                 <button
-                  onClick={() => setShowPaymentModal(false)}
+                  onClick={() => {
+                    setIsNavigating(true);
+                    setShowPaymentModal(false);
+                  }}
                   className="w-full text-gray-400 font-bold py-2 hover:text-gray-600 transition-colors">
                   Kembali
                 </button>
@@ -446,55 +667,69 @@ export default function POSPage() {
       )}
 
       {showEndSessionModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
-            <h2 className="text-lg font-bold mb-4">Tutup Sesi</h2>
-
-            <input
-              type="number"
-              placeholder="Masukkan uang akhir"
-              value={closingCash}
-              onChange={(e) => setClosingCash(e.target.value)}
-              className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 mb-4 outline-none"
-            />
-
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowEndSessionModal(false)}
-                className="flex-1 py-3 text-gray-500 font-bold">
-                Batal
-              </button>
-
-              <button
-                onClick={handleConfirmEndSession}
-                className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold">
-                Simpan
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {sessionResult && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl">
-            <h2 className="text-lg font-bold mb-4">Ringkasan Sesi</h2>
-
-            <div className="space-y-2 text-sm">
-              <p>Opening: {formatRupiah(sessionResult.opening_cash)}</p>
-              <p>Penjualan: {formatRupiah(sessionResult.total_pemasukan)}</p>
-              <p>Seharusnya: {formatRupiah(sessionResult.expected_cash)}</p>
-              <p>Uang Akhir: {formatRupiah(sessionResult.closing_cash)}</p>
-              <p className="font-bold text-red-500">
-                Selisih: {formatRupiah(sessionResult.selisih)}
-              </p>
-            </div>
-
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60">
+          <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex overflow-hidden relative">
+            {/* 🔥 TOMBOL CLOSE */}
             <button
-              onClick={() => setSessionResult(null)}
-              className="mt-4 w-full py-3 bg-[#ff6b6b] text-white rounded-xl font-bold">
-              Tutup
+              onClick={() => {
+                setShowEndSessionModal(false);
+              }}
+              className="absolute top-4 right-4 bg-red-100 hover:bg-red-200 text-red-500 w-8 h-8 flex items-center justify-center rounded-full font-bold">
+              ×
             </button>
+            {/* LEFT */}
+            <div className="flex-1 p-8">
+              <h2 className="text-2xl font-black mb-6">Tutup Sesi Kasir</h2>
+
+              <label className="text-sm font-bold text-gray-500">
+                Uang Akhir (Fisik)
+              </label>
+
+              <input
+                type="text"
+                inputMode="numeric"
+                value={formatRupiah(closingCash)}
+                onChange={(e) => {
+                  const raw = e.target.value.replace(/\D/g, "");
+                  setClosingCash(raw);
+                }}
+                placeholder="Masukkan uang akhir"
+                className="w-full mt-2 border-2 border-gray-100 rounded-2xl px-4 py-3 outline-none focus:border-red-400"
+              />
+            </div>
+
+            {/* RIGHT */}
+            <div className="w-[40%] bg-gray-50 p-8 flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm font-black text-gray-400 uppercase mb-4">
+                  Konfirmasi
+                </h3>
+
+                <p className="text-sm text-gray-500">
+                  Pastikan uang fisik sudah dihitung sebelum menutup sesi.
+                </p>
+              </div>
+
+              <button
+                onClick={async () => {
+                  setLoadingEnd(true);
+
+                  const data = await handleConfirmEndSession();
+
+                  setLoadingEnd(false);
+
+                  if (data) {
+                    setSessionResult(data);
+                    setShowEndSessionModal(false);
+                    setSessionActive(false);
+                    setClosingCash("");
+                  }
+                }}
+                disabled={loadingEnd}
+                className="w-full bg-red-500 text-white py-4 rounded-2xl font-black shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
+                {loadingEnd ? "Memproses..." : "Konfirmasi Tutup"}
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -539,25 +774,9 @@ export default function POSPage() {
                 placeholder="Cari menu..."
               />
             </div>
-
-            {/* SESSION */}
+            {/* SESSION STATUS */}
             <div className="flex gap-2 items-center">
-              {!sessionActive ? (
-                <>
-                  <input
-                    type="number"
-                    placeholder="Uang awal"
-                    value={openingCash}
-                    onChange={(e) => setOpeningCash(e.target.value)}
-                    className="px-3 py-2 border rounded-lg text-xs w-28"
-                  />
-                  <button
-                    onClick={handleStartSession}
-                    className="bg-green-500 text-white px-3 py-2 rounded-lg text-xs font-bold">
-                    Mulai Sesi
-                  </button>
-                </>
-              ) : (
+              {sessionActive ? (
                 <>
                   <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
                     Sesi Aktif
@@ -569,6 +788,18 @@ export default function POSPage() {
                     Tutup Sesi
                   </button>
                 </>
+              ) : (
+                <div className="flex gap-2 items-center">
+                  <span className="text-xs text-gray-400 italic">
+                    Belum ada sesi
+                  </span>
+
+                  <button
+                    onClick={() => setShowStartSessionModal(true)}
+                    className="bg-[#ff6b6b] text-white px-3 py-2 rounded-lg text-xs font-bold">
+                    Mulai Sesi
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -621,7 +852,13 @@ export default function POSPage() {
                       {formatRupiah(item.price)}
                     </span>
                     <button
-                      onClick={() => addToCart(item)}
+                      onClick={() => {
+                        if (!sessionActive) {
+                          setShowSessionWarning(true);
+                          return;
+                        }
+                        addToCart(item);
+                      }}
                       disabled={item.stock === 0}
                       className="w-10 h-10 rounded-2xl bg-red-50 text-[#a0383b] flex items-center justify-center font-black text-xl hover:bg-[#F53E1B] hover:text-white transition-all shadow-sm active:scale-90">
                       +
@@ -738,14 +975,20 @@ export default function POSPage() {
           {/* FOOTER SIDEBAR - Lebih compact di mobile */}
           <div className="p-5 lg:p-8 bg-white lg:bg-transparent border-t-2 lg:border-none rounded-t-[2rem] lg:rounded-none shadow-2xl lg:shadow-none relative z-30">
             <div className="space-y-2 mb-4">
-              <div className="flex justify-between text-[9px] font-black text-gray-400 uppercase tracking-widest">
+              <div className="flex justify-between text-xs font-bold text-gray-600">
                 <span>Subtotal</span>
-                <span>{formatRupiah(subtotal)}</span>
+                <span className="font-bold text-gray-800">
+                  {formatRupiah(subtotal)}
+                </span>
               </div>
-              <div className="flex justify-between text-[9px] font-black text-gray-400 uppercase tracking-widest">
+              <div className="flex justify-between text-xs font-bold text-gray-600">
                 <span
                   onClick={() => isTaxEnabled && setShowTaxModal(true)}
-                  className="cursor-pointer underline decoration-dashed decoration-2 hover:text-gray-600">
+                  className={`cursor-pointer font-bold text-xs ${
+                    isTaxEnabled
+                      ? "text-gray-600 hover:text-[#F53E1B]"
+                      : "text-gray-400"
+                  }`}>
                   Pajak ({taxPercent}%)
                 </span>
                 <div className="flex items-center gap-2">
@@ -768,7 +1011,10 @@ export default function POSPage() {
                       className={`bg-white w-3 h-3 rounded-full transition-transform duration-300 ${isTaxEnabled ? "translate-x-3.5" : ""}`}
                     />
                   </button>
-                  <span>{formatRupiah(tax)}</span>
+                  <span
+                    className={`font-bold ${isTaxEnabled ? "text-gray-800" : "text-gray-400"}`}>
+                    {formatRupiah(tax)}
+                  </span>
                 </div>
               </div>
               <div className="flex justify-between items-center pt-3 border-t border-dashed border-gray-100">
@@ -796,7 +1042,7 @@ export default function POSPage() {
               <button
                 onClick={() => {
                   if (!sessionActive) {
-                    alert("Mulai sesi dulu!");
+                    setShowSessionWarning(true);
                     return;
                   }
                   setShowPaymentModal(true);

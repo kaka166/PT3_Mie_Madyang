@@ -14,6 +14,9 @@ import {
   Search,
   X,
 } from "lucide-react";
+import { getPengeluaran } from "@/services/pengeluaranService";
+import { formatTanggal, formatTanggalRange } from "@/utils/formatTanggal";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 type FilterPeriod = "Minggu" | "Bulan" | "Tahun";
@@ -23,64 +26,8 @@ type Pengeluaran = {
   nama: string;
   kategori: string;
   waktu: string;
-  pembuat: string;
+  user_id: string;
   jumlah: number;
-};
-
-// ─── BACKEND PLACEHOLDER ──────────────────────────────────────────────────────
-// TIM BACKEND: Ganti isi fungsi ini dengan pemanggilan API sesungguhnya.
-const getPengeluaran = async (): Promise<Pengeluaran[]> => {
-  // Dummy data untuk sementara agar UI bisa di-test
-  return [
-    {
-      id: "#22398",
-      nama: "Terigu",
-      kategori: "Bahan Baku",
-      pembuat: "Kevin",
-      waktu: "2026-02-14T18:22:32",
-      jumlah: 60000,
-    },
-    {
-      id: "#22399",
-      nama: "Listrik Bulan Februari",
-      kategori: "Operasional",
-      pembuat: "Kevin",
-      waktu: "2026-02-15T10:00:00",
-      jumlah: 500000,
-    },
-    {
-      id: "#22400",
-      nama: "Dada Ayam",
-      kategori: "Bahan Baku",
-      pembuat: "Kevin",
-      waktu: "2026-02-16T08:30:00",
-      jumlah: 60000,
-    },
-    {
-      id: "#22401",
-      nama: "Plastik & Kardus",
-      kategori: "Packaging",
-      pembuat: "Kevin",
-      waktu: "2026-02-16T09:15:00",
-      jumlah: 120000,
-    },
-    {
-      id: "#22402",
-      nama: "Sayur Cesim",
-      kategori: "Bahan Baku",
-      pembuat: "Kevin",
-      waktu: "2026-02-17T07:45:00",
-      jumlah: 60000,
-    },
-    {
-      id: "#22403",
-      nama: "Minyak Goreng",
-      kategori: "Bahan Baku",
-      pembuat: "Kevin",
-      waktu: "2026-02-18T18:22:32",
-      jumlah: 60000,
-    },
-  ];
 };
 
 // ─── SUB COMPONENTS ────────────────────────────────────────────────────────────
@@ -227,11 +174,9 @@ function CalendarPicker({
 
   const displayLabel =
     value.start && value.end
-      ? `${new Date(value.start).toLocaleDateString("id-ID")} - ${new Date(
-          value.end,
-        ).toLocaleDateString("id-ID")}`
+      ? formatTanggalRange(value.start, value.end)
       : value.start
-        ? new Date(value.start).toLocaleDateString("id-ID")
+        ? formatTanggalRange(value.start, "")
         : "Hari/Bulan/Tahun";
 
   return (
@@ -446,14 +391,6 @@ export default function LaporanPengeluaran() {
   );
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  const formatRupiah = (value: number) =>
-    new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(value);
-
   // ── FILTERING & GROUPING UNTUK TABEL RINGKASAN PENGELUARAN ──
   const filteredRekap = riwayatData.filter((item) => {
     if (!item.waktu) return true;
@@ -495,7 +432,7 @@ export default function LaporanPengeluaran() {
           start.setDate(date.getDate() - date.getDay());
           const end = new Date(start);
           end.setDate(start.getDate() + 6);
-          key = `${start.toLocaleDateString("id-ID")} - ${end.toLocaleDateString("id-ID")}`;
+          key = formatTanggalRange(start.toISOString(), end.toISOString());
         }
         if (rekapFilter === "Bulan") {
           key = date.toLocaleDateString("id-ID", {
@@ -630,11 +567,7 @@ export default function LaporanPengeluaran() {
                       </td>
 
                       <td className="px-6 py-4 font-semibold text-neutral-800">
-                        {new Intl.NumberFormat("id-ID", {
-                          style: "currency",
-                          currency: "IDR",
-                          minimumFractionDigits: 0,
-                        }).format(row.total)}
+                        {formatRupiah(row.total)}
                       </td>
 
                       <td className="px-6 py-4 text-neutral-600">
@@ -648,9 +581,10 @@ export default function LaporanPengeluaran() {
           </div>
 
           {/* pagination ringkasan */}
-          <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500 bg-white">
-            <div className="flex items-center gap-3">
-              <span>
+          <div className="p-4 border-t flex justify-between items-center bg-white">
+            {/* LEFT */}
+            <div className="flex items-center gap-4">
+              <span className="text-gray-500 font-medium text-sm">
                 Showing {totalRekap === 0 ? 0 : startRekap + 1}-
                 {Math.min(startRekap + rekapLimit, totalRekap)} of {totalRekap}
               </span>
@@ -670,32 +604,48 @@ export default function LaporanPengeluaran() {
               </select>
             </div>
 
-            <div className="flex gap-1">
+            {/* RIGHT */}
+            <div className="flex items-center gap-1.5 font-bold">
               <button
                 onClick={() => setRekapPage((p) => Math.max(p - 1, 1))}
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
-                ‹
+                disabled={rekapPage === 1}
+                className={`w-8 h-8 flex items-center justify-center rounded ${
+                  rekapPage === 1
+                    ? "bg-gray-200 text-gray-400"
+                    : "bg-[#f85656] text-white"
+                }`}>
+                <ChevronLeft size={16} />
               </button>
 
-              {Array.from({ length: Math.min(totalRekapPages, 5) }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setRekapPage(i + 1)}
-                  className={`w-8 h-8 flex items-center justify-center rounded ${
-                    rekapPage === i + 1
-                      ? "bg-red-400 text-white"
-                      : "bg-gray-100"
-                  }`}>
-                  {i + 1}
-                </button>
-              ))}
+              {Array.from({ length: totalRekapPages }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setRekapPage(page)}
+                    className={`w-8 h-8 flex items-center justify-center rounded ${
+                      rekapPage === page
+                        ? "bg-[#f85656] text-white"
+                        : "bg-gray-200"
+                    }`}>
+                    {page}
+                  </button>
+                );
+              })}
 
               <button
                 onClick={() =>
-                  setRekapPage((p) => Math.min(p + 1, totalRekapPages || 1))
+                  setRekapPage((p) => Math.min(p + 1, totalRekapPages))
                 }
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
-                ›
+                disabled={
+                  rekapPage === totalRekapPages || totalRekapPages === 0
+                }
+                className={`w-8 h-8 flex items-center justify-center rounded ${
+                  rekapPage === totalRekapPages || totalRekapPages === 0
+                    ? "bg-gray-200 text-gray-400"
+                    : "bg-[#f85656] text-white"
+                }`}>
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>
@@ -763,18 +713,13 @@ export default function LaporanPengeluaran() {
                       {row.kategori}
                     </td>
                     <td className="px-6 py-4 text-neutral-500">
-                      {new Date(row.waktu).toLocaleString("id-ID")}
+                      {formatTanggal(row.waktu)}
                     </td>
                     <td className="px-6 py-4 text-neutral-600">
-                      {row.pembuat}
+                      {row.user_id}
                     </td>
                     <td className="px-6 py-4 font-semibold text-neutral-800">
-                      {new Intl.NumberFormat("id-ID", {
-                        style: "currency",
-                        currency: "IDR",
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 0,
-                      }).format(row.jumlah)}
+                      {formatRupiah(row.jumlah)}
                     </td>
                   </tr>
                 ))}
@@ -783,9 +728,10 @@ export default function LaporanPengeluaran() {
           </div>
 
           {/* pagination detail */}
-          <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500 bg-white">
-            <div className="flex items-center gap-3">
-              <span>
+          <div className="p-4 border-t flex justify-between items-center bg-white">
+            {/* LEFT */}
+            <div className="flex items-center gap-4">
+              <span className="text-gray-500 font-medium text-sm">
                 Showing {totalItems === 0 ? 0 : startIndex + 1}-
                 {Math.min(startIndex + itemsPerPage, totalItems)} of{" "}
                 {totalItems}
@@ -797,7 +743,7 @@ export default function LaporanPengeluaran() {
                   setItemsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="bg-gray-100 px-2 py-1 rounded text-sm focus:outline-none">
+                className="bg-gray-100 px-2 py-1 rounded text-sm">
                 {pageSizeOptions.map((size) => (
                   <option key={size} value={size}>
                     {size}
@@ -806,32 +752,46 @@ export default function LaporanPengeluaran() {
               </select>
             </div>
 
-            <div className="flex gap-1">
+            {/* RIGHT */}
+            <div className="flex items-center gap-1.5 font-bold">
               <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
-                ‹
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className={`w-8 h-8 flex items-center justify-center rounded ${
+                  currentPage === 1
+                    ? "bg-gray-200 text-gray-400"
+                    : "bg-[#f85656] text-white"
+                }`}>
+                <ChevronLeft size={16} />
               </button>
 
-              {Array.from({ length: totalPages }, (_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`w-8 h-8 flex items-center justify-center rounded ${
-                    currentPage === i + 1
-                      ? "bg-red-400 text-white"
-                      : "bg-gray-100"
-                  }`}>
-                  {i + 1}
-                </button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => {
+                const page = i + 1;
+                return (
+                  <button
+                    key={i}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 flex items-center justify-center rounded ${
+                      currentPage === page
+                        ? "bg-[#f85656] text-white"
+                        : "bg-gray-200"
+                    }`}>
+                    {page}
+                  </button>
+                );
+              })}
 
               <button
                 onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  setCurrentPage((p) => Math.min(p + 1, totalPages))
                 }
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
-                ›
+                disabled={currentPage === totalPages || totalPages === 0}
+                className={`w-8 h-8 flex items-center justify-center rounded ${
+                  currentPage === totalPages || totalPages === 0
+                    ? "bg-gray-200 text-gray-400"
+                    : "bg-[#f85656] text-white"
+                }`}>
+                <ChevronRight size={16} />
               </button>
             </div>
           </div>

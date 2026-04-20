@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\StokMovement;
 use App\Models\StokBahan;
 use App\Models\Bahan;
+use Illuminate\Support\Facades\Auth;
 
 class StockController extends Controller
 {
@@ -103,9 +104,20 @@ class StockController extends Controller
         // ==========================
         $movement = StokMovement::create([
             ...$data,
-            'user_id' => 1
+            'user_id' => Auth::id()
         ]);
 
+        // ==========================
+        // MASUKKAN KE PENGELUARAN (KHUSUS RESTOCK)
+        // ==========================
+        if ($request->kategori === 'restock') {
+            \App\Models\Pengeluaran::create([
+                'nama_pengeluaran' => $request->nama ?? 'Restock Bahan',
+                'jumlah' => ($request->harga ?? 0) * $request->jumlah,
+                'user_id' => Auth::id(),
+                'tanggal' => now()->toDateString(),
+            ]);
+        }
         // ==========================
         // UPDATE STOK
         // ==========================
@@ -218,7 +230,8 @@ class StockController extends Controller
     }
     public function stockHistory()
     {
-        $data = \App\Models\StokMovement::join('bahan', 'stok_movements.bahan_id', '=', 'bahan.id')
+        $data = \App\Models\StokMovement::with('user')
+            ->join('bahan', 'stok_movements.bahan_id', '=', 'bahan.id')
             ->select(
                 'stok_movements.id',
                 'stok_movements.bahan_id as itemId',
@@ -228,7 +241,7 @@ class StockController extends Controller
                 'stok_movements.jumlah',
                 'stok_movements.satuan',
                 'stok_movements.created_at',
-                'stok_movements.user_id'
+                'stok_movements.user_id',
             )
             ->latest()
             ->get()
@@ -241,7 +254,7 @@ class StockController extends Controller
                     'alasan' => $item->alasan ?? '-',
                     'kuantiti' => $item->jumlah . ' ' . $item->satuan,
                     'waktu' => $item->created_at,
-                    'pembuat' => 'User', // sementara
+                    'pembuat' => $item->user->name ?? 'Unknown',
                 ];
             });
 

@@ -14,7 +14,6 @@ export default function DashboardLayout({
   return (
     // Tambahkan h-screen dan overflow-hidden di sini agar scroll hanya di area konten
     <div className="h-screen flex flex-col bg-[#f9f9f9] overflow-hidden">
-      
       {/* 1. Navbar: Naikkan z-index ke 100 agar mutlak di atas */}
       <div className="fixed top-0 left-0 right-0 z-[100] h-16">
         <Navbar onMenuClick={() => setIsOpen(!isOpen)} />
@@ -22,7 +21,6 @@ export default function DashboardLayout({
 
       {/* 2. Wrapper Utama: Beri pt-16 agar konten tidak terpotong Navbar */}
       <div className="flex flex-1 pt-16 overflow-hidden">
-        
         {/* Sidebar */}
         <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
 

@@ -16,6 +16,11 @@ class Produksi extends Model
         'created_by'
     ];
 
+    public function details()
+    {
+        return $this->hasMany(ProduksiDetail::class);
+    }
+    
     public function menu()
     {
         return $this->belongsTo(Menu::class);

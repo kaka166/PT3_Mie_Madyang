@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 
 import { getPemasukan } from "@/services/penjualanService";
+import { formatTanggal, formatTanggalRange } from "@/utils/formatTanggal";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 type FilterPeriod = "Minggu" | "Bulan" | "Tahun";
@@ -163,11 +164,9 @@ function CalendarPicker({
 
   const displayLabel =
     value.start && value.end
-      ? `${new Date(value.start).toLocaleDateString("id-ID")} - ${new Date(
-          value.end,
-        ).toLocaleDateString("id-ID")}`
+      ? formatTanggalRange(value.start, value.end)
       : value.start
-        ? new Date(value.start).toLocaleDateString("id-ID")
+        ? formatTanggalRange(value.start, "")
         : "Hari/Bulan/Tahun";
 
   return (
@@ -489,9 +488,7 @@ export default function LaporanPemasukan() {
           const end = new Date(start);
           end.setDate(start.getDate() + 6);
 
-          key = `${start.toLocaleDateString("id-ID")} - ${end.toLocaleDateString(
-            "id-ID",
-          )}`;
+          key = formatTanggalRange(start.toISOString(), end.toISOString());
         }
 
         if (rekapFilter === "Bulan") {
@@ -754,7 +751,9 @@ export default function LaporanPemasukan() {
                     <td className="px-6 py-4 font-bold text-neutral-800">
                       {row.nama}
                     </td>
-                    <td className="px-6 py-4 text-neutral-500">{row.waktu}</td>
+                    <td className="px-6 py-4 text-neutral-500">
+                      {formatTanggal(row.waktu)}
+                    </td>
                     <td className="px-6 py-4 text-neutral-600">{row.kasir}</td>
                     <td className="px-6 py-4">
                       <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">
