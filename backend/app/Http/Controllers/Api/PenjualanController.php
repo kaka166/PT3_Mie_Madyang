@@ -226,16 +226,35 @@ class PenjualanController extends Controller
 
     public function getPemasukan()
     {
-        $data = Pemasukan::latest()->get()->map(function ($p) {
-            return [
-                'no' => '#' . $p->penjualan_id,
-                'nama' => $p->nama,
-                'waktu' => $p->waktu,
-                'kasir' => $p->kasir,
-                'metode' => $p->metode,
-                'jumlah' => $p->total
-            ];
-        });
+        $data = Pemasukan::with('penjualan.detail.menu', 'penjualan.user')
+            ->latest()
+            ->get()
+            ->map(function ($p) {
+
+                $penjualan = $p->penjualan;
+
+                return [
+                    'no' => '#' . $p->penjualan_id,
+                    'nama' => $penjualan->customer_name ?? 'Guest',
+                    'waktu' => $p->waktu,
+                    'kasir' => $p->kasir,
+                    'metode' => $p->metode,
+                    'jumlah' => $p->total,
+                    'kondisi' => $penjualan->order_type === 'Dine In'
+                        ? 'Makan di Tempat'
+                        : 'Bungkus',
+
+                    'details' => $penjualan->detail->map(function ($d) {
+                        return [
+                            'nama' => $d->menu->nama_menu ?? '-',
+                            'qty' => $d->qty,
+                            'note' => $d->note ?? '',
+                            'harga' => $d->harga,
+                            'subtotal' => $d->subtotal,
+                        ];
+                    }),
+                ];
+            });
 
         return response()->json($data);
     }

@@ -28,7 +28,6 @@ export type CreateOrderPayload = {
   metode_pembayaran: "QRIS" | "Tunai";
   items: OrderItemPayload[];
 };
-
 export type Order = {
   id: string;
   waktu: string;
@@ -37,6 +36,25 @@ export type Order = {
   harga: number;
   kondisi: string;
   status: string;
+};
+
+export type DetailItem = {
+  nama: string;
+  qty: number;
+  note: string;
+  harga: number;
+  subtotal: number;
+};
+
+export type Pemasukan = {
+  no: string;
+  nama: string;
+  waktu: string;
+  kasir: string;
+  metode: string;
+  jumlah: number;
+  kondisi: string;
+  details: DetailItem[];
 };
 
 // ================= API FUNCTIONS =================
@@ -105,7 +123,7 @@ export const updateOrderStatus = async (
   }
 };
 
-export const getPemasukan = async () => {
+export const getPemasukan = async (): Promise<Pemasukan[]> => {
   try {
     const res = await fetch(`${API_BASE_URL}/pemasukan`, {
       headers: getHeaders(),

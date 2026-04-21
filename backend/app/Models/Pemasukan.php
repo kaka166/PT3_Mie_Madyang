@@ -16,4 +16,9 @@ class Pemasukan extends Model
         'metode',
         'waktu'
     ];
+
+    public function penjualan()
+    {
+        return $this->belongsTo(\App\Models\Penjualan::class);
+    }
 }

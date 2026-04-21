@@ -215,6 +215,7 @@ export default function POSPage() {
       prev.map((item) => {
         const menu = menus.find((m) => m.id === id);
         if (!menu || menu.stock === 0) return item;
+        if (item.qty >= menu.stock) return item;
         return item.id === id ? { ...item, qty: item.qty + 1 } : item;
       }),
     );
@@ -942,9 +943,38 @@ export default function POSPage() {
                         className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-red-500 font-black text-base">
                         −
                       </button>
-                      <span className="text-[10px] font-black w-6 text-center text-gray-700">
-                        {item.qty}
-                      </span>
+                      {/* 🔥 INI DIGANTI */}
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        value={item.qty}
+                        onChange={(e) => {
+                          const value =
+                            parseInt(e.target.value.replace(/\D/g, "")) || 0;
+
+                          setCart((prev) =>
+                            prev.map((cartItem) => {
+                              if (cartItem.id !== item.id) return cartItem;
+
+                              const menu = menus.find((m) => m.id === item.id);
+                              if (!menu) return cartItem;
+
+                              // ❗ batas max stok
+                              if (value > menu.stock) {
+                                return { ...cartItem, qty: menu.stock };
+                              }
+
+                              // ❗ minimal 1
+                              if (value < 1) {
+                                return cartItem;
+                              }
+
+                              return { ...cartItem, qty: value };
+                            }),
+                          );
+                        }}
+                        className="text-[10px] font-black w-10 text-center bg-transparent outline-none"
+                      />
                       <button
                         onClick={() => increaseQty(item.id)}
                         className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-green-500 font-black text-base">

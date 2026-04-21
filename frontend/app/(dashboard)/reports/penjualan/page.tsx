@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 
-import { getPemasukan } from "@/services/penjualanService";
+import { getPemasukan, Pemasukan } from "@/services/penjualanService";
 import { formatTanggal, formatTanggalRange } from "@/utils/formatTanggal";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
@@ -347,15 +347,6 @@ export default function LaporanPemasukan() {
 
   const pageSizeOptions = [10, 20, 30, 40];
 
-  type Pemasukan = {
-    no: string;
-    nama: string;
-    waktu: string;
-    kasir: string;
-    metode: string;
-    jumlah: number;
-  };
-
   const [riwayatData, setRiwayatData] = useState<Pemasukan[]>([]);
 
   const fetchData = async () => {
@@ -540,6 +531,21 @@ export default function LaporanPemasukan() {
   );
 
   const totalRekapPages = Math.ceil(totalRekap / rekapLimit);
+
+  const [selectedTransaksi, setSelectedTransaksi] = useState<Pemasukan | null>(
+    null,
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const openModal = (data: Pemasukan) => {
+    setSelectedTransaksi(data);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setSelectedTransaksi(null);
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24">
@@ -744,7 +750,10 @@ export default function LaporanPemasukan() {
                 {(paginatedData || []).map((row, idx) => (
                   <tr
                     key={idx}
-                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-100"}>
+                    onClick={() => openModal(row)}
+                    className={`cursor-pointer ${
+                      idx % 2 === 0 ? "bg-white" : "bg-gray-100"
+                    } hover:bg-red-50 transition`}>
                     <td className="px-6 py-4 font-semibold text-neutral-700">
                       {row.no}
                     </td>
@@ -828,6 +837,97 @@ export default function LaporanPemasukan() {
             </div>
           </div>
         </div>
+        {isModalOpen && selectedTransaksi && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl p-6 relative">
+              {/* CLOSE */}
+              <button
+                onClick={closeModal}
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-500">
+                ✕
+              </button>
+
+              {/* HEADER */}
+              <h2 className="text-xl font-bold mb-4">
+                Detail Transaksi {selectedTransaksi.no}
+              </h2>
+
+              {/* INFO */}
+              <div className="space-y-2 text-sm mb-4">
+                <p>
+                  <b>Customer:</b> {selectedTransaksi.nama}
+                </p>
+                <p>
+                  <b>Waktu:</b> {formatTanggal(selectedTransaksi.waktu)}
+                </p>
+                <p>
+                  <b>Kasir:</b> {selectedTransaksi.kasir}
+                </p>
+                <p>
+                  <b>Metode:</b> {selectedTransaksi.metode}
+                </p>
+                <p>
+                  <b>Kondisi:</b> {selectedTransaksi.kondisi}
+                </p>
+              </div>
+
+              {/* ITEMS */}
+              <div className="border-t pt-4">
+                <h3 className="font-semibold mb-2">Rincian Pesanan</h3>
+
+                <div className="space-y-2 max-h-60 overflow-y-auto">
+                  {selectedTransaksi.details.map((item, i) => (
+                    <div
+                      key={i}
+                      className="flex justify-between bg-gray-50 p-3 rounded-lg">
+                      <div>
+                        <p className="font-semibold text-sm">{item.nama}</p>
+
+                        {item.note && (
+                          <p className="text-xs text-gray-400">
+                            Note: {item.note}
+                          </p>
+                        )}
+
+                        <p className="text-xs text-gray-500">
+                          {new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                          }).format(item.harga)}
+                        </p>
+                      </div>
+
+                      <div className="text-right">
+                        <p className="text-sm font-bold">x{item.qty}</p>
+
+                        <p className="text-xs text-gray-500">
+                          {new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                          }).format(item.subtotal)}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* TOTAL */}
+              <div className="border-t mt-4 pt-4 flex justify-between font-bold text-lg">
+                <span>Total</span>
+                <span>
+                  {new Intl.NumberFormat("id-ID", {
+                    style: "currency",
+                    currency: "IDR",
+                    minimumFractionDigits: 0,
+                  }).format(selectedTransaksi.jumlah)}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

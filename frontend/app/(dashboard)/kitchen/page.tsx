@@ -6,180 +6,12 @@ import { useEffect, useState, useRef } from "react";
 import { getOrders, updateOrderStatus } from "@/services/penjualanService";
 import {
   Search,
-  Calendar,
   MoreHorizontal,
   ChevronLeft,
   ChevronRight,
   X,
 } from "lucide-react";
 import { formatTanggal } from "@/utils/formatTanggal";
-
-// --- KOMPONEN CALENDAR PICKER (KUSTOM) ---
-function CalendarPicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [viewDate, setViewDate] = useState(() => {
-    const d = value ? new Date(value) : new Date();
-    return { year: d.getFullYear(), month: d.getMonth() };
-  });
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const daysInMonth = new Date(viewDate.year, viewDate.month + 1, 0).getDate();
-  const firstDay = new Date(viewDate.year, viewDate.month, 1).getDay();
-  const monthNames = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
-
-  const selectedDay = value ? new Date(value).getDate() : null;
-  const selectedMonth = value ? new Date(value).getMonth() : null;
-  const selectedYear = value ? new Date(value).getFullYear() : null;
-
-  const prevMonth = () =>
-    setViewDate((v) => {
-      const m = v.month === 0 ? 11 : v.month - 1;
-      const y = v.month === 0 ? v.year - 1 : v.year;
-      return { year: y, month: m };
-    });
-  const nextMonth = () =>
-    setViewDate((v) => {
-      const m = v.month === 11 ? 0 : v.month + 1;
-      const y = v.month === 11 ? v.year + 1 : v.year;
-      return { year: y, month: m };
-    });
-
-  const selectDay = (day: number) => {
-    const d = new Date(viewDate.year, viewDate.month, day);
-    const offset = d.getTimezoneOffset();
-    const adjustedDate = new Date(d.getTime() - offset * 60 * 1000);
-    const iso = adjustedDate.toISOString().split("T")[0];
-
-    onChange(iso);
-    setOpen(false);
-  };
-
-  const displayLabel = value
-    ? new Date(value).toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        timeZone: "Asia/Jakarta",
-      })
-    : "Hari/Bulan/Tahun";
-
-  return (
-    <div ref={ref} className="relative z-50">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between gap-3 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-48 cursor-pointer">
-        <div className="flex items-center gap-2">
-          <Calendar size={16} className="text-gray-500" />
-          <span className="truncate">{displayLabel}</span>
-        </div>
-        {value && (
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              onChange("");
-            }}
-            className="text-gray-400 hover:text-red-500 transition-colors"
-            title="Hapus Tanggal">
-            <X size={14} />
-          </span>
-        )}
-      </button>
-
-      {open && (
-        <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-gray-200 shadow-xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <button
-              onClick={prevMonth}
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-              <ChevronLeft size={16} className="text-gray-600" />
-            </button>
-            <span className="text-sm font-bold text-gray-700">
-              {monthNames[viewDate.month]} {viewDate.year}
-            </span>
-            <button
-              onClick={nextMonth}
-              className="p-1 rounded-lg hover:bg-gray-100 transition-colors">
-              <ChevronRight size={16} className="text-gray-600" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-7 mb-1">
-            {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
-              <div
-                key={d}
-                className="text-center text-[10px] font-bold text-gray-400 py-1">
-                {d}
-              </div>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-7 gap-y-1">
-            {Array(firstDay)
-              .fill(null)
-              .map((_, i) => (
-                <div key={`e-${i}`} />
-              ))}
-            {Array(daysInMonth)
-              .fill(null)
-              .map((_, i) => {
-                const day = i + 1;
-                const isSelected =
-                  day === selectedDay &&
-                  viewDate.month === selectedMonth &&
-                  viewDate.year === selectedYear;
-                const isToday =
-                  day === new Date().getDate() &&
-                  viewDate.month === new Date().getMonth() &&
-                  viewDate.year === new Date().getFullYear();
-
-                return (
-                  <button
-                    key={day}
-                    onClick={() => selectDay(day)}
-                    className={`text-center text-sm h-8 w-full rounded-lg font-medium transition-colors
-                    ${isSelected ? "bg-red-500 text-white" : ""}
-                    ${isToday && !isSelected ? "border border-red-500 text-red-500" : ""}
-                    ${!isSelected && !isToday ? "text-gray-700 hover:bg-gray-100" : ""}
-                  `}>
-                    {day}
-                  </button>
-                );
-              })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-// --- END KOMPONEN KUSTOM ---
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -196,7 +28,6 @@ const getStatusBadge = (status: string) => {
 
 export default function KitchenDashboardPage() {
   const [orders, setOrders] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState("");
   const [searchId, setSearchId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -229,14 +60,10 @@ export default function KitchenDashboardPage() {
     .filter((item) => {
       const date = new Date(item.waktu);
 
-      const orderDate = date.toLocaleDateString("sv-SE", {
-        timeZone: "Asia/Jakarta",
-      });
-      const matchDate = selectedDate ? orderDate === selectedDate : true;
       const matchSearch = searchId
         ? item.id.replace("#", "").includes(searchId)
         : true;
-      return matchDate && matchSearch;
+      return matchSearch;
     });
 
   const totalItems = filteredOrders.length;
@@ -304,7 +131,6 @@ export default function KitchenDashboardPage() {
           <h2 className="text-xl font-bold text-gray-900">Pesanan</h2>
 
           <div className="flex gap-3">
-            <CalendarPicker value={selectedDate} onChange={setSelectedDate} />
             <div className="relative">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
