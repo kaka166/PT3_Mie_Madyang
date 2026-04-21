@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\StokMovement;
 use App\Models\StokBahan;
 use App\Models\Bahan;
+use Illuminate\Support\Facades\Auth;
 
 class StockController extends Controller
 {
@@ -20,7 +21,9 @@ class StockController extends Controller
                 'bahan.id',
                 'bahan.nama_bahan as nama',
                 'bahan.satuan',
-                'stok_bahan.qty'
+                'stok_bahan.qty',
+                'bahan.stock_limit',
+                'bahan.harga'
             )
             ->get()
             ->map(function ($item) {
@@ -28,7 +31,9 @@ class StockController extends Controller
                     'id' => $item->id,
                     'nama' => $item->nama,
                     'satuan' => $item->satuan,
-                    'qty' => $item->qty ?? 0
+                    'qty' => $item->qty ?? 0,
+                    'stock_limit' => $item->stock_limit ?? 5,
+                    'harga' => $item->harga ?? 0,
                 ];
             });
 
@@ -60,10 +65,25 @@ class StockController extends Controller
         if (!$bahanId) {
             $bahan = \App\Models\Bahan::create([
                 'nama_bahan' => $request->nama,
-                'satuan' => $request->satuan ?? 'Kg'
+                'satuan' => $request->satuan ?? 'Kg',
+                'stock_limit' => $request->stock_limit ?? 5,
+                'harga' => $request->harga ?? 0,
             ]);
 
             $bahanId = $bahan->id;
+        }
+
+        // ✅ TAMBAHAN DI SINI (WAJIB)
+        if ($bahanId && $request->stock_limit !== null) {
+            \App\Models\Bahan::where('id', $bahanId)->update([
+                'stock_limit' => $request->stock_limit
+            ]);
+        }
+
+        if ($bahanId && $request->harga !== null) {
+            \App\Models\Bahan::where('id', $bahanId)->update([
+                'harga' => $request->harga
+            ]);
         }
 
         // ==========================
@@ -84,9 +104,20 @@ class StockController extends Controller
         // ==========================
         $movement = StokMovement::create([
             ...$data,
-            'user_id' => 1
+            'user_id' => Auth::id()
         ]);
 
+        // ==========================
+        // MASUKKAN KE PENGELUARAN (KHUSUS RESTOCK)
+        // ==========================
+        if ($request->kategori === 'restock') {
+            \App\Models\Pengeluaran::create([
+                'nama_pengeluaran' => $request->nama ?? 'Restock Bahan',
+                'jumlah' => ($request->harga ?? 0) * $request->jumlah,
+                'user_id' => Auth::id(),
+                'tanggal' => now()->toDateString(),
+            ]);
+        }
         // ==========================
         // UPDATE STOK
         // ==========================
@@ -107,9 +138,6 @@ class StockController extends Controller
 
         $stok->save();
 
-        // ==========================
-        // RESPONSE
-        // ==========================
         return response()->json([
             'message' => 'Berhasil disimpan',
             'data' => $movement
@@ -181,7 +209,8 @@ class StockController extends Controller
                 'bahan.id',
                 'bahan.nama_bahan as nama',
                 'bahan.satuan',
-                'stok_bahan.qty'
+                'stok_bahan.qty',
+                'bahan.stock_limit'
             )
             ->get()
             ->map(function ($item) {
@@ -192,7 +221,8 @@ class StockController extends Controller
                     'id' => $item->id,
                     'nama' => $item->nama,
                     'jumlah' => $qty . ' ' . $item->satuan,
-                    'status' => $qty <= 5 ? 'Kritis' : 'Aman',
+                    'stock_limit' => $item->stock_limit ?? 5,
+                    'status' => $qty <= ($item->stock_limit ?? 5) ? 'Kritis' : 'Aman',
                 ];
             });
 
@@ -200,7 +230,8 @@ class StockController extends Controller
     }
     public function stockHistory()
     {
-        $data = \App\Models\StokMovement::join('bahan', 'stok_movements.bahan_id', '=', 'bahan.id')
+        $data = \App\Models\StokMovement::with('user')
+            ->join('bahan', 'stok_movements.bahan_id', '=', 'bahan.id')
             ->select(
                 'stok_movements.id',
                 'stok_movements.bahan_id as itemId',
@@ -210,7 +241,7 @@ class StockController extends Controller
                 'stok_movements.jumlah',
                 'stok_movements.satuan',
                 'stok_movements.created_at',
-                'stok_movements.user_id'
+                'stok_movements.user_id',
             )
             ->latest()
             ->get()
@@ -223,7 +254,7 @@ class StockController extends Controller
                     'alasan' => $item->alasan ?? '-',
                     'kuantiti' => $item->jumlah . ' ' . $item->satuan,
                     'waktu' => $item->created_at,
-                    'pembuat' => 'User', // sementara
+                    'pembuat' => $item->user->name ?? 'Unknown',
                 ];
             });
 

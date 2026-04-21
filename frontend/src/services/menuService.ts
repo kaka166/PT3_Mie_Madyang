@@ -6,6 +6,7 @@ export interface Menu {
   is_active: number;
   gambar?: string;
   kategori?: { nama_kategori: string };
+  stock: number;
 }
 
 export interface Category {
@@ -14,7 +15,7 @@ export interface Category {
   is_active: number;
 }
 
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "https://api.farelzy.my.id/api";
 
 // Helper buat ambil Token & Header
 const getAdminHeaders = (isFormData = false) => {
@@ -132,5 +133,15 @@ export const menuService = {
       const data = await res.json();
       throw new Error(data.message || "Gagal hapus menu");
     }
+  },
+
+  updateStock: async (id: number, stock: number) => {
+    const res = await fetch(`${API_BASE_URL}/menu/${id}/stock`, {
+      method: "PATCH",
+      headers: getAdminHeaders(),
+      body: JSON.stringify({ stock }),
+    });
+
+    if (!res.ok) throw new Error("Gagal update stok");
   },
 };

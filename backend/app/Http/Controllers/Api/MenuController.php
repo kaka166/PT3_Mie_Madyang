@@ -13,12 +13,22 @@ class MenuController extends Controller
     // GET /api/menu
     public function index()
     {
-        $menu = Menu::with('kategori')->get();
+        $menu = Menu::with('kategori', 'stokPorsi')->get();
 
         return response()->json([
             'success' => true,
             'message' => 'Daftar menu',
-            'data' => $menu
+            'data' => $menu->map(function ($m) {
+                return [
+                    'id' => $m->id,
+                    'nama_menu' => $m->nama_menu,
+                    'harga_jual' => $m->harga_jual,
+                    'gambar' => $m->gambar,
+                    'is_active' => $m->is_active,
+                    'kategori' => $m->kategori,
+                    'stock' => $m->stokPorsi->qty ?? 0,
+                ];
+            })
         ]);
     }
 
@@ -168,6 +178,27 @@ class MenuController extends Controller
         return response()->json([
             'message' => 'Status menu berhasil diubah',
             'is_active' => $menu->is_active
+        ]);
+    }
+
+    public function updateStock(Request $request, $id)
+    {
+        $request->validate([
+            'stock' => 'required|integer|min:0'
+        ]);
+
+        $menu = Menu::findOrFail($id);
+
+        $stok = \App\Models\StokPorsi::firstOrCreate(
+            ['menu_id' => $menu->id],
+            ['qty' => 0]
+        );
+
+        $stok->qty = $request->stock;
+        $stok->save();
+
+        return response()->json([
+            'message' => 'Stok berhasil diupdate'
         ]);
     }
 }

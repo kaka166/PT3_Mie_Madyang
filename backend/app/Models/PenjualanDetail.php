@@ -13,7 +13,8 @@ class PenjualanDetail extends Model
         'menu_id',
         'qty',
         'harga',
-        'subtotal'
+        'subtotal',
+        'note',
     ];
 
     public function menu()

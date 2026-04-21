@@ -10,6 +10,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { menuService, Menu, Category } from "@/services/menuService";
+import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
 
 export default function InventoryPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
@@ -55,11 +56,6 @@ export default function InventoryPage() {
   const [editingCatId, setEditingCatId] = useState<number | null>(null);
   const [editingCatName, setEditingCatName] = useState("");
   const [newCatName, setNewCatName] = useState("");
-
-  const formatRupiah = (value: string | number) => {
-    if (!value) return "";
-    return new Intl.NumberFormat("id-ID").format(Number(value));
-  };
 
   // --- DATA FETCHING ---
   const fetchData = useCallback(async () => {
@@ -218,11 +214,11 @@ export default function InventoryPage() {
       {/* 1. HEADER SECTION */}
       <div className="flex flex-col md:flex-row justify-between mb-8 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-800 tracking-tight">
-            Menu & Inventory Controls
+          <h1 className="text-2xl font-bold text-[#F53E1B] tracking-tight">
+            Menu
           </h1>
           <p className="text-sm text-zinc-500">
-            Kelola menu, strategi harga, dan pantau stok bahan baku.
+            Kelola menu dan strategi harga
           </p>
         </div>
 
@@ -242,25 +238,30 @@ export default function InventoryPage() {
 
           <button
             onClick={() => setShowCatModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-zinc-200"
-          >
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-zinc-200">
             <FolderPlus size={16} /> Kategori
           </button>
 
           <button
             onClick={() => {
               setIsEdit(false);
-              setCalc({ hpp: 0, mode: "manual", value: 0 });
+
+              setCalc({
+                hpp: 0,
+                mode: "manual",
+                value: 0,
+              });
+
               setForm({
                 nama_menu: "",
                 harga_jual: "",
                 kategori_id: categories[0]?.id.toString() || "",
                 gambar: null,
               });
+
               setShowModal(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-red-600/20"
-          >
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-red-600/20">
             <Plus size={16} /> Tambah Menu
           </button>
         </div>
@@ -270,16 +271,14 @@ export default function InventoryPage() {
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
         <button
           onClick={() => setFilter("All Items")}
-          className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === "All Items" ? "bg-red-600 text-white shadow-md shadow-red-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}
-        >
+          className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === "All Items" ? "bg-red-600 text-white shadow-md shadow-red-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}>
           Semua
         </button>
         {categories.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setFilter(cat.nama_kategori)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === cat.nama_kategori ? "bg-red-600 text-white shadow-md shadow-red-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}
-          >
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === cat.nama_kategori ? "bg-red-600 text-white shadow-md shadow-red-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}>
             {cat.nama_kategori}
           </button>
         ))}
@@ -288,23 +287,23 @@ export default function InventoryPage() {
       {/* 3. MENU TABLE */}
       <div className="bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden mb-12">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-zinc-50/50 text-[10px] uppercase font-bold text-zinc-400 tracking-widest">
-              <tr>
-                <th className="px-6 py-4 text-left">Nama Menu</th>
-                <th className="px-6 py-4 text-left">Kategori</th>
-                <th className="px-6 py-4 text-left">Harga Jual</th>
+          <table className="w-full text-sm text-left">
+            <thead>
+              <tr className="text-gray-500 text-xs font-semibold uppercase tracking-wider border-b">
+                <th className="py-3 px-4 text-left">Nama Makanan</th>
+                <th className="py-3 px-4 text-left">Kategori</th>
+                <th className="py-3 px-4 text-left">Harga Jual</th>
+                <th className="py-3 px-4 text-center">Stok</th>
                 <th className="px-6 py-4 text-center">Visibilitas POS</th>
-                <th className="px-6 py-4 text-right">Aksi</th>
+                <th className="py-3 px-4 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-50">
               {filteredMenus.map((item) => (
                 <tr
                   key={item.id}
-                  className="hover:bg-zinc-50/30 transition-colors group"
-                >
-                  <td className="px-6 py-4 font-bold text-neutral-700">
+                  className="hover:bg-zinc-50/30 transition-colors group">
+                  <td className="px-6 py-4 text-neutral-700">
                     {item.nama_menu}
                   </td>
                   <td className="px-6 py-4">
@@ -312,18 +311,40 @@ export default function InventoryPage() {
                       {item.kategori?.nama_kategori}
                     </span>
                   </td>
-                  <td className="px-6 py-4 font-black text-neutral-800">
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                      minimumFractionDigits: 0,
-                    }).format(item.harga_jual)}
+                  <td className="px-6 py-4 text-neutral-800">
+                    {formatRupiah(item.harga_jual)}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <input
+                      type="number"
+                      defaultValue={item.stock ?? 0}
+                      className="w-20 text-center border rounded-lg px-2 py-1"
+                      onBlur={async (e) => {
+                        const newStock = Number(e.target.value);
+
+                        try {
+                          await menuService.updateStock(item.id, newStock);
+                          setMenus((prev) =>
+                            prev.map((m) =>
+                              m.id === item.id
+                                ? {
+                                    ...m,
+                                    stock: newStock,
+                                  }
+                                : m,
+                            ),
+                          );
+                        } catch (err) {
+                          alert("Gagal update stok");
+                          fetchData();
+                        }
+                      }}
+                    />
                   </td>
                   <td className="px-6 py-4 text-center">
                     <button
                       onClick={() => toggleMenu(item)}
-                      className={`w-11 h-6 flex items-center rounded-full transition-all mx-auto ${item.is_active ? "bg-green-500" : "bg-zinc-300"}`}
-                    >
+                      className={`w-11 h-6 flex items-center rounded-full transition-all mx-auto ${item.is_active ? "bg-green-500" : "bg-zinc-300"}`}>
                       <div
                         className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-all ${item.is_active ? "translate-x-6" : "translate-x-1"}`}
                       />
@@ -343,8 +364,7 @@ export default function InventoryPage() {
                           });
                           setShowModal(true);
                         }}
-                        className="p-2 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all"
-                      >
+                        className="p-2 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">
                         <Pencil size={16} />
                       </button>
                       {/* <button
@@ -369,8 +389,7 @@ export default function InventoryPage() {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
           <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl animate-in fade-in zoom-in duration-200 text-center">
             <div
-              className={`w-16 h-16 rounded-2xl mb-6 mx-auto flex items-center justify-center ${confirmPopup.type === "danger" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-600"}`}
-            >
+              className={`w-16 h-16 rounded-2xl mb-6 mx-auto flex items-center justify-center ${confirmPopup.type === "danger" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-600"}`}>
               <AlertTriangle size={32} />
             </div>
             <h3 className="text-xl font-bold text-neutral-800 mb-2">
@@ -384,14 +403,12 @@ export default function InventoryPage() {
                 onClick={() =>
                   setConfirmPopup((prev) => ({ ...prev, isOpen: false }))
                 }
-                className="flex-1 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors"
-              >
+                className="flex-1 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors">
                 Batal
               </button>
               <button
                 onClick={confirmPopup.onConfirm}
-                className={`flex-1 py-3 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all ${confirmPopup.type === "danger" ? "bg-red-600 shadow-red-200" : "bg-amber-600 shadow-amber-200"}`}
-              >
+                className={`flex-1 py-3 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all ${confirmPopup.type === "danger" ? "bg-red-600 shadow-red-200" : "bg-amber-600 shadow-amber-200"}`}>
                 Ya, Lanjutkan
               </button>
             </div>
@@ -409,8 +426,7 @@ export default function InventoryPage() {
               </h2>
               <button
                 onClick={() => setShowCatModal(false)}
-                className="p-2 hover:bg-zinc-100 rounded-full transition-colors"
-              >
+                className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
                 <X size={20} />
               </button>
             </div>
@@ -425,8 +441,7 @@ export default function InventoryPage() {
               />
               <button
                 onClick={handleAddCategory}
-                className="bg-green-700 text-white px-5 py-2 rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-green-100"
-              >
+                className="bg-green-700 text-white px-5 py-2 rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-green-100">
                 Tambah
               </button>
             </div>
@@ -438,8 +453,7 @@ export default function InventoryPage() {
               {categories.map((cat) => (
                 <div
                   key={cat.id}
-                  className={`flex items-center justify-between p-4 rounded-2xl transition-all border group ${cat.is_active ? "bg-zinc-50 border-transparent hover:border-zinc-200" : "bg-zinc-100/50 border-zinc-200 opacity-60"}`}
-                >
+                  className={`flex items-center justify-between p-4 rounded-2xl transition-all border group ${cat.is_active ? "bg-zinc-50 border-transparent hover:border-zinc-200" : "bg-zinc-100/50 border-zinc-200 opacity-60"}`}>
                   <div className="flex flex-col">
                     {editingCatId === cat.id ? (
                       <input
@@ -451,8 +465,7 @@ export default function InventoryPage() {
                       />
                     ) : (
                       <span
-                        className={`text-sm font-bold transition-all ${cat.is_active ? "text-zinc-700" : "text-zinc-400 line-through"}`}
-                      >
+                        className={`text-sm font-bold transition-all ${cat.is_active ? "text-zinc-700" : "text-zinc-400 line-through"}`}>
                         {cat.nama_kategori}
                       </span>
                     )}
@@ -461,16 +474,14 @@ export default function InventoryPage() {
                     {editingCatId === cat.id ? (
                       <button
                         onClick={() => handleUpdateCategory(cat.id)}
-                        className="text-[10px] font-bold text-green-600 uppercase px-3 py-1 bg-green-50 rounded-lg"
-                      >
+                        className="text-[10px] font-bold text-green-600 uppercase px-3 py-1 bg-green-50 rounded-lg">
                         Simpan
                       </button>
                     ) : (
                       <>
                         <button
                           onClick={() => handleToggleCategory(cat)}
-                          className={`w-8 h-4.5 flex items-center rounded-full transition-all px-0.5 mr-2 ${cat.is_active ? "bg-green-500 shadow-md" : "bg-zinc-300"}`}
-                        >
+                          className={`w-8 h-4.5 flex items-center rounded-full transition-all px-0.5 mr-2 ${cat.is_active ? "bg-green-500 shadow-md" : "bg-zinc-300"}`}>
                           <div
                             className={`w-3.5 h-3.5 bg-white rounded-full transform transition-all ${cat.is_active ? "translate-x-3.5" : "translate-x-0"}`}
                           />
@@ -480,8 +491,7 @@ export default function InventoryPage() {
                             setEditingCatId(cat.id);
                             setEditingCatName(cat.nama_kategori);
                           }}
-                          className="p-1.5 text-zinc-400 opacity-0 group-hover:opacity-100 hover:text-blue-500 transition-all"
-                        >
+                          className="p-1.5 text-zinc-400 opacity-0 group-hover:opacity-100 hover:text-blue-500 transition-all">
                           <Pencil size={14} />
                         </button>
                       </>
@@ -504,8 +514,7 @@ export default function InventoryPage() {
               </h2>
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 hover:bg-zinc-100 rounded-full transition-colors"
-              >
+                className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
                 <X size={24} />
               </button>
             </div>
@@ -535,8 +544,7 @@ export default function InventoryPage() {
                     onChange={(e) =>
                       setForm({ ...form, kategori_id: e.target.value })
                     }
-                    className="w-full border-b-2 border-zinc-100 py-2 outline-none bg-transparent font-bold"
-                  >
+                    className="w-full border-b-2 border-zinc-100 py-2 outline-none bg-transparent font-bold">
                     {categories.map((c) => (
                       <option key={c.id} value={c.id.toString()}>
                         {c.nama_kategori}
@@ -556,12 +564,21 @@ export default function InventoryPage() {
                     <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
                       HPP (Modal)
                     </label>
-                    <input
-                      type="number"
-                      placeholder="Modal bahan..."
-                      className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm focus:ring-2 ring-red-500/10 transition-all"
-                      onChange={(e) => handleCalcChange("hpp", e.target.value)}
-                    />
+                    <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-3 py-2.5 shadow-sm focus-within:ring-2 ring-red-500/10">
+                      <span className="text-sm font-semibold text-zinc-500 mr-2">
+                        Rp
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="0"
+                        className="w-full bg-transparent outline-none text-sm"
+                        value={formatRupiah(calc.hpp).replace("Rp", "").trim()}
+                        onChange={(e) => {
+                          const raw = parseRupiah(e.target.value);
+                          handleCalcChange("hpp", raw);
+                        }}
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
@@ -570,8 +587,9 @@ export default function InventoryPage() {
                     <select
                       className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2.5 text-sm outline-none shadow-sm transition-all font-medium"
                       value={calc.mode}
-                      onChange={(e) => handleCalcChange("mode", e.target.value)}
-                    >
+                      onChange={(e) =>
+                        handleCalcChange("mode", e.target.value)
+                      }>
                       <option value="manual">Harga Manual</option>
                       <option value="margin">Margin Rp</option>
                       <option value="percent">Persentase (%)</option>
@@ -604,13 +622,12 @@ export default function InventoryPage() {
                     Hasil Harga Jual Akhir
                   </span>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-zinc-400">Rp</span>
                     <input
-                      type="text" // ⬅️ ganti dari number ke text
+                      type="text"
                       value={formatRupiah(form.harga_jual)}
                       readOnly={calc.mode !== "manual"}
                       onChange={(e) => {
-                        const raw = e.target.value.replace(/\D/g, ""); // ambil angka saja
+                        const raw = parseRupiah(e.target.value);
                         setForm({ ...form, harga_jual: raw });
                       }}
                       className={`text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${
@@ -655,14 +672,12 @@ export default function InventoryPage() {
             <div className="flex justify-end gap-3 mt-10">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-8 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors"
-              >
+                className="px-8 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors">
                 Batal
               </button>
               <button
                 onClick={submitMenu}
-                className="px-10 py-3 bg-neutral-900 hover:bg-black text-white rounded-2xl text-sm font-bold active:scale-95 transition-all shadow-xl shadow-zinc-200"
-              >
+                className="px-10 py-3 bg-neutral-900 hover:bg-black text-white rounded-2xl text-sm font-bold active:scale-95 transition-all shadow-xl shadow-zinc-200">
                 Simpan Menu
               </button>
             </div>
@@ -685,8 +700,7 @@ const ChevronRight = ({ size }: { size: number }) => (
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
-    className="lucide lucide-chevron-right"
-  >
+    className="lucide lucide-chevron-right">
     <path d="m9 18 6-6-6-6" />
   </svg>
 );

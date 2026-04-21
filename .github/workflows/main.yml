@@ -2,7 +2,7 @@ name: Deploy Ma-Dyang Backend
 
 on:
   push:
-    branches: [ develop ] # CI/CD jalan setiap kamu push ke branch main
+    branches: [ main ] # CI/CD jalan setiap kamu push ke branch main
 
 jobs:
   deploy:
@@ -17,7 +17,7 @@ jobs:
           password: ${{ 'farelzy@!VPS' }}
           script: |
             cd /home/relz/kuliah/PT3_Mie_Madyang/backend
-            git pull origin develop
+            git pull origin main
             composer install --no-dev --optimize-autoloader
             php artisan migrate --force
             php artisan config:cache

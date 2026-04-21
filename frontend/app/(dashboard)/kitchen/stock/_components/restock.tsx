@@ -5,8 +5,9 @@
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { getBahan, createStockMovement } from "@/services/stockService";
+import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
 
-const unitOptions = ["Kg", "L","ml", "Pack", "Ikat"];
+const unitOptions = ["Kg", "L", "ml", "Pack", "Ikat"];
 
 interface RestockModalProps {
   isOpen: boolean;
@@ -27,6 +28,7 @@ export default function RestockModal({
   const [jumlah, setJumlah] = useState("");
   const [satuan, setSatuan] = useState("Kg");
   const [harga, setHarga] = useState("");
+  const [stockLimit, setStockLimit] = useState("");
 
   const [search, setSearch] = useState("");
   const filteredBahan = bahanMaster.filter((b) =>
@@ -89,11 +91,21 @@ export default function RestockModal({
     setSelectedBahan(null);
   };
 
+  const handleRemoveItem = (index: number) => {
+    const updated = keranjang.filter((_, i) => i !== index);
+    setKeranjang(updated);
+  };
+
   // ================= SIMPAN RESTOCK =================
   const handleSubmit = async () => {
+    if (isBahanBaru && !stockLimit) {
+      return alert("Stock limit wajib diisi");
+    }
+
     if (keranjang.length === 0) {
       return alert("Keranjang kosong");
     }
+    console.log("DEBUG stockLimit:", stockLimit);
     await Promise.all(
       keranjang.map((item) =>
         createStockMovement({
@@ -104,11 +116,22 @@ export default function RestockModal({
           tipe: "plus",
           kategori: "restock",
           alasan: "Restock",
+          stock_limit: Number(stockLimit || 5),
+          harga: Number(item.harga || 0),
         }),
       ),
     );
 
     onSuccess?.();
+
+    setKeranjang([]);
+    setStockLimit("");
+    setJumlah("");
+    setHarga("");
+    setSearch("");
+    setSelectedBahan(null);
+    setIsBahanBaru(true);
+
     onClose();
   };
 
@@ -175,8 +198,11 @@ export default function RestockModal({
                 <input
                   type="text"
                   placeholder="Cari bahan..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  value={selectedBahan ? selectedBahan.nama : search}
+                  onChange={(e) => {
+                    setSelectedBahan(null);
+                    setSearch(e.target.value);
+                  }}
                   className="w-full bg-gray-100 rounded-lg p-3 text-sm"
                 />
 
@@ -187,8 +213,14 @@ export default function RestockModal({
                         key={b.id}
                         onClick={() => {
                           setSelectedBahan(b);
-                          setSearch(b.nama);
+
                           setSatuan(b.satuan || "Kg");
+                          setHarga(b.harga ? String(b.harga) : "");
+                          setStockLimit(
+                            b.stock_limit ? String(b.stock_limit) : "",
+                          );
+
+                          setSearch("");
                         }}
                         className="p-2 hover:bg-gray-100 cursor-pointer text-sm">
                         {b.nama}
@@ -239,17 +271,36 @@ export default function RestockModal({
             </div>
           </div>
 
-          {/* HARGA */}
-          <div className="mb-6 w-1/2 pr-2">
-            <label className="text-sm font-semibold mb-2">
-              Harga per satuan
-            </label>
-            <input
-              type="number"
-              value={harga}
-              onChange={(e) => setHarga(e.target.value)}
-              className="w-full bg-gray-100 p-3 rounded-lg"
-            />
+          <div className="flex gap-4 mb-6">
+            {/* HARGA */}
+            <div className="flex-1">
+              <label className="text-sm font-semibold mb-2">
+                Harga per satuan
+              </label>
+              <input
+                type="text"
+                value={harga ? formatRupiah(harga) : ""}
+                onChange={(e) => {
+                  const raw = parseRupiah(e.target.value);
+                  setHarga(raw);
+                }}
+                placeholder="Masukkan harga"
+                className="w-full bg-gray-100 p-3 rounded-lg"
+              />
+            </div>
+
+            {/* STOCK LIMIT */}
+            <div className="flex-1">
+              <label className="text-sm font-semibold mb-2">
+                Stock Limit (Kritis)
+              </label>
+              <input
+                type="number"
+                value={stockLimit}
+                onChange={(e) => setStockLimit(e.target.value)}
+                className="w-full bg-gray-100 p-3 rounded-lg"
+              />
+            </div>
           </div>
 
           <button
@@ -268,25 +319,30 @@ export default function RestockModal({
           </button>
 
           <h3 className="font-bold text-xl mb-6 mt-2">Keranjang</h3>
-
           <div className="flex-1 overflow-y-auto space-y-3">
             {keranjang.map((item, i) => (
               <div
                 key={`${item.nama}-${i}`}
-                className="bg-white p-4 rounded-xl">
+                className="bg-white p-4 rounded-xl relative">
+                <button
+                  onClick={() => handleRemoveItem(i)}
+                  className="absolute top-0 right-0 m-2 text-gray-400 hover:text-red-500">
+                  <X size={16} />
+                </button>
+
                 <div className="flex justify-between">
                   <span className="font-bold">{item.nama}</span>
                   <span className="text-red-600 font-bold">
                     {item.jumlah} {item.satuan}
                   </span>
                 </div>
+
                 <div className="text-xs text-gray-400 mt-1">
-                  Rp {item.harga}
+                  {item.harga ? formatRupiah(item.harga) : "-"}
                 </div>
               </div>
             ))}
           </div>
-
           <button
             onClick={handleSubmit}
             className="mt-auto w-full bg-red-500 text-white py-3 rounded-xl">

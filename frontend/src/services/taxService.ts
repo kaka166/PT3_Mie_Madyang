@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "https://api.farelzy.my.id/api";
 
 // ================= TYPES =================
 export interface TaxSetting {
@@ -12,10 +12,16 @@ export const getTax = async (): Promise<TaxSetting> => {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_BASE_URL}/tax`, {
-    headers: {
-      Authorization: token ? `Bearer ${token}` : "",
-    },
+    headers,
   });
 
   if (!res.ok) {

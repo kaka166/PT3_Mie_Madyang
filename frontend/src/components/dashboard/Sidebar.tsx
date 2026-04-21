@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { authService } from "@/services/authService";
+import { getActiveSession } from "@/services/sessionService";
 
 export default function Sidebar({
   isOpen,
@@ -34,32 +35,30 @@ export default function Sidebar({
   // Daftar Menu dengan Aturan Akses Role ID
   // 1 = Owner, 2 = Kasir, 3 = Dapur
   const menuItems = [
-    { 
-      icon: LayoutDashboard, 
-      label: "Admin", 
-      href: "/admin", 
-      allowedRoles: [1] 
+    {
+      icon: LayoutDashboard,
+      label: "Admin",
+      href: "/admin",
+      allowedRoles: [1],
     },
-    { 
-      icon: CreditCard, 
-      label: "Cashier", 
-      href: "/cashier", 
-      allowedRoles: [1, 2] 
+    {
+      icon: CreditCard,
+      label: "Cashier",
+      href: "/cashier",
+      allowedRoles: [1, 2],
     },
-    { 
-      icon: Package2, 
-      label: "Menu", 
-      href: "/inventory", 
-      allowedRoles: [1] 
+    {
+      icon: Package2,
+      label: "Menu",
+      href: "/menu",
+      allowedRoles: [1],
     },
-    { 
-      icon: UtensilsCrossed, 
-      label: "Kitchen", 
-      href: "/kitchen", 
+    {
+      icon: UtensilsCrossed,
+      label: "Kitchen",
+      href: "/kitchen",
       allowedRoles: [1, 2, 3],
-      subItems: [
-        { label: "Stock", href: "/kitchen/stock" },
-      ],
+      subItems: [{ label: "Stock", href: "/kitchen/stock" }],
     },
     {
       icon: BarChart3,
@@ -76,25 +75,42 @@ export default function Sidebar({
   ];
 
   // Filter menu berdasarkan roleId user
-  const filteredMenu = menuItems.filter((item) => 
-    roleId !== null && item.allowedRoles.includes(roleId)
+  const filteredMenu = menuItems.filter(
+    (item) => roleId !== null && item.allowedRoles.includes(roleId),
   );
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     closeSidebar();
-    Swal.fire({
-      title: "Yakin mau keluar?",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#c93535",
-      confirmButtonText: "Ya, Keluar!",
-      cancelButtonText: "Batal",
-    }).then(async (result) => {
+
+    try {
+      const session = await getActiveSession();
+
+      // 🔥 TARUH DI SINI
+      if (session?.data?.id) {
+        await Swal.fire({
+          title: "Sesi masih aktif!",
+          text: "Tutup sesi terlebih dahulu sebelum logout.",
+          icon: "error",
+        });
+        return;
+      }
+
+      const result = await Swal.fire({
+        title: "Yakin mau keluar?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#c93535",
+        confirmButtonText: "Ya, Keluar!",
+        cancelButtonText: "Batal",
+      });
+
       if (result.isConfirmed) {
         authService.logout();
         router.push("/login");
       }
-    });
+    } catch (error) {
+      console.error("Gagal cek session:", error);
+    }
   };
 
   return (
@@ -115,8 +131,7 @@ export default function Sidebar({
           z-40 transform transition-transform duration-300 ease-in-out 
           ${isOpen ? "translate-x-0" : "-translate-x-full"} 
           lg:translate-x-0 border-r border-neutral-200
-        `}
-      >
+        `}>
         {/* MOBILE HEADER */}
         <div className="lg:hidden flex items-center justify-between px-6 py-5 border-b border-neutral-200">
           <span className="font-bold text-primary italic">MA-DYANG POS</span>
@@ -153,8 +168,7 @@ export default function Sidebar({
                     isParentActive
                       ? "bg-white text-primary shadow-sm border-l-4 border-primary font-bold"
                       : "text-neutral-500 hover:bg-neutral-200"
-                  }`}
-                >
+                  }`}>
                   <item.icon size={20} />
                   <span className="text-sm">{item.label}</span>
                 </LinkNext>
@@ -171,12 +185,11 @@ export default function Sidebar({
                           pathname === sub.href
                             ? "text-neutral-900 font-bold bg-neutral-200 shadow-inner"
                             : "text-neutral-600 hover:bg-neutral-200"
-                        }`}
-                      >
+                        }`}>
                         {sub.label}
                       </LinkNext>
                     ))}
-                    </div>
+                  </div>
                 )}
               </div>
             );
@@ -185,18 +198,16 @@ export default function Sidebar({
 
         {/* FOOTER */}
         <div className="px-3 border-t border-neutral-200 py-4  space-y-1">
-            <LinkNext
+          <LinkNext
             href="#"
-            className="flex items-center gap-3 text-neutral-500 px-4 py-3 hover:bg-neutral-200 rounded-xl transition-all"
-          >
+            className="flex items-center gap-3 text-neutral-500 px-4 py-3 hover:bg-neutral-200 rounded-xl transition-all">
             <HelpCircle size={20} />
             <span className="text-sm font-semibold">Help Center</span>
           </LinkNext>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 text-red-500 px-4 py-3 hover:bg-red-50 rounded-xl transition-all"
-          >
+            className="w-full flex items-center gap-3 text-red-500 px-4 py-3 hover:bg-red-50 rounded-xl transition-all">
             <LogOut size={20} />
             <span className="text-sm font-semibold">Logout</span>
           </button>

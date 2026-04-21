@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "https://api.farelzy.my.id/api";
 
 // ==========================
 // TYPES
@@ -27,6 +27,8 @@ export interface CreateStockPayload {
   tipe: "plus" | "minus";
   kategori: "penyesuaian" | "restock" | "produksi";
   alasan?: string;
+  stock_limit?: number;
+  harga?: number;
 }
 
 // ==========================
