@@ -272,7 +272,7 @@ export default function HPPPage() {
                         <div className="flex bg-[#f5f5f5] rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-gray-300">
                           <input 
                             type="number" 
-                            placeholder="Jumlah"
+                        placeholder="Jumlah"
                             className="w-full bg-transparent border-none px-4 py-3 text-gray-700 focus:outline-none font-medium"
                           />
                           {/* INI DATA BUAT DROP DOWN */}
