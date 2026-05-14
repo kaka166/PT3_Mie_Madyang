@@ -60,6 +60,28 @@ class SessionController extends Controller
         ]);
     }
 
+    public function lastRecap()
+    {
+        $session = PosSession::where('user_id', Auth::id())
+            ->whereNotNull('ended_at')
+            ->latest()
+            ->first();
+
+        if (!$session) {
+            return response()->json(['data' => null]);
+        }
+
+        return response()->json([
+            'data' => [
+                'opening_cash' => $session->opening_cash,
+                'total_pemasukan' => $session->total_pemasukan,
+                'total_pengeluaran' => $session->total_pengeluaran,
+                'closing_cash' => $session->closing_cash,
+                'ended_at' => $session->ended_at,
+            ]
+        ]);
+    }
+
     public function endSession(Request $request)
     {
         // 🔥 HANDLE USER
@@ -88,14 +110,16 @@ class SessionController extends Controller
                 ], 400);
             }
 
-            $total = $session->penjualan()->sum('total');
+            $totalPenjualan = $session->penjualan()->sum('total');
+            $totalPengeluaran = $session->pengeluaran()->sum('jumlah');
 
-            $expectedCash = $session->opening_cash + $total;
+            $expectedCash = $session->opening_cash + $totalPenjualan - $totalPengeluaran;
             $selisih = $request->closing_cash - $expectedCash;
 
             $session->update([
                 'ended_at' => now(),
-                'total_pemasukan' => $total,
+                'total_pemasukan' => $totalPenjualan,
+                'total_pengeluaran' => $totalPengeluaran,
                 'closing_cash' => $request->closing_cash,
             ]);
 
@@ -104,7 +128,8 @@ class SessionController extends Controller
                 'message' => 'Sesi berhasil ditutup',
                 'data' => [
                     'opening_cash' => $session->opening_cash,
-                    'total_pemasukan' => $total,
+                    'total_pemasukan' => $totalPenjualan,
+                    'total_pengeluaran' => $totalPengeluaran,
                     'expected_cash' => $expectedCash,
                     'closing_cash' => $request->closing_cash,
                     'selisih' => $selisih

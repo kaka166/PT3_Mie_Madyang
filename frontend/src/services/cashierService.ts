@@ -3,6 +3,7 @@ export type ApiMenu = {
   nama_menu: string;
   harga_jual: string;
   is_active: number;
+  is_fast_moving?: boolean;
   gambar?: string | null;
   kategori?: { nama_kategori: string };
   stock?: number;
@@ -15,6 +16,7 @@ export type MenuItem = {
   stock: number;
   kategori: string;
   gambar?: string;
+  is_fast_moving?: boolean;
 };
 
 export type ApiCategory = {
@@ -23,7 +25,7 @@ export type ApiCategory = {
   is_active: number;
 };
 
-const API_BASE_URL = "https://api.farelzy.my.id/api";
+const API_BASE_URL = "http://127.0.0.1:8000/api";
 
 // Helper Headers khusus Kasir
 const getCashierHeaders = () => {
@@ -52,6 +54,7 @@ export const getMenus = async (): Promise<MenuItem[]> => {
         stock: item.stock ?? 0,
         kategori: item.kategori?.nama_kategori || "Umum",
         gambar: item.gambar || "",
+        is_fast_moving: item.is_fast_moving ?? false,
       }));
   } catch (error) {
     console.error("Error GetMenus Kasir:", error);

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Navbar from "../../src/components/dashboard/navbar";
 import Sidebar from "../../src/components/dashboard/Sidebar";
 
@@ -9,7 +10,28 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const router = useRouter();
+  const [valid, setValid] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    if (!token || !user) {
+      document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
+      router.push("/login");
+    } else {
+      setValid(true);
+    }
+  }, [router]);
+
+  if (!valid) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#c93535]" />
+      </div>
+    );
+  }
 
   return (
     // Tambahkan h-screen dan overflow-hidden di sini agar scroll hanya di area konten

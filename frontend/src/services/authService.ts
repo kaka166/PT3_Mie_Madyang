@@ -1,5 +1,15 @@
 // src/services/authService.ts
 
+const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 hari
+
+function setTokenCookie(token: string) {
+  document.cookie = `token=${token}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
+}
+
+function clearTokenCookie() {
+  document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
+}
+
 export interface User {
   id: number;
   username: string;
@@ -25,7 +35,7 @@ export interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-const API_URL = "https://api.farelzy.my.id/api";
+const API_URL = "http://127.0.0.1:8000/api";
 
 export const authService = {
   async login(identifier: string, password: string): Promise<LoginResponse> {
@@ -62,6 +72,8 @@ export const authService = {
       if (typeof window !== "undefined") {
         localStorage.setItem("token", successData.data.token);
         localStorage.setItem("user", JSON.stringify(successData.data.user));
+        localStorage.removeItem("lastSessionRecap");
+        setTokenCookie(successData.data.token);
       }
 
       return successData;
@@ -142,6 +154,7 @@ export const authService = {
     if (typeof window !== "undefined") {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      clearTokenCookie();
     }
   },
 };

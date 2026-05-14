@@ -13,9 +13,11 @@ import {
   HelpCircle,
   LogOut,
   X,
+  Settings,
 } from "lucide-react";
 import { authService } from "@/services/authService";
 import { getActiveSession } from "@/services/sessionService";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 export default function Sidebar({
   isOpen,
@@ -68,8 +70,18 @@ export default function Sidebar({
       subItems: [
         { label: "Penjualan", href: "/reports/penjualan" },
         { label: "Pengeluaran", href: "/reports/pengeluaran" },
+        { label: "Laba Rugi", href: "/reports/laba-rugi" },
         { label: "HPP", href: "/reports/hpp" },
         { label: "Stock Bahan", href: "/reports/stock-bahan" },
+      ],
+    },
+    {
+      icon: Settings,
+      label: "Settings",
+      href: "/settings/qris",
+      allowedRoles: [1],
+      subItems: [
+        { label: "QRIS", href: "/settings/qris" },
       ],
     },
   ];
@@ -85,7 +97,6 @@ export default function Sidebar({
     try {
       const session = await getActiveSession();
 
-      // 🔥 TARUH DI SINI
       if (session?.data?.id) {
         await Swal.fire({
           title: "Sesi masih aktif!",
@@ -95,8 +106,51 @@ export default function Sidebar({
         return;
       }
 
+      // Dapur (role 3) tidak perlu rekap
+      let recapHtml = "";
+      if (roleId !== 3) {
+        try {
+          const recapData = localStorage.getItem("lastSessionRecap");
+          if (recapData) {
+            const d = JSON.parse(recapData);
+            recapHtml = `
+              <div style="text-align:left;background:#f9f9f9;border-radius:16px;padding:16px;margin:12px 0;">
+                <p style="font-size:12px;font-weight:700;color:#999;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:8px;">Rekap Sesi Terakhir</p>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                  <span style="font-weight:600;color:#555;">Uang Awal</span>
+                  <span style="font-weight:800;color:#333;">${formatRupiah(d.opening_cash)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                  <span style="font-weight:600;color:#555;">Penjualan</span>
+                  <span style="font-weight:800;color:#16a34a;">+${formatRupiah(d.total_pemasukan)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                  <span style="font-weight:600;color:#555;">Pengeluaran</span>
+                  <span style="font-weight:800;color:#dc2626;">-${formatRupiah(d.total_pengeluaran)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                  <span style="font-weight:600;color:#555;">Uang Akhir</span>
+                  <span style="font-weight:800;color:#333;">${formatRupiah(d.closing_cash)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;">
+                  <span style="font-weight:600;color:#555;">Selisih</span>
+                  <span style="font-weight:800;color:${(d.selisih ?? 0) < 0 ? '#dc2626' : '#16a34a'};">${formatRupiah(d.selisih ?? 0)}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px dashed #ddd;margin-top:8px;">
+                  <span style="font-weight:600;color:#555;">Seharusnya</span>
+                  <span style="font-weight:800;color:#333;">${formatRupiah(d.expected_cash)}</span>
+                </div>
+              </div>
+            `;
+          }
+        } catch (err) {
+          console.error("Gagal parse rekap:", err);
+        }
+      }
+
       const result = await Swal.fire({
         title: "Yakin mau keluar?",
+        html: recapHtml,
         icon: "warning",
         showCancelButton: true,
         confirmButtonColor: "#c93535",
@@ -164,11 +218,10 @@ export default function Sidebar({
                 <LinkNext
                   href={item.href}
                   onClick={() => !hasSubItems && closeSidebar()}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isParentActive
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isParentActive
                       ? "bg-white text-primary shadow-sm border-l-4 border-primary font-bold"
                       : "text-neutral-500 hover:bg-neutral-200"
-                  }`}>
+                    }`}>
                   <item.icon size={20} />
                   <span className="text-sm">{item.label}</span>
                 </LinkNext>
@@ -181,11 +234,10 @@ export default function Sidebar({
                         key={sub.label}
                         href={sub.href}
                         onClick={closeSidebar}
-                        className={`px-4 py-2 text-sm rounded-lg transition-all ${
-                          pathname === sub.href
+                        className={`px-4 py-2 text-sm rounded-lg transition-all ${pathname === sub.href
                             ? "text-neutral-900 font-bold bg-neutral-200 shadow-inner"
                             : "text-neutral-600 hover:bg-neutral-200"
-                        }`}>
+                          }`}>
                         {sub.label}
                       </LinkNext>
                     ))}

@@ -32,8 +32,14 @@ export default function LoginPage() {
       const response = await authService.login(identifier, password);
       
       if (response.status === "success") {
-        // Redirect ke dashboard admin jika berhasil
-        router.push("/admin");
+        const role = response.data.user.role;
+        if (role === 2) {
+          router.push("/cashier?startSession=1");
+        } else if (role === 3) {
+          router.push("/kitchen");
+        } else {
+          router.push("/admin");
+        }
       }
     } catch (err) {
       if (err instanceof Error) {

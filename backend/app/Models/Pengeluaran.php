@@ -12,12 +12,20 @@ class Pengeluaran extends Model
         'nama_pengeluaran',
         'jumlah',
         'user_id',
-        'tanggal'
+        'session_id',
+        'tanggal',
+        'kategori',
+        'deskripsi',
+        'evidence_file',
     ];
 
-    // Relasi ke tabel users (Dapur/Kasir mana yang input)
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function session()
+    {
+        return $this->belongsTo(PosSession::class, 'session_id');
     }
 }

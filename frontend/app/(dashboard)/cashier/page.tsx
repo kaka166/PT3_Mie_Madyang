@@ -9,7 +9,9 @@ import {
   endSession,
   getActiveSession,
 } from "@/services/sessionService";
-import { X } from "lucide-react";
+import { getQrisSettings, QrisSetting } from "@/services/qrisService";
+import { createPengeluaran } from "@/services/pengeluaranService";
+import { X, QrCode, Receipt } from "lucide-react";
 
 /* ================= TYPES ================= */
 type CartItem = {
@@ -39,6 +41,11 @@ export default function POSPage() {
   const [taxPercent, setTaxPercent] = useState(0);
   const [showTaxModal, setShowTaxModal] = useState(false);
 
+  const [qrisSettings, setQrisSettings] = useState<QrisSetting[]>([]);
+
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [expenseForm, setExpenseForm] = useState({ nama_pengeluaran: "", jumlah: "", kategori: "Operasional", deskripsi: "" });
+
   const [isNavigating, setIsNavigating] = useState(false);
 
   type SessionResult = {
@@ -58,6 +65,7 @@ export default function POSPage() {
   const [loadingEnd, setLoadingEnd] = useState(false);
 
   const [sessionActive, setSessionActive] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [openingCash, setOpeningCash] = useState("");
   const [showStartSessionModal, setShowStartSessionModal] = useState(false);
   const [loadingStart, setLoadingStart] = useState(false);
@@ -73,8 +81,9 @@ export default function POSPage() {
     }
 
     try {
-      await startSession(cash);
+      const res = await startSession(cash);
       setSessionActive(true);
+      setActiveSessionId(res.data?.id ?? null);
       setOpeningCash("");
       return true;
     } catch (err: unknown) {
@@ -156,13 +165,35 @@ export default function POSPage() {
     const init = async () => {
       await fetchTax();
       await loadInitialData();
+      try {
+        const qrisRes = await getQrisSettings();
+        if (qrisRes.success) setQrisSettings(qrisRes.data.filter((q) => q.is_active));
+      } catch (err) { console.error("Gagal fetch QRIS:", err); }
 
       const session = await getActiveSession();
+      const userData = localStorage.getItem("user");
+      const user = userData ? JSON.parse(userData) : null;
 
       if (session?.data?.id) {
         setSessionActive(true);
+        setActiveSessionId(session.data.id);
       } else {
         setSessionActive(false);
+
+        const params = new URLSearchParams(window.location.search);
+        const startSession = params.get("startSession");
+
+        // Cashier login → auto-show modal start session
+        if (user?.role === 2 && startSession === "1") {
+          setShowStartSessionModal(true);
+          window.history.replaceState({}, "", "/cashier");
+          return;
+        }
+
+        // Owner → never auto-show, only via button
+        if (user?.role === 1) {
+          return;
+        }
 
         const hasSeenModal = localStorage.getItem("hasSeenStartSession");
 
@@ -591,15 +622,24 @@ export default function POSPage() {
 
               <div className="flex-1 min-h-[180px] bg-white rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-6 mb-8 shadow-inner">
                 {paymentMethod === "QRIS" ? (
-                  <div className="text-center animate-pulse">
-                    <img
-                      src="https://placehold.co/200x200?text=SCAN+QR"
-                      className="w-32 h-32 rounded-2xl mb-3 opacity-80"
-                      alt="QR"
-                    />
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                      Menunggu...
-                    </p>
+                  <div className="text-center">
+                    {qrisSettings.length > 0 ? (
+                      <>
+                        <img
+                          src={`http://127.0.0.1:8000/storage/qris/${qrisSettings[0].gambar_qris}`}
+                          className="w-40 h-40 object-contain rounded-2xl mb-3"
+                          alt="QRIS"
+                        />
+                        <p className="text-[10px] font-bold text-gray-500">{qrisSettings[0].nama_bank} - {qrisSettings[0].nama_pemilik}</p>
+                      </>
+                    ) : (
+                      <div className="text-center">
+                        <QrCode size={48} className="mx-auto text-gray-300 mb-2" />
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                          Scan QRIS
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center">
@@ -729,13 +769,73 @@ export default function POSPage() {
                     setSessionResult(data);
                     setShowEndSessionModal(false);
                     setSessionActive(false);
+                    setActiveSessionId(null);
                     setClosingCash("");
+                    localStorage.setItem("lastSessionRecap", JSON.stringify(data));
                   }
                 }}
                 disabled={loadingEnd}
                 className="w-full bg-red-500 text-white py-4 rounded-2xl font-black shadow-xl disabled:opacity-50 disabled:cursor-not-allowed">
                 {loadingEnd ? "Memproses..." : "Konfirmasi Tutup"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= MODAL PENGELUARAN ================= */}
+      {showExpenseModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-bold">Catat Pengeluaran</h2>
+              <button onClick={() => setShowExpenseModal(false)}><X size={20} /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Nama Pengeluaran</label>
+                <input type="text" value={expenseForm.nama_pengeluaran} onChange={(e) => setExpenseForm({ ...expenseForm, nama_pengeluaran: e.target.value })}
+                  placeholder="Contoh: Beli es batu" className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Jumlah (Rp)</label>
+                <input type="number" value={expenseForm.jumlah} onChange={(e) => setExpenseForm({ ...expenseForm, jumlah: e.target.value })}
+                  placeholder="0" className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Kategori</label>
+                <select value={expenseForm.kategori} onChange={(e) => setExpenseForm({ ...expenseForm, kategori: e.target.value })}
+                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200">
+                  <option>Operasional</option>
+                  <option>Gaji</option>
+                  <option>Sewa</option>
+                  <option>Bahan Baku</option>
+                  <option>Lain-lain</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 mb-1 block">Deskripsi</label>
+                <textarea value={expenseForm.deskripsi} onChange={(e) => setExpenseForm({ ...expenseForm, deskripsi: e.target.value })}
+                  placeholder="Opsional" rows={2} className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200 resize-none" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setShowExpenseModal(false)} className="flex-1 py-3 rounded-xl font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">Batal</button>
+              <button onClick={async () => {
+                if (!expenseForm.nama_pengeluaran || !expenseForm.jumlah) { alert("Isi nama dan jumlah!"); return; }
+                try {
+                  await createPengeluaran({
+                    nama_pengeluaran: expenseForm.nama_pengeluaran,
+                    jumlah: Number(expenseForm.jumlah),
+                    kategori: expenseForm.kategori,
+                    tanggal: new Date().toISOString().split("T")[0],
+                    session_id: activeSessionId ?? undefined,
+                  });
+                  setShowExpenseModal(false);
+                  setExpenseForm({ nama_pengeluaran: "", jumlah: "", kategori: "Operasional", deskripsi: "" });
+                  alert("Pengeluaran berhasil dicatat!");
+                } catch (err) { console.error(err); alert("Gagal mencatat pengeluaran"); }
+              }} className="flex-1 py-3 rounded-xl font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors">Simpan</button>
             </div>
           </div>
         </div>
@@ -789,6 +889,11 @@ export default function POSPage() {
                     Sesi Aktif
                   </span>
 
+                  <button
+                    onClick={() => setShowExpenseModal(true)}
+                    className="bg-orange-500 text-white px-3 py-2 rounded-lg text-xs font-bold">
+                    <Receipt size={14} className="inline mr-1" />Catat
+                  </button>
                   <button
                     onClick={handleEndSession}
                     className="bg-red-500 text-white px-3 py-2 rounded-lg text-xs font-bold">

@@ -300,12 +300,14 @@ export default function InventoryPage() {
             </thead>
             <tbody className="divide-y divide-zinc-50">
               {filteredMenus.map((item) => (
-                <tr
-                  key={item.id}
-                  className="hover:bg-zinc-50/30 transition-colors group">
-                  <td className="px-6 py-4 text-neutral-700">
-                    {item.nama_menu}
-                  </td>
+                  <tr
+                    key={item.id}
+                    className="hover:bg-zinc-50/30 transition-colors group">
+                    <td className="px-6 py-4 text-neutral-700">
+                      <div className="flex items-center gap-2">
+                        {item.nama_menu}
+                      </div>
+                    </td>
                   <td className="px-6 py-4">
                     <span className="bg-zinc-100 text-zinc-500 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight">
                       {item.kategori?.nama_kategori}

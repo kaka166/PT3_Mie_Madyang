@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\PosSession;
+use App\Models\Penjualan;
+use App\Models\Pemasukan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -17,7 +20,6 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        // Sekarang kita cari di kolom 'username' atau 'email' secara spesifik
         $user = User::where('username', $request->login)
             ->orWhere('email', $request->login)
             ->first();
@@ -42,11 +44,37 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        $user = $request->user();
+
+        $session = PosSession::where('user_id', $user->id)
+            ->whereNull('ended_at')
+            ->latest()
+            ->first();
+
+        $recap = null;
+
+        if ($session) {
+            $penjualan = Penjualan::where('session_id', $session->id)
+                ->where('status', 'done')
+               ->get();
+
+            $totalPenjualan = $penjualan->sum('total');
+            $totalTransaksi = $penjualan->count();
+
+            $recap = [
+                'session_id' => $session->id,
+                'total_penjualan' => $totalPenjualan,
+                'total_transaksi' => $totalTransaksi,
+                'message' => 'Sesi masih aktif! Tutup sesi terlebih dahulu untuk rekap lengkap.'
+            ];
+        }
+
         $request->user()->currentAccessToken()->delete();
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Berhasil Logout'
+            'message' => 'Berhasil Logout',
+            'recap' => $recap
         ]);
     }
 

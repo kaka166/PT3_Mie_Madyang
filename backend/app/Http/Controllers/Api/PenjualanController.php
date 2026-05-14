@@ -13,6 +13,7 @@ use App\Models\Pemasukan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PenjualanController extends Controller
 {
@@ -22,6 +23,7 @@ class PenjualanController extends Controller
     public function index()
     {
         $data = Penjualan::with('detail')
+            ->where('status', '!=', 'done')
             ->latest()
             ->get()
             ->map(function ($p) {

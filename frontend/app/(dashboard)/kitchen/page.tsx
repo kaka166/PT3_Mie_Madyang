@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { formatTanggal } from "@/utils/formatTanggal";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -178,12 +179,7 @@ export default function KitchenDashboardPage() {
                   </td>
                   <td className="py-4 px-4 font-medium">{item.items}</td>
                   <td className="py-4 px-4 font-bold text-gray-800">
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(item.harga)}
+                    {formatRupiah(item.harga)}
                   </td>
                   <td className="py-4 px-4 font-bold text-gray-800">
                     {item.kondisi}

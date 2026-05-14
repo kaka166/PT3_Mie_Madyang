@@ -14,7 +14,8 @@ class Pemasukan extends Model
         'total',
         'kasir',
         'metode',
-        'waktu'
+        'waktu',
+        'evidence_file',
     ];
 
     public function penjualan()

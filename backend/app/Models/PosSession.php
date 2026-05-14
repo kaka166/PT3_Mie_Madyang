@@ -20,4 +20,9 @@ class PosSession extends Model
     {
         return $this->hasMany(Penjualan::class, 'session_id');
     }
+
+    public function pengeluaran()
+    {
+        return $this->hasMany(Pengeluaran::class, 'session_id');
+    }
 }
