@@ -11,6 +11,7 @@ import {
 } from "@/services/sessionService";
 import { getQrisSettings, QrisSetting } from "@/services/qrisService";
 import { X, QrCode } from "lucide-react";
+import { addNotification, showToast } from "@/services/notificationService";
 
 /* ================= TYPES ================= */
 type CartItem = {
@@ -72,7 +73,7 @@ export default function POSPage() {
     const cash = Number(openingCash);
 
     if (!cash || cash < 0) {
-      alert("Masukkan uang awal dulu!");
+      showToast("Masukkan uang awal dulu!", "warning");
       return false;
     }
 
@@ -81,12 +82,13 @@ export default function POSPage() {
       setSessionActive(true);
       setActiveSessionId(res.data?.id ?? null);
       setOpeningCash("");
+      addNotification("Sesi Dimulai", `Sesi kasir #${res.data?.id} berhasil dimulai dengan uang awal Rp${cash.toLocaleString("id-ID")}`, "success");
       return true;
     } catch (err: unknown) {
       if (err instanceof Error) {
-        alert(err.message);
+        showToast(err.message, "error");
       } else {
-        alert("Gagal memulai sesi");
+        showToast("Gagal memulai sesi", "error");
       }
       return false;
     }
@@ -100,18 +102,19 @@ export default function POSPage() {
     const cash = Number(closingCash);
 
     if (!cash || cash < 0) {
-      alert("Masukkan uang akhir yang valid!");
+      showToast("Masukkan uang akhir yang valid!", "warning");
       return null;
     }
 
     try {
       const res = await endSession(cash);
+      addNotification("Sesi Diakhiri", `Sesi kasir berakhir. Uang akhir: Rp${cash.toLocaleString("id-ID")}`, "info");
       return res.data ?? res;
     } catch (err: unknown) {
       if (err instanceof Error) {
-        alert(err.message);
+        showToast(err.message, "error");
       } else {
-        alert("Gagal mengakhiri sesi");
+        showToast("Gagal mengakhiri sesi", "error");
       }
       return null;
     }
@@ -665,7 +668,11 @@ export default function POSPage() {
 
                     if (result) {
                       setIsNavigating(true);
-                      alert("Pesanan masuk kitchen!");
+                      addNotification(
+                        "Pesanan Terkirim!",
+                        `${customerName || "Guest"} - ${cart.reduce((s, i) => s + i.qty, 0)} item telah masuk ke kitchen`,
+                        "success"
+                      );
 
                       setMenus((prevMenus) =>
                         prevMenus.map((menu) => {
@@ -689,7 +696,7 @@ export default function POSPage() {
                       setCustomerName("");
                       setTableNumber("");
                     } else {
-                      alert("Gagal kirim ke kitchen");
+                      showToast("Gagal kirim ke kitchen", "error");
                     }
                   }}
                   className="w-full bg-[#ff6b6b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200 active:scale-95 transition-all">

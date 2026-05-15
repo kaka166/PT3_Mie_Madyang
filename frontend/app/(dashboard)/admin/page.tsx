@@ -18,6 +18,7 @@ import {
 import { formatRupiah } from "@/utils/formatRupiah";
 import { getPengeluaran, createPengeluaran } from "@/services/pengeluaranService";
 import { getLaporanUsers, getLaporanShifts, updateUser, deleteUser } from "@/services/laporanService";
+import { addNotification } from "@/services/notificationService";
 import Swal from "sweetalert2";
 
 function CalendarPicker({
@@ -208,7 +209,7 @@ export default function AdminDashboardPage() {
       });
       const json = await res.json();
       if (json.success) {
-        Swal.fire("Berhasil", "Pengeluaran berhasil dicatat", "success");
+        addNotification("Pengeluaran Dicatat", `${formData.nama_pengeluaran} - Rp${Number(formData.jumlah).toLocaleString("id-ID")}`, "success");
         setShowCreateModal(false);
         setFormData({ nama_pengeluaran: "", jumlah: "", kategori: "Operasional", deskripsi: "", tanggal: "" });
         setEvidenceFile(null);
@@ -239,7 +240,7 @@ export default function AdminDashboardPage() {
     try {
       const json = await deleteUser(user.id);
       if (json.success) {
-        Swal.fire("Berhasil", `User "${user.name}" berhasil dihapus`, "success");
+        addNotification("User Dihapus", `User "${user.name}" berhasil dihapus (soft delete)`, "warning", true);
         fetchUsers();
       } else {
         Swal.fire("Error", json.message || "Gagal menghapus user", "error");
@@ -269,7 +270,7 @@ export default function AdminDashboardPage() {
 
       const json = await updateUser(editingUser.id, payload);
       if (json.success) {
-        Swal.fire("Berhasil", "User berhasil diupdate", "success");
+        addNotification("User Diupdate", `Data user "${editForm.name}" berhasil diperbarui`, "success", true);
         setShowEditModal(false);
         setEditingUser(null);
         fetchUsers();

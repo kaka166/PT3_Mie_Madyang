@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
-  Bell,
   Settings,
   X,
   User as UserIcon,
@@ -11,6 +10,7 @@ import {
   Shield,
   Save,
 } from "lucide-react";
+import NotificationCenter from "./NotificationCenter";
 
 // Definisi Interface agar tidak menggunakan 'any'
 interface UserData {
@@ -101,10 +101,7 @@ export default function Navbar({
             </p>
           </div>
 
-          <button className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-full relative transition-colors">
-            <Bell size={20} />
-            <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
+          <NotificationCenter />
 
           <button
             onClick={() => setIsModalOpen(true)}
