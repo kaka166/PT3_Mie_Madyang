@@ -7,10 +7,7 @@ import {
   Search,
   Download,
   Filter,
-  ChevronLeft,
-  ChevronRight,
   PackagePlus,
-  RefreshCw,
   Edit,
 } from "lucide-react";
 

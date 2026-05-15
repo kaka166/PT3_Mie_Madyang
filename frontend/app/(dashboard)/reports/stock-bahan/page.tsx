@@ -3,10 +3,8 @@
 import React, { useState, useEffect } from "react";
 import {
   Search,
-  Download,
   ChevronLeft,
   ChevronRight,
-  PackagePlus,
 } from "lucide-react";
 
 import { getStockList } from "@/services/stockService";
@@ -37,17 +35,12 @@ export default function StockBahanPage() {
     currentPage * itemsPerPage,
   );
 
-  const fetchData = async () => {
-    try {
-      const stock = await getStockList();
-      setStockListData(stock);
-    } catch (err) {
-      console.error("Gagal ambil stock:", err);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
+    let mounted = true;
+    getStockList()
+      .then((stock) => { if (mounted) setStockListData(stock); })
+      .catch((err) => console.error("Gagal ambil stock:", err));
+    return () => { mounted = false; };
   }, []);
 
   const getQtyValue = (jumlah: string): number => {

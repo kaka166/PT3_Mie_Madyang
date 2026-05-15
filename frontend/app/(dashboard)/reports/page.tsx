@@ -5,6 +5,20 @@ import { getLabaRugi } from "@/services/laporanService";
 import { getStockList } from "@/services/stockService";
 import { formatRupiah } from "@/utils/formatRupiah";
 
+interface ReportsRingkasan {
+  total_penjualan: number;
+  total_pengeluaran: number;
+  laba_bersih: number;
+}
+
+interface ReportsStockItem {
+  id: number;
+  nama: string;
+  jumlah: string;
+  stock_limit: number;
+  status: string;
+}
+
 // --- Icons ---
 const SalesIcon = () => (
   <svg
@@ -88,7 +102,7 @@ const DownloadIcon = () => (
 
 export default function ReportsAnalyticsPage() {
   const [downloading, setDownloading] = useState(false);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<{ ringkasan: ReportsRingkasan | null; stock: ReportsStockItem[] } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -113,7 +127,7 @@ export default function ReportsAnalyticsPage() {
 
   const ringkasan = data?.ringkasan;
   const stockList = data?.stock || [];
-  const kritisCount = stockList.filter((s: any) => s.status === "Kritis").length;
+  const kritisCount = stockList.filter((s: ReportsStockItem) => s.status === "Kritis").length;
   const stockPct = stockList.length > 0
     ? Math.round(((stockList.length - kritisCount) / stockList.length) * 100)
     : 0;

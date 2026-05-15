@@ -5,7 +5,6 @@ import {
   TrendingUp,
   TrendingDown,
   Wallet,
-  Receipt,
   BarChart3,
   Calendar,
   ChevronLeft,
@@ -15,6 +14,30 @@ import {
 import { getLabaRugi } from "@/services/laporanService";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { formatTanggal, formatTanggalRange } from "@/utils/formatTanggal";
+
+interface RingkasanLabaRugi {
+  total_penjualan: number;
+  total_pemasukan: number;
+  total_pengeluaran: number;
+  hpp_per_porsi: number;
+  laba_kotor: number;
+  laba_bersih: number;
+  total_hpp: number;
+  total_porsi_terjual: number;
+}
+
+interface RiwayatItem {
+  nama: string;
+  waktu: string;
+  total: number;
+  kategori?: string;
+}
+
+interface LabaRugiData {
+  ringkasan: RingkasanLabaRugi;
+  riwayat_pemasukan: RiwayatItem[];
+  riwayat_pengeluaran: RiwayatItem[];
+}
 
 function CalendarPicker({
   value,
@@ -134,7 +157,7 @@ function CalendarPicker({
 }
 
 export default function LabaRugiPage() {
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<LabaRugiData | null>(null);
   const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: "", end: "" });
   const [loading, setLoading] = useState(true);
 
@@ -158,6 +181,8 @@ export default function LabaRugiPage() {
   }, [dateRange]);
 
   const ringkasan = data?.ringkasan;
+  const pemasukanList = data?.riwayat_pemasukan ?? [];
+  const pengeluaranList = data?.riwayat_pengeluaran ?? [];
 
   const metrics = ringkasan
     ? [
@@ -249,11 +274,11 @@ export default function LabaRugiPage() {
                           <td className="py-3 font-semibold text-neutral-700">{row.label}</td>
                           <td className={`py-3 text-right font-bold ${
                             row.type === "result"
-                              ? (ringkasan?.laba_bersih >= 0 ? "text-green-600" : "text-red-600")
+                              ? (ringkasan!.laba_bersih >= 0 ? "text-green-600" : "text-red-600")
                               : row.type === "plus" ? "text-green-600" : "text-red-600"
                           }`}>
                             {row.type === "result" ? "" : (row.type === "plus" ? "+ " : "- ")}
-                            {formatRupiah(row.value)}
+                            {formatRupiah(row.value ?? 0)}
                           </td>
                         </tr>
                       )
@@ -262,9 +287,9 @@ export default function LabaRugiPage() {
                 </table>
                 <div className="mt-4 p-4 bg-green-50 rounded-xl">
                   <p className="text-sm font-semibold text-green-700">
-                    {ringkasan?.laba_bersih >= 0
-                      ? `UNTUNG: ${formatRupiah(ringkasan.laba_bersih)}`
-                      : `RUGI: ${formatRupiah(Math.abs(ringkasan?.laba_bersih))}`}
+                    {ringkasan!.laba_bersih >= 0
+                      ? `UNTUNG: ${formatRupiah(ringkasan!.laba_bersih)}`
+                      : `RUGI: ${formatRupiah(Math.abs(ringkasan!.laba_bersih))}`}
                   </p>
                   <p className="text-xs text-green-600 mt-1">
                     Porsi terjual: {ringkasan?.total_porsi_terjual || 0} porsi
@@ -279,8 +304,8 @@ export default function LabaRugiPage() {
                   <h3 className="font-bold text-neutral-900">Riwayat Pemasukan</h3>
                 </div>
                 <div className="max-h-60 overflow-y-auto">
-                  {data?.riwayat_pemasukan?.length > 0 ? (
-                    data.riwayat_pemasukan.map((item: any, i: number) => (
+                  {pemasukanList.length > 0 ? (
+                    pemasukanList.map((item: RiwayatItem, i: number) => (
                       <div key={i} className="flex justify-between px-4 py-3 border-b border-neutral-50 text-sm">
                         <div>
                           <p className="font-semibold">{item.nama}</p>
@@ -300,8 +325,8 @@ export default function LabaRugiPage() {
                   <h3 className="font-bold text-neutral-900">Riwayat Pengeluaran</h3>
                 </div>
                 <div className="max-h-60 overflow-y-auto">
-                  {data?.riwayat_pengeluaran?.length > 0 ? (
-                    data.riwayat_pengeluaran.map((item: any, i: number) => (
+                  {pengeluaranList.length > 0 ? (
+                    pengeluaranList.map((item: RiwayatItem, i: number) => (
                       <div key={i} className="flex justify-between px-4 py-3 border-b border-neutral-50 text-sm">
                         <div>
                           <p className="font-semibold">{item.nama}</p>

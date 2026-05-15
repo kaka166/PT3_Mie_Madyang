@@ -13,7 +13,6 @@ import {
   Search,
   X,
   User,
-  Package,
   Printer,
 } from "lucide-react";
 import { getPengeluaran } from "@/services/pengeluaranService";
@@ -203,19 +202,17 @@ export default function LaporanPengeluaran() {
 
   const [riwayatData, setRiwayatData] = useState<Pengeluaran[]>([]);
 
-  const fetchData = async () => {
-    try {
-      const data = await getPengeluaran();
-      setRiwayatData(data);
-    } catch (error) {
-      console.error("Failed to fetch pengeluaran data", error);
-    }
-  };
-
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 3000);
-    return () => clearInterval(interval);
+    let mounted = true;
+    getPengeluaran()
+      .then((data) => { if (mounted) setRiwayatData(data); })
+      .catch((error) => console.error("Failed to fetch pengeluaran data", error));
+    const interval = setInterval(() => {
+      getPengeluaran()
+        .then((data) => setRiwayatData(data))
+        .catch((error) => console.error("Failed to fetch pengeluaran data", error));
+    }, 3000);
+    return () => { mounted = false; clearInterval(interval); };
   }, []);
 
   const filteredRiwayat = riwayatData.filter((item) => {

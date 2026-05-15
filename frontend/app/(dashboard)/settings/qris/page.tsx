@@ -117,7 +117,7 @@ export default function QrisSettingsPage() {
         <div className="bg-white rounded-3xl shadow-sm border border-zinc-100 p-12 text-center">
           <QrCode size={48} className="mx-auto text-zinc-300 mb-4" />
           <p className="text-zinc-500 font-semibold">Belum ada pengaturan QRIS</p>
-          <p className="text-zinc-400 text-sm mt-1">Klik "Tambah QRIS" untuk menambahkan</p>
+          <p className="text-zinc-400 text-sm mt-1">Klik &quot;Tambah QRIS&quot; untuk menambahkan</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

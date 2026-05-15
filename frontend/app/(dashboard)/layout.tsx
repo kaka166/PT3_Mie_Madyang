@@ -11,19 +11,22 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [valid, setValid] = useState(false);
+  const [valid] = useState(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      const user = localStorage.getItem("user");
+      return !!(token && user);
+    }
+    return false;
+  });
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = localStorage.getItem("user");
-    if (!token || !user) {
+    if (!valid) {
       document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
       router.push("/login");
-    } else {
-      setValid(true);
     }
-  }, [router]);
+  }, [valid, router]);
 
   if (!valid) {
     return (

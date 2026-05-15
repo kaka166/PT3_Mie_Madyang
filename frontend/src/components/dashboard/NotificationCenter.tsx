@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Bell, CheckCheck, Trash2, X, Clock } from "lucide-react";
 import {
   getUnreadCount,
@@ -10,13 +10,6 @@ import {
   clearNotifications,
   type AppNotification,
 } from "@/services/notificationService";
-
-const typeStyles: Record<string, string> = {
-  success: "bg-emerald-50 border-emerald-200 text-emerald-700",
-  error: "bg-red-50 border-red-200 text-red-700",
-  warning: "bg-amber-50 border-amber-200 text-amber-700",
-  info: "bg-blue-50 border-blue-200 text-blue-700",
-};
 
 const typeDots: Record<string, string> = {
   success: "bg-emerald-500",
@@ -38,24 +31,17 @@ function formatTime(ts: number) {
 
 export default function NotificationCenter() {
   const [open, setOpen] = useState(false);
-  const [count, setCount] = useState(0);
-  const [notifs, setNotifs] = useState<AppNotification[]>([]);
+  const [count, setCount] = useState(() => getUnreadCount());
+  const [notifs, setNotifs] = useState<AppNotification[]>(() => getAllNotifications());
   const ref = useRef<HTMLDivElement>(null);
 
-  const refresh = useCallback(() => {
-    setNotifs(getAllNotifications());
-    setCount(getUnreadCount());
-  }, []);
-
   useEffect(() => {
-    refresh();
-  }, [open, refresh]);
-
-  useEffect(() => {
-    refresh();
-    const interval = setInterval(refresh, 2000);
+    const interval = setInterval(() => {
+      setNotifs(getAllNotifications());
+      setCount(getUnreadCount());
+    }, 2000);
     return () => clearInterval(interval);
-  }, [refresh]);
+  }, []);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -67,23 +53,30 @@ export default function NotificationCenter() {
 
   const handleMarkRead = (id: string) => {
     markAsRead(id);
-    refresh();
+    setNotifs(getAllNotifications());
+    setCount(getUnreadCount());
   };
 
   const handleMarkAll = () => {
     markAllAsRead();
-    refresh();
+    setNotifs(getAllNotifications());
+    setCount(getUnreadCount());
   };
 
   const handleClear = () => {
     clearNotifications();
-    refresh();
+    setNotifs(getAllNotifications());
+    setCount(getUnreadCount());
   };
 
   return (
     <div ref={ref} className="relative">
       <button
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setOpen((o) => !o);
+          setNotifs(getAllNotifications());
+          setCount(getUnreadCount());
+        }}
         className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-full relative transition-colors"
       >
         <Bell size={20} />

@@ -13,7 +13,6 @@ import {
   Search,
   X,
   User,
-  Package,
   Printer,
 } from "lucide-react";
 
@@ -195,20 +194,18 @@ export default function LaporanPemasukan() {
 
   const [riwayatData, setRiwayatData] = useState<Pemasukan[]>([]);
 
-  const fetchData = async () => {
-    const data = await getPemasukan();
-    setRiwayatData(data);
-  };
-
   useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 3000);
-    return () => clearInterval(interval);
+    let mounted = true;
+    getPemasukan()
+      .then((data) => { if (mounted) setRiwayatData(data); })
+      .catch(() => {});
+    const interval = setInterval(() => {
+      getPemasukan()
+        .then((data) => setRiwayatData(data))
+        .catch(() => {});
+    }, 3000);
+    return () => { mounted = false; clearInterval(interval); };
   }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [dateRange, search, rekapFilter, kasirFilter, metodeFilter]);
 
   const filteredRiwayat = riwayatData.filter((item) => {
     if (!item.waktu) return true;
@@ -359,7 +356,7 @@ export default function LaporanPemasukan() {
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
           <div className="p-6 flex flex-wrap justify-between items-center border-b relative z-20">
             <h2 className="text-xl font-bold text-neutral-900">Ringkasan Penjualan</h2>
-            <FilterDropdown value={rekapFilter} onChange={setRekapFilter} />
+            <FilterDropdown value={rekapFilter} onChange={(v) => { setRekapFilter(v); setCurrentPage(1); }} />
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
@@ -406,7 +403,7 @@ export default function LaporanPemasukan() {
           <div className="p-6 flex flex-wrap justify-between items-center border-b relative z-20">
             <h2 className="text-xl font-bold text-neutral-900">Detail Pemasukan</h2>
             <div className="flex flex-wrap gap-2 items-center">
-              <select value={metodeFilter} onChange={(e) => setMetodeFilter(e.target.value)}
+              <select value={metodeFilter} onChange={(e) => { setMetodeFilter(e.target.value); setCurrentPage(1); }}
                 className="bg-gray-100 px-3 py-2 rounded-lg text-sm focus:outline-none">
                 <option value="">Semua Metode</option>
                 <option value="Tunai">Tunai</option>
@@ -415,14 +412,14 @@ export default function LaporanPemasukan() {
               <div className="relative">
                 <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input type="text" placeholder="Filter kasir..." value={kasirFilter}
-                  onChange={(e) => setKasirFilter(e.target.value)}
+                  onChange={(e) => { setKasirFilter(e.target.value); setCurrentPage(1); }}
                   className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 w-32" />
               </div>
-              <CalendarPicker value={dateRange} onChange={setDateRange} />
+              <CalendarPicker value={dateRange} onChange={(v) => { setDateRange(v); setCurrentPage(1); }} />
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <input type="text" placeholder="Cari nomor transaksi..." value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
                   className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200" />
               </div>
             </div>
