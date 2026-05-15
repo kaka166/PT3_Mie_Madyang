@@ -165,7 +165,22 @@ export default function ReportsAnalyticsPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-neutral-400">Memuat data...</div>
+          <div className="space-y-4 animate-pulse">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+              <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+              <div className="h-10 bg-gray-200 rounded w-64 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-32"></div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1,2,3,4].map((i) => (
+                <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 min-h-[140px]">
+                  <div className="h-10 w-10 bg-gray-200 rounded-xl mb-4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-28"></div>
+                </div>
+              ))}
+            </div>
+          </div>
         ) : ringkasan ? (
           <>
             {/* --- Ringkasan Keuntungan Card --- */}
@@ -190,7 +205,7 @@ export default function ReportsAnalyticsPage() {
               {statCards.map((card, idx) => (
                 <div
                   key={idx}
-                  className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm p-5 flex flex-col justify-between min-h-[140px]">
+                  className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm p-5 flex flex-col justify-between min-h-[140px] transition-all hover:shadow-md">
                   <div className="flex items-start justify-between">
                     <div className="p-2 bg-gray-50 rounded-xl">{card.icon}</div>
                   </div>

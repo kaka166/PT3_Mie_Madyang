@@ -16,6 +16,14 @@ class PosSession extends Model
         'total_pengeluaran'
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'started_at' => 'datetime',
+            'ended_at' => 'datetime',
+        ];
+    }
+
     public function penjualan()
     {
         return $this->hasMany(Penjualan::class, 'session_id');
@@ -24,5 +32,10 @@ class PosSession extends Model
     public function pengeluaran()
     {
         return $this->hasMany(Pengeluaran::class, 'session_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

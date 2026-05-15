@@ -13,10 +13,11 @@ import {
   Pencil,
   Plus,
   Upload,
+  Trash2,
 } from "lucide-react";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { getPengeluaran, createPengeluaran } from "@/services/pengeluaranService";
-import { getLaporanUsers } from "@/services/laporanService";
+import { getLaporanUsers, getLaporanShifts, updateUser, deleteUser } from "@/services/laporanService";
 import Swal from "sweetalert2";
 
 function CalendarPicker({
@@ -119,26 +120,50 @@ function CalendarPicker({
   );
 }
 
-const dummyUsers = [
-  { id: "#1", nama: "Hafizh", role: "Admin", status: "Online" },
-  { id: "#2", nama: "Haikal", role: "Kitchen", status: "Offline" },
-  { id: "#3", nama: "Jonson", role: "Cashier", status: "Offline" },
-];
 
-const dummyShifts = [
-  { id: "#1", nama: "Hafizh", role: "Admin", mulai: "07.00", selesai: "17.00", durasi: "8:15:29" },
-  { id: "#2", nama: "Haikal", role: "Kitchen", mulai: "07.30", selesai: "17.30", durasi: "8:15:29" },
-  { id: "#3", nama: "Jonson", role: "Cashier", mulai: "07.30", selesai: "17.30", durasi: "8:15:29" },
-];
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<"users" | "shifts" | "expenses">("users");
   const [selectedExpenseDate, setSelectedExpenseDate] = useState("");
   const [searchExpense, setSearchExpense] = useState("");
   const [expenses, setExpenses] = useState<any[]>([]);
+  const [users, setUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+  const [shifts, setShifts] = useState<any[]>([]);
+  const [loadingShifts, setLoadingShifts] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({ nama_pengeluaran: "", jumlah: "", kategori: "Operasional", deskripsi: "", tanggal: "" });
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ username: "", name: "", email: "", phone: "", role: 2, password: "" });
+
+  const fetchUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const data = await getLaporanUsers();
+      setUsers(data.data || []);
+    } catch (err) {
+      console.error(err);
+      setUsers([]);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const fetchShifts = async () => {
+    try {
+      setLoadingShifts(true);
+      const data = await getLaporanShifts();
+      setShifts(data.data || []);
+    } catch (err) {
+      console.error(err);
+      setShifts([]);
+    } finally {
+      setLoadingShifts(false);
+    }
+  };
 
   const fetchExpenses = async () => {
     try {
@@ -150,6 +175,8 @@ export default function AdminDashboardPage() {
   };
 
   useEffect(() => {
+    fetchUsers();
+    fetchShifts();
     fetchExpenses();
   }, []);
 
@@ -195,6 +222,66 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const handleDeleteUser = async (user: any) => {
+    const result = await Swal.fire({
+      title: "Hapus User?",
+      text: `User "${user.name}" akan dihapus. Data shift & transaksi tetap aman (soft delete).`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (!result.isConfirmed) return;
+
+    try {
+      const json = await deleteUser(user.id);
+      if (json.success) {
+        Swal.fire("Berhasil", `User "${user.name}" berhasil dihapus`, "success");
+        fetchUsers();
+      } else {
+        Swal.fire("Error", json.message || "Gagal menghapus user", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Gagal menghapus user", "error");
+    }
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+
+    try {
+      const payload: any = {};
+      if (editForm.username !== editingUser.username) payload.username = editForm.username;
+      if (editForm.name !== editingUser.name) payload.name = editForm.name;
+      if (editForm.email !== editingUser.email) payload.email = editForm.email;
+      if (editForm.phone !== (editingUser.phone || "")) payload.phone = editForm.phone;
+      if (editForm.role !== editingUser.role) payload.role = editForm.role;
+      if (editForm.password) payload.password = editForm.password;
+
+      if (Object.keys(payload).length === 0) {
+        setShowEditModal(false);
+        return;
+      }
+
+      const json = await updateUser(editingUser.id, payload);
+      if (json.success) {
+        Swal.fire("Berhasil", "User berhasil diupdate", "success");
+        setShowEditModal(false);
+        setEditingUser(null);
+        fetchUsers();
+      } else {
+        Swal.fire("Error", json.message || "Gagal mengupdate user", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      Swal.fire("Error", "Gagal mengupdate user", "error");
+    }
+  };
+
   const tabs = [
     { key: "users" as const, label: "User" },
     { key: "shifts" as const, label: "Shift" },
@@ -205,7 +292,7 @@ export default function AdminDashboardPage() {
     <div className="h-full w-full overflow-y-auto bg-[#efefef] p-8 pb-12 font-sans text-gray-800 relative">
       <div className="mb-8">
         <h1 className="text-4xl font-bold text-[#F53E1B] mb-2">Admin - Dashboard</h1>
-        <p className="text-gray-500 font-medium">Laporan Pemasukan Mi Madyang</p>
+        <p className="text-gray-500 font-medium">Dasboard Mie Madyang</p>
       </div>
 
       <div className="flex gap-2 mb-6 border-b border-gray-200 pb-2">
@@ -213,9 +300,8 @@ export default function AdminDashboardPage() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`px-6 py-3 rounded-t-lg font-bold text-sm transition-colors ${
-              activeTab === tab.key ? "bg-white text-[#F53E1B] shadow-sm border-t border-l border-r" : "text-gray-500 hover:text-gray-700"
-            }`}
+            className={`px-6 py-3 rounded-t-lg font-bold text-sm transition-colors ${activeTab === tab.key ? "bg-white text-[#F53E1B] shadow-sm border-t border-l border-r" : "text-gray-500 hover:text-gray-700"
+              }`}
           >
             {tab.label}
           </button>
@@ -226,47 +312,69 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-xl shadow-sm mb-8">
           <div className="p-5 border-b"><h2 className="text-xl font-bold text-black">User</h2></div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-gray-500">
-                <tr>
-                  <th className="py-4 px-6 font-medium">ID</th>
-                  <th className="py-4 px-6 font-medium">Nama</th>
-                  <th className="py-4 px-6 font-medium">Role</th>
-                  <th className="py-4 px-6 font-medium">Status</th>
-                  <th className="py-4 px-6 font-medium text-center">Edit</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dummyUsers.map((user, index) => (
-                  <tr key={index} className={`border border-neutral-100 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-100"}`}>
-                    <td className="py-4 px-6 font-bold text-gray-800">{user.id}</td>
-                    <td className="py-4 px-6 font-bold text-gray-800">{user.nama}</td>
-                    <td className="py-4 px-6 text-gray-600">{user.role}</td>
-                    <td className="py-4 px-6">
-                      <span className={`px-3 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1.5 ${user.status === "Online" ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"}`}>
-                        <span className={`w-2 h-2 rounded-full ${user.status === "Online" ? "bg-green-600" : "bg-red-600"}`}></span>
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6 text-center text-gray-400">
-                      <button className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-200 p-2 rounded-lg transition-colors inline-flex justify-center items-center">
-                        <Pencil size={18} />
-                      </button>
-                    </td>
-                  </tr>
+            {loadingUsers ? (
+              <div className="p-8 space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />
                 ))}
-              </tbody>
-            </table>
+              </div>
+            ) : users.length === 0 ? (
+              <div className="py-12 text-center text-gray-400">Belum ada data user</div>
+            ) : (
+              <table className="w-full text-sm text-left">
+                <thead className="text-gray-500">
+                  <tr>
+                    <th className="py-4 px-6 font-medium">ID</th>
+                    <th className="py-4 px-6 font-medium">Nama</th>
+                    <th className="py-4 px-6 font-medium">Role</th>
+                    <th className="py-4 px-6 font-medium text-center">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user: any, index: number) => (
+                    <tr key={user.id} className={`border border-neutral-100 transition-colors hover:bg-red-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-100"}`}>
+                      <td className="py-4 px-6 font-bold text-gray-800">#{user.id}</td>
+                      <td className="py-4 px-6 font-bold text-gray-800">{user.name}</td>
+                      <td className="py-4 px-6">
+                        <span className={`px-3 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1.5 ${user.role === 1 ? "bg-purple-100 text-purple-700" : user.role === 2 ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-700"}`}>
+                          {user.role === 1 ? "Owner" : user.role === 2 ? "Kasir" : "Dapur"}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => {
+                              setEditingUser(user);
+                              setEditForm({
+                                username: user.username || "",
+                                name: user.name || "",
+                                email: user.email || "",
+                                phone: user.phone || "",
+                                role: user.role,
+                                password: "",
+                              });
+                              setShowEditModal(true);
+                            }}
+                            className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-200 p-2 rounded-lg transition-colors inline-flex justify-center items-center"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteUser(user)}
+                            className="text-red-400 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors inline-flex justify-center items-center"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
           <div className="p-4 border-t flex justify-between items-center text-sm bg-white rounded-b-xl">
-            <span className="text-gray-500 font-medium">Showing 1-9 of 2810 Transaction</span>
-            <div className="flex items-center gap-1">
-              <button className="w-8 h-8 flex items-center justify-center rounded bg-[#f87171] text-white"><ChevronLeft size={16} /></button>
-              <button className="w-8 h-8 flex items-center justify-center rounded bg-[#f87171] text-white shadow-sm font-bold">1</button>
-              {[2,3,4,5].map((n) => (
-                <button key={n} className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 text-gray-700 font-bold">{n}</button>
-              ))}
-            </div>
+            <span className="text-gray-500 font-medium">Total {users.length} user</span>
           </div>
         </div>
       )}
@@ -275,40 +383,49 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-xl shadow-sm mb-12">
           <div className="p-5 border-b"><h2 className="text-xl font-bold text-black">Shift</h2></div>
           <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-gray-500 border-b bg-white">
-                <tr>
-                  <th className="py-4 px-6 font-medium">ID</th>
-                  <th className="py-4 px-6 font-medium">Nama</th>
-                  <th className="py-4 px-6 font-medium">Role</th>
-                  <th className="py-4 px-6 font-medium">Waktu Mulai</th>
-                  <th className="py-4 px-6 font-medium">Waktu Selesai</th>
-                  <th className="py-4 px-6 font-medium">Durasi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dummyShifts.map((shift, index) => (
-                  <tr key={index} className={`border border-neutral-100 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-100"}`}>
-                    <td className="py-4 px-6 font-bold text-gray-800">{shift.id}</td>
-                    <td className="py-4 px-6 font-bold text-gray-800">{shift.nama}</td>
-                    <td className="py-4 px-6 text-gray-600">{shift.role}</td>
-                    <td className="py-4 px-6 text-gray-600">{shift.mulai}</td>
-                    <td className="py-4 px-6 text-gray-600">{shift.selesai}</td>
-                    <td className="py-4 px-6 text-gray-600">{shift.durasi}</td>
-                  </tr>
+            {loadingShifts ? (
+              <div className="p-8 space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />
                 ))}
-              </tbody>
-            </table>
+              </div>
+            ) : shifts.length === 0 ? (
+              <div className="py-12 text-center text-gray-400">Belum ada data shift</div>
+            ) : (
+              <table className="w-full text-sm text-left">
+                <thead className="text-gray-500 border-b bg-white">
+                  <tr>
+                    <th className="py-4 px-6 font-medium">ID</th>
+                    <th className="py-4 px-6 font-medium">Nama</th>
+                    <th className="py-4 px-6 font-medium">Role</th>
+                    <th className="py-4 px-6 font-medium">Waktu Mulai</th>
+                    <th className="py-4 px-6 font-medium">Waktu Selesai</th>
+                    <th className="py-4 px-6 font-medium">Durasi</th>
+                    <th className="py-4 px-6 font-medium">Total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {shifts.map((shift: any, index: number) => (
+                    <tr key={shift.id} className={`border border-neutral-100 transition-colors hover:bg-red-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-100"}`}>
+                      <td className="py-4 px-6 font-bold text-gray-800">{shift.id}</td>
+                      <td className="py-4 px-6 font-bold text-gray-800">{shift.nama}</td>
+                      <td className="py-4 px-6">
+                        <span className={`px-3 py-1 rounded-md text-xs font-bold inline-flex items-center gap-1.5 ${shift.role === 1 ? "bg-purple-100 text-purple-700" : shift.role === 2 ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-700"}`}>
+                          {shift.role === 1 ? "Owner" : shift.role === 2 ? "Kasir" : "Dapur"}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-gray-600">{shift.mulai ? new Date(shift.mulai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) + ", " + new Date(shift.mulai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : "-"}</td>
+                      <td className="py-4 px-6 text-gray-600">{shift.selesai ? new Date(shift.selesai).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) + ", " + new Date(shift.selesai).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }) : <span className="text-green-600 font-medium">Aktif</span>}</td>
+                      <td className="py-4 px-6 text-gray-600">{shift.durasi}</td>
+                      <td className="py-4 px-6 font-bold text-gray-800">{formatRupiah(shift.total_pemasukan)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
           <div className="p-4 border-t flex justify-between items-center text-sm bg-white rounded-b-xl">
-            <span className="text-gray-500 font-medium">Showing 1-9 of 2810 Shift</span>
-            <div className="flex items-center gap-1">
-              <button className="w-8 h-8 flex items-center justify-center rounded bg-[#f87171] text-white"><ChevronLeft size={16} /></button>
-              <button className="w-8 h-8 flex items-center justify-center rounded bg-[#f87171] text-white shadow-sm font-bold">1</button>
-              {[2,3,4,5].map((n) => (
-                <button key={n} className="w-8 h-8 flex items-center justify-center rounded bg-gray-200 text-gray-700 font-bold">{n}</button>
-              ))}
-            </div>
+            <span className="text-gray-500 font-medium">Total {shifts.length} shift</span>
           </div>
         </div>
       )}
@@ -405,7 +522,6 @@ export default function AdminDashboardPage() {
                   <option>Operasional</option>
                   <option>Gaji</option>
                   <option>Sewa</option>
-                  <option>Bahan Baku</option>
                   <option>Lain-lain</option>
                 </select>
               </div>
@@ -439,6 +555,72 @@ export default function AdminDashboardPage() {
             <div className="flex gap-3 mt-6">
               <button onClick={() => setShowCreateModal(false)} className="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">Batal</button>
               <button onClick={handleCreateExpense} className="flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-[#f85656] hover:bg-[#e04545] transition-colors">Simpan</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && editingUser && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold">Edit User</h2>
+              <button onClick={() => { setShowEditModal(false); setEditingUser(null); }}>
+                <X size={20} className="text-neutral-400" />
+              </button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Username</label>
+                <input value={editForm.username}
+                  onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Nama</label>
+                <input value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Email</label>
+                <input type="email" value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">No. Telepon</label>
+                <input value={editForm.phone}
+                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Role</label>
+                <select value={editForm.role}
+                  onChange={(e) => setEditForm({ ...editForm, role: Number(e.target.value) })}
+                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200">
+                  <option value={1}>Owner</option>
+                  <option value={2}>Kasir</option>
+                  <option value={3}>Dapur</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 mb-1">Password Baru (kosongkan jika tidak diganti)</label>
+                <input type="password" value={editForm.password}
+                  onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+                  placeholder="Min. 8 karakter"
+                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => { setShowEditModal(false); setEditingUser(null); }}
+                className="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">
+                Batal
+              </button>
+              <button onClick={handleUpdateUser}
+                className="flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-[#f85656] hover:bg-[#e04545] transition-colors">
+                Simpan
+              </button>
             </div>
           </div>
         </div>

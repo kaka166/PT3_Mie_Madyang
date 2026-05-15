@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\HppCalculatorController;
 use App\Http\Controllers\Api\LabaRugiController;
 use App\Http\Controllers\Api\LaporanController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\QrisSettingController;
 use App\Http\Controllers\Api\EvidenceController;
 
@@ -59,12 +60,17 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/laporan/pengeluaran', [LaporanController::class, 'pengeluaranDetail']);
         Route::get('/laporan/users', [LaporanController::class, 'getUsers']);
         Route::get('/laporan/menu-items', [LaporanController::class, 'getMenuItems']);
+        Route::get('/laporan/shifts', [LaporanController::class, 'getShifts']);
         Route::get('/laporan/download-evidence', [LaporanController::class, 'downloadEvidence']);
 
         // QRIS Settings
         Route::post('/qris-settings', [QrisSettingController::class, 'store']);
         Route::put('/qris-settings/{id}', [QrisSettingController::class, 'update']);
         Route::delete('/qris-settings/{id}', [QrisSettingController::class, 'destroy']);
+
+        // User Management
+        Route::put('/users/{id}', [UserController::class, 'update']);
+        Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
         // Pengeluaran (create)
         Route::post('/pengeluaran', [PengeluaranController::class, 'store']);

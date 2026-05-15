@@ -186,14 +186,32 @@ export default function LabaRugiPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-20 text-neutral-400">Memuat data...</div>
+          <div className="space-y-6 animate-pulse">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[1,2,3,4,5,6].map((i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm min-h-[130px]">
+                  <div className="h-10 w-10 bg-gray-200 rounded-xl mb-4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-28"></div>
+                </div>
+              ))}
+            </div>
+            <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
+              <div className="h-5 bg-gray-200 rounded w-48 mb-6"></div>
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-200 rounded w-full"></div>
+                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+              </div>
+            </div>
+          </div>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {metrics.map((m, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px]"
+                  className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px] transition-all hover:shadow-md"
                 >
                   <div className="flex justify-between items-start mb-3">
                     <div className={`p-2.5 bg-${m.color}-50 text-${m.color}-500 rounded-xl`}>

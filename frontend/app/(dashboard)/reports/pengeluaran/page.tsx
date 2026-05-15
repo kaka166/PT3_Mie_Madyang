@@ -350,7 +350,7 @@ export default function LaporanPengeluaran() {
             { title: "TOTAL TRANSAKSI", value: totalTransaksi.toLocaleString("id-ID"), icon: Receipt },
             { title: "RATA RATA NOMINAL PENGELUARAN", value: formatRupiah(rataRata), icon: Wallet },
           ].map((metric, idx) => (
-            <div key={idx} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px]">
+            <div key={idx} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px] transition-all hover:shadow-md">
               <div className="flex justify-between items-start mb-3">
                 <div className="p-2.5 bg-red-50 text-red-500 rounded-xl"><metric.icon size={20} /></div>
               </div>
@@ -378,10 +378,10 @@ export default function LaporanPengeluaran() {
               </thead>
               <tbody>
                 {paginatedRekap.map((row: { rentang: string; total: number; transaksi: number }, idx: number) => (
-                  <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-                    <td className="px-6 py-4 text-neutral-600">{row.rentang}</td>
-                    <td className="px-6 py-4 font-semibold text-neutral-800">{formatRupiah(row.total)}</td>
-                    <td className="px-6 py-4 text-neutral-600">{row.transaksi}</td>
+                  <tr key={idx} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-red-50 transition-colors`}>
+                    <td className="px-6 py-3 text-neutral-600">{row.rentang}</td>
+                    <td className="px-6 py-3 font-semibold text-neutral-800">{formatRupiah(row.total)}</td>
+                    <td className="px-6 py-3 text-neutral-600">{row.transaksi}</td>
                   </tr>
                 ))}
               </tbody>
@@ -399,20 +399,20 @@ export default function LaporanPengeluaran() {
             </div>
             <div className="flex items-center gap-1.5 font-bold">
               <button onClick={() => setRekapPage((p) => Math.max(p - 1, 1))} disabled={rekapPage === 1}
-                className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === 1 ? "bg-gray-200 text-gray-400" : "bg-[#f85656] text-white"}`}>
+                className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === 1 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronLeft size={16} />
               </button>
               {Array.from({ length: totalRekapPages }, (_, i) => {
                 const page = i + 1;
                 return (
                   <button key={i} onClick={() => setRekapPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === page ? "bg-[#f85656] text-white" : "bg-gray-200"}`}>
+                    className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === page ? "bg-red-400 text-white" : "bg-gray-100"}`}>
                     {page}
                   </button>
                 );
               })}
               <button onClick={() => setRekapPage((p) => Math.min(p + 1, totalRekapPages))} disabled={rekapPage === totalRekapPages || totalRekapPages === 0}
-                className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === totalRekapPages || totalRekapPages === 0 ? "bg-gray-200 text-gray-400" : "bg-[#f85656] text-white"}`}>
+                className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === totalRekapPages || totalRekapPages === 0 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -459,11 +459,14 @@ export default function LaporanPengeluaran() {
               <tbody>
                 {paginatedData.length > 0 ? (
                   (paginatedData || []).map((row, idx) => (
-                    <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-gray-100"}>
+                    <tr key={idx} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-red-50 transition-colors`}>
                       <td className="px-6 py-4 font-semibold text-neutral-700">{row.id}</td>
                       <td className="px-6 py-4 font-bold text-neutral-800">{row.nama}</td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full text-xs font-bold">{row.kategori}</span>
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{
+                          backgroundColor: row.kategori === "Operasional" ? "#e0f2fe" : row.kategori === "Gaji" ? "#dcfce7" : row.kategori === "Sewa" ? "#fef3c7" : row.kategori === "Bahan Baku" ? "#fae8ff" : "#f3e8ff",
+                          color: row.kategori === "Operasional" ? "#0369a1" : row.kategori === "Gaji" ? "#166534" : row.kategori === "Sewa" ? "#92400e" : row.kategori === "Bahan Baku" ? "#86198f" : "#5b21b6",
+                        }}>{row.kategori}</span>
                       </td>
                       <td className="px-6 py-4 text-neutral-500">{formatTanggal(row.waktu)}</td>
                       <td className="px-6 py-4 text-neutral-600">{row.user_id}</td>
@@ -490,20 +493,20 @@ export default function LaporanPengeluaran() {
             </div>
             <div className="flex items-center gap-1.5 font-bold">
               <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}
-                className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === 1 ? "bg-gray-200 text-gray-400" : "bg-[#f85656] text-white"}`}>
+                className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === 1 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronLeft size={16} />
               </button>
               {Array.from({ length: totalPages }, (_, i) => {
                 const page = i + 1;
                 return (
                   <button key={i} onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === page ? "bg-[#f85656] text-white" : "bg-gray-200"}`}>
+                    className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === page ? "bg-red-400 text-white" : "bg-gray-100"}`}>
                     {page}
                   </button>
                 );
               })}
               <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}
-                className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === totalPages || totalPages === 0 ? "bg-gray-200 text-gray-400" : "bg-[#f85656] text-white"}`}>
+                className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === totalPages || totalPages === 0 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronRight size={16} />
               </button>
             </div>

@@ -344,7 +344,7 @@ export default function LaporanPemasukan() {
             { title: "TOTAL TRANSAKSI", value: totalTransaksi.toLocaleString("id-ID"), icon: Receipt },
             { title: "RATA RATA NOMINAL PENJUALAN", value: formatRupiah(rataRata), icon: Wallet },
           ].map((metric, idx) => (
-            <div key={idx} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px]">
+            <div key={idx} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px] transition-all hover:shadow-md">
               <div className="flex justify-between items-start mb-3">
                 <div className="p-2.5 bg-blue-50 text-blue-500 rounded-xl"><metric.icon size={20} /></div>
               </div>
@@ -449,7 +449,7 @@ export default function LaporanPemasukan() {
                       <td className="px-6 py-4 text-neutral-500">{formatTanggal(row.waktu)}</td>
                       <td className="px-6 py-4 text-neutral-600">{row.kasir}</td>
                       <td className="px-6 py-4">
-                        <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-600">{row.metode}</span>
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row.metode === "QRIS" ? "bg-purple-50 text-purple-600" : "bg-green-50 text-green-600"}`}>{row.metode}</span>
                       </td>
                       <td className="px-6 py-4 font-semibold text-neutral-800">{formatRupiah(row.jumlah)}</td>
                     </tr>

@@ -108,7 +108,7 @@ export default function StockBahanPage() {
                   return (
                     <tr
                       key={item.id}
-                      className={`border border-neutral-200 transition-colors ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                      className={`border border-neutral-200 transition-colors hover:bg-red-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
                         }`}
                     >
                       <td className="py-3 px-4 text-left font-semibold text-neutral-700">{item.id}</td>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
 use App\Models\Penjualan;
+use App\Models\PosSession;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -104,10 +105,50 @@ class LaporanController extends Controller
 
     public function getUsers()
     {
-        $users = User::select('id', 'name', 'role')->get();
+        $users = User::select('id', 'username', 'name', 'email', 'phone', 'role')->get();
         return response()->json([
             'success' => true,
             'data' => $users
+        ]);
+    }
+
+    public function getShifts(Request $request)
+    {
+        $query = PosSession::with('user');
+
+        if ($request->start_date) {
+            $query->whereDate('started_at', '>=', $request->start_date);
+        }
+
+        if ($request->end_date) {
+            $query->whereDate('started_at', '<=', $request->end_date);
+        }
+
+        $data = $query->latest('started_at')->get()->map(function ($s) {
+            $durasi = '-';
+            if ($s->ended_at) {
+                $diff = $s->started_at->diff($s->ended_at);
+                $jam = $diff->h + ($diff->days * 24);
+                $menit = $diff->i;
+                $durasi = $jam > 0 ? "{$jam}j {$menit}m" : "{$menit}m";
+            }
+
+            return [
+                'id' => '#' . $s->id,
+                'user_id' => $s->user_id,
+                'nama' => $s->user->name ?? 'Unknown',
+                'role' => $s->user->role ?? null,
+                'mulai' => $s->started_at,
+                'selesai' => $s->ended_at,
+                'durasi' => $durasi,
+                'total_pemasukan' => $s->total_pemasukan,
+                'total_pengeluaran' => $s->total_pengeluaran,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data
         ]);
     }
 

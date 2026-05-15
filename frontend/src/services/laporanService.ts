@@ -62,7 +62,43 @@ export const getLaporanUsers = async () => {
   return res.json();
 };
 
+export const getLaporanShifts = async (params?: { start_date?: string; end_date?: string }) => {
+  const query = new URLSearchParams();
+  if (params?.start_date) query.set("start_date", params.start_date);
+  if (params?.end_date) query.set("end_date", params.end_date);
+  const qs = query.toString();
+
+  const res = await fetch(`${API_BASE_URL}/laporan/shifts${qs ? "?" + qs : ""}`, {
+    headers: getHeaders(),
+  });
+  return res.json();
+};
+
 export const getLaporanMenuItems = async () => {
   const res = await fetch(`${API_BASE_URL}/laporan/menu-items`, { headers: getHeaders() });
+  return res.json();
+};
+
+export const updateUser = async (id: number, data: {
+  username?: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  password?: string;
+  role?: number;
+}) => {
+  const res = await fetch(`${API_BASE_URL}/users/${id}`, {
+    method: "PUT",
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};
+
+export const deleteUser = async (id: number) => {
+  const res = await fetch(`${API_BASE_URL}/users/${id}`, {
+    method: "DELETE",
+    headers: getHeaders(),
+  });
   return res.json();
 };

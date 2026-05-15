@@ -10,8 +10,7 @@ import {
   getActiveSession,
 } from "@/services/sessionService";
 import { getQrisSettings, QrisSetting } from "@/services/qrisService";
-import { createPengeluaran } from "@/services/pengeluaranService";
-import { X, QrCode, Receipt } from "lucide-react";
+import { X, QrCode } from "lucide-react";
 
 /* ================= TYPES ================= */
 type CartItem = {
@@ -42,9 +41,6 @@ export default function POSPage() {
   const [showTaxModal, setShowTaxModal] = useState(false);
 
   const [qrisSettings, setQrisSettings] = useState<QrisSetting[]>([]);
-
-  const [showExpenseModal, setShowExpenseModal] = useState(false);
-  const [expenseForm, setExpenseForm] = useState({ nama_pengeluaran: "", jumlah: "", kategori: "Operasional", deskripsi: "" });
 
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -783,64 +779,6 @@ export default function POSPage() {
         </div>
       )}
 
-      {/* ================= MODAL PENGELUARAN ================= */}
-      {showExpenseModal && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-lg font-bold">Catat Pengeluaran</h2>
-              <button onClick={() => setShowExpenseModal(false)}><X size={20} /></button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Nama Pengeluaran</label>
-                <input type="text" value={expenseForm.nama_pengeluaran} onChange={(e) => setExpenseForm({ ...expenseForm, nama_pengeluaran: e.target.value })}
-                  placeholder="Contoh: Beli es batu" className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Jumlah (Rp)</label>
-                <input type="number" value={expenseForm.jumlah} onChange={(e) => setExpenseForm({ ...expenseForm, jumlah: e.target.value })}
-                  placeholder="0" className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Kategori</label>
-                <select value={expenseForm.kategori} onChange={(e) => setExpenseForm({ ...expenseForm, kategori: e.target.value })}
-                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200">
-                  <option>Operasional</option>
-                  <option>Gaji</option>
-                  <option>Sewa</option>
-                  <option>Bahan Baku</option>
-                  <option>Lain-lain</option>
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 mb-1 block">Deskripsi</label>
-                <textarea value={expenseForm.deskripsi} onChange={(e) => setExpenseForm({ ...expenseForm, deskripsi: e.target.value })}
-                  placeholder="Opsional" rows={2} className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-200 resize-none" />
-              </div>
-            </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setShowExpenseModal(false)} className="flex-1 py-3 rounded-xl font-semibold text-gray-500 bg-gray-100 hover:bg-gray-200 transition-colors">Batal</button>
-              <button onClick={async () => {
-                if (!expenseForm.nama_pengeluaran || !expenseForm.jumlah) { alert("Isi nama dan jumlah!"); return; }
-                try {
-                  await createPengeluaran({
-                    nama_pengeluaran: expenseForm.nama_pengeluaran,
-                    jumlah: Number(expenseForm.jumlah),
-                    kategori: expenseForm.kategori,
-                    tanggal: new Date().toISOString().split("T")[0],
-                    session_id: activeSessionId ?? undefined,
-                  });
-                  setShowExpenseModal(false);
-                  setExpenseForm({ nama_pengeluaran: "", jumlah: "", kategori: "Operasional", deskripsi: "" });
-                  alert("Pengeluaran berhasil dicatat!");
-                } catch (err) { console.error(err); alert("Gagal mencatat pengeluaran"); }
-              }} className="flex-1 py-3 rounded-xl font-semibold text-white bg-orange-500 hover:bg-orange-600 transition-colors">Simpan</button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* ================= MAIN CONTENT ================= */}
       <main className="flex-1 flex flex-col min-w-0 bg-white lg:bg-transparent relative z-10 overflow-hidden">
         <header className="bg-white px-6 py-5 flex flex-col lg:flex-row justify-between items-center gap-4 border-b border-gray-100 shadow-sm">
@@ -889,11 +827,6 @@ export default function POSPage() {
                     Sesi Aktif
                   </span>
 
-                  <button
-                    onClick={() => setShowExpenseModal(true)}
-                    className="bg-orange-500 text-white px-3 py-2 rounded-lg text-xs font-bold">
-                    <Receipt size={14} className="inline mr-1" />Catat
-                  </button>
                   <button
                     onClick={handleEndSession}
                     className="bg-red-500 text-white px-3 py-2 rounded-lg text-xs font-bold">

@@ -246,7 +246,7 @@ export default function HPPPage() {
                 .map((item, index) => (
                   <tr
                     key={item.id}
-                    className={`border-b border-gray-100 transition-colors hover:bg-gray-100 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    className={`border-b border-gray-100 transition-colors hover:bg-red-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
                       }`}>
                     <td className="py-4 px-6 font-semibold text-gray-700">
                       #{item.id}
