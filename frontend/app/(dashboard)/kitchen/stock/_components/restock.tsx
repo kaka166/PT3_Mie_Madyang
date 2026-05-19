@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { getBahan, createStockMovement } from "@/services/stockService";
 import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
+import { addNotification } from "@/services/notificationService";
 
 const unitOptions = ["Kg", "L", "ml", "Pack", "Ikat"];
 
@@ -36,6 +37,7 @@ export default function RestockModal({
   );
 
   const [keranjang, setKeranjang] = useState<any[]>([]);
+  const [error, setError] = useState("");
 
   // ================= FETCH BAHAN =================
   useEffect(() => {
@@ -98,31 +100,43 @@ export default function RestockModal({
 
   // ================= SIMPAN RESTOCK =================
   const handleSubmit = async () => {
+    setError("");
+
     if (isBahanBaru && !stockLimit) {
-      return alert("Stock limit wajib diisi");
+      setError("Stock limit wajib diisi");
+      return;
     }
 
     if (keranjang.length === 0) {
-      return alert("Keranjang kosong");
+      setError("Keranjang kosong");
+      return;
     }
-    console.log("DEBUG stockLimit:", stockLimit);
-    await Promise.all(
-      keranjang.map((item) =>
-        createStockMovement({
-          bahan_id: item.id || null,
-          nama: item.nama,
-          jumlah: Number(item.jumlah),
-          satuan: item.satuan,
-          tipe: "plus",
-          kategori: "restock",
-          alasan: "Restock",
-          stock_limit: Number(stockLimit || 5),
-          harga: Number(item.harga || 0),
-        }),
-      ),
-    );
+
+    try {
+      await Promise.all(
+        keranjang.map((item) =>
+          createStockMovement({
+            bahan_id: item.id || null,
+            nama: item.nama,
+            jumlah: Number(item.jumlah),
+            satuan: item.satuan,
+            tipe: "plus",
+            kategori: "restock",
+            alasan: "Restock",
+            stock_limit: Number(stockLimit || 5),
+            harga: Number(item.harga || 0),
+          }),
+        ),
+      );
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Gagal menyimpan restock";
+      setError(msg);
+      return;
+    }
 
     onSuccess?.();
+
+    addNotification("Restock Dicatat", `${keranjang.length} bahan berhasil di-restock`, "success", true, "kitchen");
 
     setKeranjang([]);
     setStockLimit("");
@@ -343,6 +357,11 @@ export default function RestockModal({
               </div>
             ))}
           </div>
+          {error && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+              {error}
+            </div>
+          )}
           <button
             onClick={handleSubmit}
             className="mt-auto w-full bg-red-500 text-white py-3 rounded-xl">

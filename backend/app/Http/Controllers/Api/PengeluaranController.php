@@ -12,7 +12,9 @@ class PengeluaranController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Pengeluaran::with('user')->latest();
+        $query = Pengeluaran::with(['user' => function ($q) {
+            $q->withTrashed();
+        }])->latest();
 
         if ($request->start_date) {
             $query->whereDate('tanggal', '>=', $request->start_date);
@@ -28,12 +30,13 @@ class PengeluaranController extends Controller
         }
 
         $data = $query->get()->map(function ($item) {
+            $user = $item->user;
             return [
                 'id' => '#' . str_pad($item->id, 5, '0', STR_PAD_LEFT),
                 'nama' => $item->nama_pengeluaran,
                 'kategori' => $item->kategori ?? 'Operasional',
                 'deskripsi' => $item->deskripsi ?? '',
-                'user_id' => $item->user->name ?? 'Unknown',
+                'user_id' => $user ? $user->name : 'Unknown',
                 'waktu' => $item->tanggal,
                 'jumlah' => $item->jumlah,
                 'evidence_file' => $item->evidence_file,
@@ -86,16 +89,19 @@ class PengeluaranController extends Controller
         $tanggal = $request->query('tanggal', now()->toDateString());
 
         $pengeluaran = Pengeluaran::whereDate('tanggal', $tanggal)
-            ->with('user')
+            ->with(['user' => function ($q) {
+                $q->withTrashed();
+            }])
             ->latest()
             ->get()
             ->map(function ($item) {
+                $user = $item->user;
                 return [
                     'id' => '#' . str_pad($item->id, 5, '0', STR_PAD_LEFT),
                     'nama' => $item->nama_pengeluaran,
                     'kategori' => $item->kategori ?? 'Operasional',
                     'jumlah' => $item->jumlah,
-                    'user' => $item->user->name ?? 'Unknown',
+                    'user' => $user ? $user->name : 'Unknown',
                     'waktu' => $item->tanggal,
                 ];
             });

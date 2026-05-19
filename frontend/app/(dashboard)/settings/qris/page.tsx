@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, X, QrCode, Trash2 } from "lucide-react";
 import { getQrisSettings, createQrisSetting, updateQrisSetting, deleteQrisSetting, QrisSetting } from "@/services/qrisService";
+import { addNotification } from "@/services/notificationService";
 
 export default function QrisSettingsPage() {
   const [settings, setSettings] = useState<QrisSetting[]>([]);
@@ -65,8 +66,10 @@ export default function QrisSettingsPage() {
     try {
       if (editId) {
         await updateQrisSetting(editId, fd);
+        addNotification("QRIS Diperbarui", `${form.nama_bank} - ${form.nama_pemilik}`, "success", true, "admin");
       } else {
         await createQrisSetting(fd);
+        addNotification("QRIS Ditambahkan", `${form.nama_bank} - ${form.nama_pemilik}`, "success", true, "admin");
       }
       setShowModal(false);
       fetchData();

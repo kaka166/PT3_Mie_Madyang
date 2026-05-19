@@ -1,15 +1,23 @@
 import Swal from "sweetalert2";
 
 export type NotifType = "success" | "error" | "warning" | "info";
+export type NotifSource = "admin" | "cashier" | "kitchen";
 
 export interface AppNotification {
   id: string;
   title: string;
   message: string;
   type: NotifType;
+  source: NotifSource;
   timestamp: number;
   read: boolean;
 }
+
+const SOURCE_ROLES: Record<NotifSource, number[]> = {
+  admin: [1],
+  cashier: [1, 2],
+  kitchen: [1, 2, 3],
+};
 
 const NOTIF_KEY = "app_notifications";
 const MAX_NOTIFS = 50;
@@ -61,13 +69,15 @@ export function addNotification(
   title: string,
   message: string,
   type: NotifType = "info",
-  silent?: boolean
+  silent?: boolean,
+  source: NotifSource = "admin"
 ) {
   const notif: AppNotification = {
     id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     title,
     message,
     type,
+    source,
     timestamp: Date.now(),
     read: false,
   };
@@ -87,6 +97,17 @@ export function getUnreadCount(): number {
 
 export function getAllNotifications(): AppNotification[] {
   return getNotifications();
+}
+
+export function getNotificationsByRole(roleId: number): AppNotification[] {
+  const allowedSources = (Object.entries(SOURCE_ROLES) as [NotifSource, number[]][])
+    .filter(([, roles]) => roles.includes(roleId))
+    .map(([source]) => source);
+  return getNotifications().filter((n) => allowedSources.includes(n.source));
+}
+
+export function getUnreadCountByRole(roleId: number): number {
+  return getNotificationsByRole(roleId).filter((n) => !n.read).length;
 }
 
 export function markAsRead(id: string) {

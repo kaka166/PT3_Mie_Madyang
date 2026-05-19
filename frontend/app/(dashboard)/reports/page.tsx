@@ -158,7 +158,6 @@ export default function ReportsAnalyticsPage() {
       URL.revokeObjectURL(url);
     } catch (err) {
       console.error(err);
-      alert("Gagal download evidence");
     } finally {
       setDownloading(false);
     }

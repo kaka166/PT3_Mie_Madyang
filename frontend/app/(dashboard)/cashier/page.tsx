@@ -11,7 +11,7 @@ import {
 } from "@/services/sessionService";
 import { getQrisSettings, QrisSetting } from "@/services/qrisService";
 import { X, QrCode } from "lucide-react";
-import { addNotification, showToast } from "@/services/notificationService";
+import { addNotification } from "@/services/notificationService";
 
 /* ================= TYPES ================= */
 type CartItem = {
@@ -73,7 +73,6 @@ export default function POSPage() {
     const cash = Number(openingCash);
 
     if (!cash || cash < 0) {
-      showToast("Masukkan uang awal dulu!", "warning");
       return false;
     }
 
@@ -82,14 +81,9 @@ export default function POSPage() {
       setSessionActive(true);
       setActiveSessionId(res.data?.id ?? null);
       setOpeningCash("");
-      addNotification("Sesi Dimulai", `Sesi kasir #${res.data?.id} berhasil dimulai dengan uang awal Rp${cash.toLocaleString("id-ID")}`, "success");
+      addNotification("Sesi Dimulai", `Sesi kasir #${res.data?.id} berhasil dimulai dengan uang awal Rp${cash.toLocaleString("id-ID")}`, "success", true, "cashier");
       return true;
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        showToast(err.message, "error");
-      } else {
-        showToast("Gagal memulai sesi", "error");
-      }
       return false;
     }
   };
@@ -102,20 +96,14 @@ export default function POSPage() {
     const cash = Number(closingCash);
 
     if (!cash || cash < 0) {
-      showToast("Masukkan uang akhir yang valid!", "warning");
       return null;
     }
 
     try {
       const res = await endSession(cash);
-      addNotification("Sesi Diakhiri", `Sesi kasir berakhir. Uang akhir: Rp${cash.toLocaleString("id-ID")}`, "info");
+      addNotification("Sesi Diakhiri", `Sesi kasir berakhir. Uang akhir: Rp${cash.toLocaleString("id-ID")}`, "info", true, "cashier");
       return res.data ?? res;
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        showToast(err.message, "error");
-      } else {
-        showToast("Gagal mengakhiri sesi", "error");
-      }
       return null;
     }
   };
@@ -671,7 +659,9 @@ export default function POSPage() {
                       addNotification(
                         "Pesanan Terkirim!",
                         `${customerName || "Guest"} - ${cart.reduce((s, i) => s + i.qty, 0)} item telah masuk ke kitchen`,
-                        "success"
+                        "success",
+                        true,
+                        "cashier"
                       );
 
                       setMenus((prevMenus) =>
@@ -695,8 +685,6 @@ export default function POSPage() {
                       setCart([]);
                       setCustomerName("");
                       setTableNumber("");
-                    } else {
-                      showToast("Gagal kirim ke kitchen", "error");
                     }
                   }}
                   className="w-full bg-[#ff6b6b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200 active:scale-95 transition-all">

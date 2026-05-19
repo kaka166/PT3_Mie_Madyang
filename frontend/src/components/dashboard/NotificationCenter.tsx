@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef } from "react";
 import { Bell, CheckCheck, Trash2, X, Clock } from "lucide-react";
 import {
-  getUnreadCount,
-  getAllNotifications,
+  getUnreadCountByRole,
+  getNotificationsByRole,
   markAsRead,
   markAllAsRead,
   clearNotifications,
   type AppNotification,
 } from "@/services/notificationService";
+import { authService } from "@/services/authService";
 
 const typeDots: Record<string, string> = {
   success: "bg-emerald-500",
@@ -31,17 +32,19 @@ function formatTime(ts: number) {
 
 export default function NotificationCenter() {
   const [open, setOpen] = useState(false);
-  const [count, setCount] = useState(() => getUnreadCount());
-  const [notifs, setNotifs] = useState<AppNotification[]>(() => getAllNotifications());
+  const roleId = authService.getRole();
+  const [count, setCount] = useState(() => (roleId ? getUnreadCountByRole(roleId) : 0));
+  const [notifs, setNotifs] = useState<AppNotification[]>(() => (roleId ? getNotificationsByRole(roleId) : []));
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setNotifs(getAllNotifications());
-      setCount(getUnreadCount());
+      if (!roleId) return;
+      setNotifs(getNotificationsByRole(roleId));
+      setCount(getUnreadCountByRole(roleId));
     }, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [roleId]);
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -51,22 +54,25 @@ export default function NotificationCenter() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  const refreshNotifs = () => {
+    if (!roleId) return;
+    setNotifs(getNotificationsByRole(roleId));
+    setCount(getUnreadCountByRole(roleId));
+  };
+
   const handleMarkRead = (id: string) => {
     markAsRead(id);
-    setNotifs(getAllNotifications());
-    setCount(getUnreadCount());
+    refreshNotifs();
   };
 
   const handleMarkAll = () => {
     markAllAsRead();
-    setNotifs(getAllNotifications());
-    setCount(getUnreadCount());
+    refreshNotifs();
   };
 
   const handleClear = () => {
     clearNotifications();
-    setNotifs(getAllNotifications());
-    setCount(getUnreadCount());
+    refreshNotifs();
   };
 
   return (
@@ -74,8 +80,7 @@ export default function NotificationCenter() {
       <button
         onClick={() => {
           setOpen((o) => !o);
-          setNotifs(getAllNotifications());
-          setCount(getUnreadCount());
+          refreshNotifs();
         }}
         className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-full relative transition-colors"
       >

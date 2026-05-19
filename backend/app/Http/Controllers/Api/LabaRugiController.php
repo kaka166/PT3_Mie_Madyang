@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Pemasukan;
 use App\Models\Pengeluaran;
-use App\Models\HppHistory;
 use App\Models\Penjualan;
+use App\Models\PenjualanDetail;
+use App\Models\Menu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -38,9 +39,15 @@ class LabaRugiController extends Controller
         $totalPenjualan = $penjualanQuery->sum('total');
         $totalPorsiTerjual = $penjualanQuery->withSum('detail as qty_sum', 'qty')->get()->sum('qty_sum');
 
-        $hppTerbaru = HppHistory::latest()->first();
-        $hppPerPorsi = $hppTerbaru ? $hppTerbaru->total_hpp : 0;
-        $totalHpp = $hppPerPorsi * $totalPorsiTerjual;
+        // HPP dihitung per menu dari hpp_default (data produksi, direct cost saja)
+        $penjualanIds = $penjualanQuery->pluck('id');
+        $perMenu = PenjualanDetail::whereIn('penjualan_id', $penjualanIds)
+            ->select('menu_id', DB::raw('SUM(qty) as total_qty'))
+            ->groupBy('menu_id')
+            ->get();
+        $menuHpps = Menu::pluck('hpp_default', 'id');
+        $totalHpp = $perMenu->sum(fn($item) => ($menuHpps[$item->menu_id] ?? 0) * $item->total_qty);
+        $hppPerPorsi = $totalPorsiTerjual > 0 ? $totalHpp / $totalPorsiTerjual : 0;
 
         $labaKotor = $totalPenjualan - $totalHpp;
         $labaBersih = $labaKotor - $totalPengeluaran;

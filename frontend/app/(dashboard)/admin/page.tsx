@@ -16,6 +16,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { formatTanggal, formatTanggalRange } from "@/utils/formatTanggal";
 import { getPengeluaran, createPengeluaran } from "@/services/pengeluaranService";
 import { getLaporanUsers, getLaporanShifts, updateUser, deleteUser } from "@/services/laporanService";
 import { addNotification } from "@/services/notificationService";
@@ -25,12 +26,13 @@ function CalendarPicker({
   value,
   onChange,
 }: {
-  value: string;
-  onChange: (v: string) => void;
+  value: { start: string; end: string };
+  onChange: (v: { start: string; end: string }) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [position, setPosition] = useState<"top" | "bottom">("bottom");
   const [viewDate, setViewDate] = useState(() => {
-    const d = value ? new Date(value) : new Date();
+    const d = value.start ? new Date(value.start) : new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
   });
   const ref = useRef<HTMLDivElement>(null);
@@ -46,9 +48,9 @@ function CalendarPicker({
   const daysInMonth = new Date(viewDate.year, viewDate.month + 1, 0).getDate();
   const firstDay = new Date(viewDate.year, viewDate.month, 1).getDay();
   const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-  const selectedDay = value ? new Date(value).getDate() : null;
-  const selectedMonth = value ? new Date(value).getMonth() : null;
-  const selectedYear = value ? new Date(value).getFullYear() : null;
+  const selectedDay = value.start ? new Date(value.start).getDate() : null;
+  const selectedMonth = value.start ? new Date(value.start).getMonth() : null;
+  const selectedYear = value.start ? new Date(value.start).getFullYear() : null;
 
   const prevMonth = () => setViewDate((v) => {
     const m = v.month === 0 ? 11 : v.month - 1;
@@ -63,42 +65,59 @@ function CalendarPicker({
 
   const selectDay = (day: number) => {
     const d = new Date(viewDate.year, viewDate.month, day);
-    const offset = d.getTimezoneOffset();
-    const adjustedDate = new Date(d.getTime() - offset * 60 * 1000);
-    const iso = adjustedDate.toISOString().split("T")[0];
-    onChange(iso);
+    const formatDateLocal = (date: Date) =>
+      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    const iso = formatDateLocal(d);
+
+    if (!value.start || (value.start && value.end)) {
+      onChange({ start: iso, end: "" });
+      return;
+    }
+
+    if (new Date(iso) < new Date(value.start)) {
+      onChange({ start: iso, end: value.start });
+    } else {
+      onChange({ start: value.start, end: iso });
+    }
     setOpen(false);
   };
 
-  const displayLabel = value
-    ? new Date(value).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
-    : "Hari/Bulan/Tahun";
+  const today = new Date();
+  const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const isSelectingEnd = value.start && !value.end;
+  const displayLabel = value.start && value.end
+    ? value.start === value.end
+      ? formatTanggalRange(value.start, "")
+      : formatTanggalRange(value.start, value.end)
+    : isSelectingEnd ? `Pilih akhir: ${formatTanggalRange(value.start, "")}` : "Pilih tanggal";
+  const isDefault = value.start === todayISO && value.end === todayISO;
 
   return (
-    <div ref={ref} className="relative z-50">
-      <button onClick={() => setOpen((o) => !o)}
-        className="flex items-center justify-between gap-3 bg-gray-200 text-gray-700 hover:bg-gray-300 transition-colors px-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-48 cursor-pointer">
-        <div className="flex items-center gap-2">
-          <Calendar size={16} className="text-gray-500" />
-          <span className="truncate">{displayLabel}</span>
-        </div>
-        {value && (
-          <span onClick={(e) => { e.stopPropagation(); onChange(""); }}
-            className="text-gray-400 hover:text-red-500 transition-colors" title="Hapus Tanggal">
-            <X size={14} />
-          </span>
+    <div ref={ref} className="relative">
+      <button onClick={() => {
+        setOpen((o) => !o);
+        const rect = ref.current?.getBoundingClientRect();
+        if (!rect) return;
+        setPosition(window.innerHeight - rect.bottom < 300 ? "top" : "bottom");
+      }}
+        className={`bg-gray-100 pl-3 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 flex items-center gap-2 ${isDefault || isSelectingEnd ? "text-red-500 font-semibold" : ""}`}>
+        <Calendar size={14} className={`${isDefault || isSelectingEnd ? "text-red-500" : "text-neutral-400"}`} />
+        {isDefault ? "Hari ini" : isSelectingEnd ? displayLabel : displayLabel}
+        {value.start && !isDefault && !isSelectingEnd && (
+          <span onClick={(e) => { e.stopPropagation(); onChange({ start: todayISO, end: todayISO }); }}
+            className="ml-1 text-neutral-400 hover:text-neutral-600"><X size={12} /></span>
         )}
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl border border-gray-200 shadow-xl p-4">
+        <div className={`absolute right-0 w-72 bg-white rounded-2xl border border-neutral-200 shadow-xl z-50 p-4 ${position === "bottom" ? "mt-2 top-full" : "mb-2 bottom-full"}`}>
           <div className="flex items-center justify-between mb-3">
-            <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-gray-100 transition-colors"><ChevronLeft size={16} className="text-gray-600" /></button>
-            <span className="text-sm font-bold text-gray-700">{monthNames[viewDate.month]} {viewDate.year}</span>
-            <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-gray-100 transition-colors"><ChevronRight size={16} className="text-gray-600" /></button>
+            <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-neutral-100 transition-colors"><ChevronLeft size={16} /></button>
+            <span className="text-sm font-bold text-neutral-700">{monthNames[viewDate.month]} {viewDate.year}</span>
+            <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-neutral-100 transition-colors"><ChevronRight size={16} /></button>
           </div>
           <div className="grid grid-cols-7 mb-1">
             {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
-              <div key={d} className="text-center text-[10px] font-bold text-gray-400 py-1">{d}</div>
+              <div key={d} className="text-center text-[10px] font-bold text-neutral-400 py-1">{d}</div>
             ))}
           </div>
           <div className="grid grid-cols-7 gap-y-1">
@@ -107,9 +126,13 @@ function CalendarPicker({
               const day = i + 1;
               const isSelected = day === selectedDay && viewDate.month === selectedMonth && viewDate.year === selectedYear;
               const isToday = day === new Date().getDate() && viewDate.month === new Date().getMonth() && viewDate.year === new Date().getFullYear();
+              const currentDate = new Date(viewDate.year, viewDate.month, day);
+              const isInRange = value.start && value.end && currentDate >= new Date(value.start) && currentDate <= new Date(value.end);
+              const isStart = value.start && day === new Date(value.start).getDate() && viewDate.month === new Date(value.start).getMonth() && viewDate.year === new Date(value.start).getFullYear();
+              const isEnd = value.end && day === new Date(value.end).getDate() && viewDate.month === new Date(value.end).getMonth() && viewDate.year === new Date(value.end).getFullYear();
               return (
                 <button key={day} onClick={() => selectDay(day)}
-                  className={`text-center text-sm h-8 w-full rounded-lg font-medium transition-colors ${isSelected ? "bg-red-500 text-white" : ""} ${isToday && !isSelected ? "border border-red-500 text-red-500" : ""} ${!isSelected && !isToday ? "text-gray-700 hover:bg-gray-100" : ""}`}>
+                  className={`text-center text-sm h-8 w-full rounded-lg font-medium transition-colors ${isStart || isEnd ? "bg-[#FF7067] text-white" : ""} ${isInRange && !isStart && !isEnd ? "bg-red-100 text-red-600" : ""} ${isToday && !isSelected ? "border border-[#FF7067] text-[#FF7067]" : ""} ${!isSelected && !isToday ? "text-neutral-700 hover:bg-neutral-100" : ""}`}>
                   {day}
                 </button>
               );
@@ -125,7 +148,9 @@ function CalendarPicker({
 
 export default function AdminDashboardPage() {
   const [activeTab, setActiveTab] = useState<"users" | "shifts" | "expenses">("users");
-  const [selectedExpenseDate, setSelectedExpenseDate] = useState("");
+  const today = new Date();
+  const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const [selectedExpenseDate, setSelectedExpenseDate] = useState<{ start: string; end: string }>({ start: todayISO, end: todayISO });
   const [searchExpense, setSearchExpense] = useState("");
   const [expenses, setExpenses] = useState<any[]>([]);
   const [users, setUsers] = useState<any[]>([]);
@@ -183,7 +208,14 @@ export default function AdminDashboardPage() {
 
   const filteredExpenses = expenses.filter((e) => {
     const matchSearch = e.nama?.toLowerCase().includes(searchExpense.toLowerCase()) || e.id?.includes(searchExpense);
-    const matchDate = selectedExpenseDate ? e.waktu === selectedExpenseDate : true;
+    const matchDate = selectedExpenseDate.start
+      ? new Date(e.waktu) >= new Date(selectedExpenseDate.start) &&
+        new Date(e.waktu) <= (() => {
+          const end = selectedExpenseDate.end ? new Date(selectedExpenseDate.end) : new Date(selectedExpenseDate.start);
+          end.setHours(23, 59, 59, 999);
+          return end;
+        })()
+      : true;
     return matchSearch && matchDate;
   });
 
@@ -209,7 +241,7 @@ export default function AdminDashboardPage() {
       });
       const json = await res.json();
       if (json.success) {
-        addNotification("Pengeluaran Dicatat", `${formData.nama_pengeluaran} - Rp${Number(formData.jumlah).toLocaleString("id-ID")}`, "success");
+        addNotification("Pengeluaran Dicatat", `${formData.nama_pengeluaran} - Rp${Number(formData.jumlah).toLocaleString("id-ID")}`, "success", true, "admin");
         setShowCreateModal(false);
         setFormData({ nama_pengeluaran: "", jumlah: "", kategori: "Operasional", deskripsi: "", tanggal: "" });
         setEvidenceFile(null);
@@ -240,7 +272,7 @@ export default function AdminDashboardPage() {
     try {
       const json = await deleteUser(user.id);
       if (json.success) {
-        addNotification("User Dihapus", `User "${user.name}" berhasil dihapus (soft delete)`, "warning", true);
+        addNotification("User Dihapus", `User "${user.name}" berhasil dihapus (soft delete)`, "warning", true, "admin");
         fetchUsers();
       } else {
         Swal.fire("Error", json.message || "Gagal menghapus user", "error");
@@ -270,7 +302,7 @@ export default function AdminDashboardPage() {
 
       const json = await updateUser(editingUser.id, payload);
       if (json.success) {
-        addNotification("User Diupdate", `Data user "${editForm.name}" berhasil diperbarui`, "success", true);
+        addNotification("User Diupdate", `Data user "${editForm.name}" berhasil diperbarui`, "success", true, "admin");
         setShowEditModal(false);
         setEditingUser(null);
         fetchUsers();
@@ -442,7 +474,15 @@ export default function AdminDashboardPage() {
               Tambah Pengeluaran
             </button>
             <div className="bg-white px-4 py-2 rounded-lg shadow-sm border border-neutral-100">
-              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">Harian</p>
+              <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                {selectedExpenseDate.start === selectedExpenseDate.end && selectedExpenseDate.start === todayISO
+                  ? "HARIAN"
+                  : selectedExpenseDate.start === selectedExpenseDate.end
+                    ? formatTanggal(selectedExpenseDate.start)
+                    : selectedExpenseDate.start && selectedExpenseDate.end
+                      ? `${formatTanggal(selectedExpenseDate.start)} - ${formatTanggal(selectedExpenseDate.end)}`
+                      : "RENTANG"}
+              </p>
               <p className="text-lg font-extrabold text-neutral-800">
                 {formatRupiah(filteredExpenses.reduce((s, e) => s + Number(e.jumlah), 0))}
               </p>

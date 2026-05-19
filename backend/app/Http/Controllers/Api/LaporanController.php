@@ -66,7 +66,9 @@ class LaporanController extends Controller
 
     public function pengeluaranDetail(Request $request)
     {
-        $query = Pengeluaran::with('user');
+        $query = Pengeluaran::with(['user' => function ($q) {
+            $q->withTrashed();
+        }]);
 
         if ($request->user_id) {
             $query->where('user_id', $request->user_id);
@@ -85,12 +87,13 @@ class LaporanController extends Controller
         }
 
         $data = $query->latest()->get()->map(function ($item) {
+            $user = $item->user;
             return [
                 'id' => '#' . str_pad($item->id, 5, '0', STR_PAD_LEFT),
                 'nama' => $item->nama_pengeluaran,
                 'kategori' => $item->kategori ?? 'Operasional',
                 'deskripsi' => $item->deskripsi ?? '',
-                'user_id' => $item->user->name ?? 'Unknown',
+                'user_id' => $user ? $user->name : 'Unknown',
                 'waktu' => $item->tanggal,
                 'jumlah' => $item->jumlah,
                 'evidence_file' => $item->evidence_file,
@@ -114,7 +117,9 @@ class LaporanController extends Controller
 
     public function getShifts(Request $request)
     {
-        $query = PosSession::with('user');
+        $query = PosSession::with(['user' => function ($q) {
+            $q->withTrashed();
+        }]);
 
         if ($request->start_date) {
             $query->whereDate('started_at', '>=', $request->start_date);
@@ -133,11 +138,13 @@ class LaporanController extends Controller
                 $durasi = $jam > 0 ? "{$jam}j {$menit}m" : "{$menit}m";
             }
 
+            $user = $s->user;
+
             return [
                 'id' => '#' . $s->id,
                 'user_id' => $s->user_id,
-                'nama' => $s->user->name ?? 'Unknown',
-                'role' => $s->user->role ?? null,
+                'nama' => $user ? $user->name : 'Unknown',
+                'role' => $user ? $user->role : null,
                 'mulai' => $s->started_at,
                 'selesai' => $s->ended_at,
                 'durasi' => $durasi,

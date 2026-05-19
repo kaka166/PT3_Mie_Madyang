@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { formatTanggal } from "@/utils/formatTanggal";
 import { formatRupiah } from "@/utils/formatRupiah";
-import { addNotification, showToast } from "@/services/notificationService";
+import { addNotification } from "@/services/notificationService";
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -37,6 +37,7 @@ export default function KitchenDashboardPage() {
   // --- STATE UNTUK MODAL ---
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [modalStatus, setModalStatus] = useState<string>("");
+  const [statusError, setStatusError] = useState("");
   const previousOrderIds = useRef<Set<string>>(new Set());
 
   const fetchOrders = async () => {
@@ -54,7 +55,9 @@ export default function KitchenDashboardPage() {
             addNotification(
               "Pesanan Baru!",
               `#${order.id} - ${order.customer} (${order.items} item)`,
-              "success"
+              "success",
+              true,
+              "kitchen"
             );
           }
         });
@@ -63,7 +66,7 @@ export default function KitchenDashboardPage() {
         (id) => !currentIds.has(id)
       );
       if (removedOrderIds.length > 0) {
-        showToast(`${removedOrderIds.length} pesanan selesai`, "info");
+
       }
     }
 
@@ -117,31 +120,35 @@ export default function KitchenDashboardPage() {
   };
 
   const handleSimpanStatus = async () => {
+    setStatusError("");
     if (!selectedOrder) return;
 
-    // Deklarasikan tipe secara eksplisit sesuai yang diminta backend
     let statusBackend: "cooking" | "done" | "pending";
 
-    // Mapping status dari bahasa Indonesia ke format backend
     if (modalStatus === "Dimasak") {
       statusBackend = "cooking";
     } else if (modalStatus === "Ready") {
       statusBackend = "done";
     } else {
-      // Jika statusnya "Antri" atau belum diubah, kita jadikan "pending"
       statusBackend = "pending";
     }
 
-    // Eksekusi fungsi update
-    await updateOrderStatus(
+    const ok = await updateOrderStatus(
       Number(selectedOrder.id.replace("#", "")),
       statusBackend,
     );
+
+    if (!ok) {
+      setStatusError("Gagal memperbarui status pesanan");
+      return;
+    }
 
     addNotification(
       `Status #${selectedOrder.id.replace("#", "")} diperbarui`,
       `${selectedOrder.customer} → ${modalStatus}`,
       modalStatus === "Ready" ? "success" : "warning",
+      true,
+      "kitchen"
     );
 
     fetchOrders();
@@ -391,6 +398,11 @@ export default function KitchenDashboardPage() {
               </div>
 
               <div className="mt-6 pt-2">
+                {statusError && (
+                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                    {statusError}
+                  </div>
+                )}
                 <button
                   onClick={handleSimpanStatus}
                   className="w-full bg-[#f85656] hover:bg-[#e04545] text-white py-3.5 rounded-xl font-bold text-lg transition-colors shadow-sm">

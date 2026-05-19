@@ -90,11 +90,13 @@ class StockController extends Controller
         // VALIDASI (SETELAH ADA bahan_id)
         // ==========================
         $data = $request->validate([
-            'jumlah' => 'required|numeric',
+            'jumlah' => 'required|numeric|min:0',
             'tipe' => 'required|in:plus,minus',
             'satuan' => 'required|string',
             'kategori' => 'required|string',
             'alasan' => 'nullable|string',
+            'stock_limit' => 'nullable|integer|min:0',
+            'harga' => 'nullable|numeric|min:0',
         ]);
 
         $data['bahan_id'] = $bahanId;
@@ -133,6 +135,11 @@ class StockController extends Controller
         if ($data['tipe'] === 'plus') {
             $stok->qty += $data['jumlah'];
         } else {
+            if ($stok->qty < $data['jumlah']) {
+                return response()->json([
+                    'message' => 'Stok tidak mencukupi. Sisa stok: ' . $stok->qty . ' ' . $data['satuan']
+                ], 400);
+            }
             $stok->qty -= $data['jumlah'];
         }
 
@@ -148,9 +155,12 @@ class StockController extends Controller
     {
         $data = $request->validate([
             'hasil_id' => 'required|exists:bahan,id',
-            'jumlah_hasil' => 'required|numeric',
+            'jumlah_hasil' => 'required|numeric|min:0',
             'satuan' => 'required|string',
-            'bahan' => 'required|array'
+            'bahan' => 'required|array',
+            'bahan.*.id' => 'required|exists:bahan,id',
+            'bahan.*.jumlah' => 'required|numeric|min:0',
+            'bahan.*.satuan' => 'required|string',
         ]);
 
         // =========================
@@ -184,6 +194,13 @@ class StockController extends Controller
         foreach ($data['bahan'] as $bahan) {
 
             $stok = StokBahan::where('bahan_id', $bahan['id'])->first();
+
+            if (!$stok || $stok->qty < $bahan['jumlah']) {
+                $nama = \App\Models\Bahan::find($bahan['id'])->nama_bahan ?? 'Unknown';
+                return response()->json([
+                    'message' => "Stok bahan '$nama' tidak mencukupi."
+                ], 400);
+            }
 
             $stok->qty -= $bahan['jumlah'];
             $stok->save();
@@ -230,7 +247,9 @@ class StockController extends Controller
     }
     public function stockHistory()
     {
-        $data = \App\Models\StokMovement::with('user')
+        $data = \App\Models\StokMovement::with(['user' => function ($q) {
+            $q->withTrashed();
+        }])
             ->join('bahan', 'stok_movements.bahan_id', '=', 'bahan.id')
             ->select(
                 'stok_movements.id',
@@ -246,6 +265,7 @@ class StockController extends Controller
             ->latest()
             ->get()
             ->map(function ($item) {
+                $user = $item->user;
                 return [
                     'id' => '#' . str_pad($item->id, 6, '0', STR_PAD_LEFT),
                     'itemId' => $item->itemId,
@@ -254,7 +274,7 @@ class StockController extends Controller
                     'alasan' => $item->alasan ?? '-',
                     'kuantiti' => $item->jumlah . ' ' . $item->satuan,
                     'waktu' => $item->created_at,
-                    'pembuat' => $item->user->name ?? 'Unknown',
+                    'pembuat' => $user ? $user->name : 'Unknown',
                 ];
             });
 

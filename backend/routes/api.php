@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/kategori/{id}/toggle', [MenuKategoriController::class, 'toggleStatus']);
         Route::get('/hpp-history', [HppCalculatorController::class, 'index']);
         Route::post('/calculate-hpp', [HppCalculatorController::class, 'store']);
+        Route::put('/hpp-history/{id}', [HppCalculatorController::class, 'update']);
 
         // Laba Rugi
         Route::get('/laba-rugi', [LabaRugiController::class, 'index']);

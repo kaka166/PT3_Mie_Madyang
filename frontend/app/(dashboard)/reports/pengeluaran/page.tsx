@@ -120,22 +120,32 @@ function CalendarPicker({
       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const iso = formatDateLocal(d);
 
+    // Belum ada start, atau sudah punya range lengkap → mulai baru
     if (!value.start || (value.start && value.end)) {
       onChange({ start: iso, end: "" });
-    } else {
-      if (new Date(iso) < new Date(value.start)) {
-        onChange({ start: iso, end: value.start });
-      } else {
-        onChange({ start: value.start, end: iso });
-      }
+      // Tetap buka, biar user bisa pilih tanggal akhir
+      return;
     }
-    if (value.start && !value.end) setOpen(false);
-    setTimeout(() => setOpen(false), 0);
+
+    // Start sudah dipilih, sekarang pilih tanggal akhir
+    if (new Date(iso) < new Date(value.start)) {
+      onChange({ start: iso, end: value.start });
+    } else {
+      onChange({ start: value.start, end: iso });
+    }
+    // Range lengkap, tutup kalender
+    setOpen(false);
   };
 
+  const today = new Date();
+  const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const isSelectingEnd = value.start && !value.end;
   const displayLabel = value.start && value.end
-    ? formatTanggalRange(value.start, value.end)
-    : value.start ? formatTanggalRange(value.start, "") : "Hari/Bulan/Tahun";
+    ? value.start === value.end
+      ? formatTanggalRange(value.start, "")
+      : formatTanggalRange(value.start, value.end)
+    : isSelectingEnd ? `Pilih akhir: ${formatTanggalRange(value.start, "")}` : "Pilih tanggal";
+  const isDefault = value.start === todayISO && value.end === todayISO;
 
   return (
     <div ref={ref} className="relative">
@@ -145,11 +155,11 @@ function CalendarPicker({
         if (!rect) return;
         setPosition(window.innerHeight - rect.bottom < 300 ? "top" : "bottom");
       }}
-        className="bg-gray-100 pl-3 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 flex items-center gap-2">
-        <Calendar size={14} className="text-neutral-400" />
-        {displayLabel}
-        {value.start && (
-          <span onClick={(e) => { e.stopPropagation(); onChange({ start: "", end: "" }); }}
+        className={`bg-gray-100 pl-3 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 flex items-center gap-2 ${isDefault || isSelectingEnd ? "text-red-500 font-semibold" : ""}`}>
+        <Calendar size={14} className={`${isDefault || isSelectingEnd ? "text-red-500" : "text-neutral-400"}`} />
+        {isDefault ? "Hari ini" : isSelectingEnd ? displayLabel : displayLabel}
+        {value.start && !isDefault && !isSelectingEnd && (
+          <span onClick={(e) => { e.stopPropagation(); onChange({ start: todayISO, end: todayISO }); }}
             className="ml-1 text-neutral-400 hover:text-neutral-600"><X size={12} /></span>
         )}
       </button>
@@ -191,7 +201,9 @@ function CalendarPicker({
 
 export default function LaporanPengeluaran() {
   const [rekapFilter, setRekapFilter] = useState<FilterPeriod>("Bulan");
-  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: "", end: "" });
+  const today = new Date();
+  const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: todayISO, end: todayISO });
   const [search, setSearch] = useState("");
   const [userFilter, setUserFilter] = useState("");
   const [kategoriFilter, setKategoriFilter] = useState("");
@@ -227,9 +239,13 @@ export default function LaporanPengeluaran() {
 
     const matchKategori = kategoriFilter ? item.kategori === kategoriFilter : true;
 
-    const matchDate = dateRange.start && dateRange.end
+    const matchDate = dateRange.start
       ? new Date(item.waktu) >= new Date(dateRange.start) &&
-        new Date(item.waktu) <= (() => { const end = new Date(dateRange.end); end.setHours(23, 59, 59, 999); return end; })()
+        new Date(item.waktu) <= (() => {
+          const end = dateRange.end ? new Date(dateRange.end) : new Date(dateRange.start);
+          end.setHours(23, 59, 59, 999);
+          return end;
+        })()
       : true;
 
     let matchPeriod = true;

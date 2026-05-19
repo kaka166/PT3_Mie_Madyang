@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { menuService, Menu, Category } from "@/services/menuService";
 import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
+import { addNotification } from "@/services/notificationService";
 
 export default function InventoryPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
@@ -139,8 +140,10 @@ export default function InventoryPage() {
       if (isEdit && selectedId) {
         formData.append("_method", "PUT");
         await menuService.update(selectedId, formData);
+        addNotification("Menu Diperbarui", `"${form.nama_menu}" berhasil diperbarui`, "success", true, "admin");
       } else {
         await menuService.create(formData);
+        addNotification("Menu Ditambahkan", `"${form.nama_menu}" berhasil ditambahkan`, "success", true, "admin");
       }
       setShowModal(false);
       fetchData();
