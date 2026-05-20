@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { formatTanggal } from "@/utils/formatTanggal";
 import Swal from "sweetalert2";
 import {
   Clock,
@@ -13,6 +12,31 @@ import {
 } from "lucide-react";
 import { attendanceService, AttendanceData } from "@/services/attendanceService";
 import { authService } from "@/services/authService";
+
+// Format tanggal saja (tanpa jam) dari string tanggal DB
+const formatDateOnly = (dateStr: string) => {
+  if (!dateStr) return "-";
+  const date = new Date(dateStr + "T00:00:00+07:00");
+  return date.toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Jakarta",
+  });
+};
+
+// Konversi waktu HH:MM:SS yang tersimpan sebagai UTC ke WIB (GMT+7)
+const formatTimeWIB = (timeStr: string | null) => {
+  if (!timeStr) return "-";
+  // Backend menyimpan jam dalam format HH:MM:SS
+  // Kita tambah 7 jam untuk konversi UTC -> WIB
+  const [h, m, s] = timeStr.split(":").map(Number);
+  const totalSeconds = h * 3600 + m * 60 + (s || 0) + 7 * 3600;
+  const wibH = Math.floor((totalSeconds % 86400) / 3600).toString().padStart(2, "0");
+  const wibM = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
+  const wibS = (totalSeconds % 60).toString().padStart(2, "0");
+  return `${wibH}:${wibM}:${wibS}`;
+};
 
 export default function AbsensiPage() {
   const [time, setTime] = useState("");
@@ -364,7 +388,7 @@ export default function AbsensiPage() {
                     key={idx}
                     className="border-b border-neutral-50 even:bg-neutral-50/50 hover:bg-neutral-50 transition-colors">
                     <td className="py-4 px-4 font-semibold text-gray-700">
-                      {formatTanggal(row.tanggal)}
+                      {formatDateOnly(row.tanggal)}
                     </td>
                     {roleId === 1 && (
                       <td className="py-4 px-4 font-bold text-gray-900">
@@ -377,10 +401,10 @@ export default function AbsensiPage() {
                       </td>
                     )}
                     <td className="py-4 px-4 text-gray-800 font-bold">
-                      {row.jam_masuk || "-"}
+                      {formatTimeWIB(row.jam_masuk)}
                     </td>
                     <td className="py-4 px-4 text-gray-800 font-bold">
-                      {row.jam_keluar || "-"}
+                      {formatTimeWIB(row.jam_keluar)}
                     </td>
                     <td className="py-4 px-4">
                       <span
