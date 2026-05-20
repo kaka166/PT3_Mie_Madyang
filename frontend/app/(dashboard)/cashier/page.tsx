@@ -9,7 +9,9 @@ import {
   endSession,
   getActiveSession,
 } from "@/services/sessionService";
-import { X } from "lucide-react";
+import { getQrisSettings, QrisSetting } from "@/services/qrisService";
+import { X, QrCode } from "lucide-react";
+import { addNotification } from "@/services/notificationService";
 
 /* ================= TYPES ================= */
 type CartItem = {
@@ -38,6 +40,8 @@ export default function POSPage() {
   const [isTaxEnabled, setIsTaxEnabled] = useState(true);
   const [taxPercent, setTaxPercent] = useState(0);
   const [showTaxModal, setShowTaxModal] = useState(false);
+
+  const [qrisSettings, setQrisSettings] = useState<QrisSetting[]>([]);
 
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -250,6 +254,7 @@ export default function POSPage() {
   const [loadingEnd, setLoadingEnd] = useState(false);
 
   const [sessionActive, setSessionActive] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<number | null>(null);
   const [openingCash, setOpeningCash] = useState("");
   const [showStartSessionModal, setShowStartSessionModal] = useState(false);
   const [loadingStart, setLoadingStart] = useState(false);
@@ -260,21 +265,17 @@ export default function POSPage() {
     const cash = Number(openingCash);
 
     if (!cash || cash < 0) {
-      alert("Masukkan uang awal dulu!");
       return false;
     }
 
     try {
-      await startSession(cash);
+      const res = await startSession(cash);
       setSessionActive(true);
+      setActiveSessionId(res.data?.id ?? null);
       setOpeningCash("");
+      addNotification("Sesi Dimulai", `Sesi kasir #${res.data?.id} berhasil dimulai dengan uang awal Rp${cash.toLocaleString("id-ID")}`, "success", true, "cashier");
       return true;
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert("Gagal memulai sesi");
-      }
       return false;
     }
   };
@@ -287,19 +288,14 @@ export default function POSPage() {
     const cash = Number(closingCash);
 
     if (!cash || cash < 0) {
-      alert("Masukkan uang akhir yang valid!");
       return null;
     }
 
     try {
       const res = await endSession(cash);
+      addNotification("Sesi Diakhiri", `Sesi kasir berakhir. Uang akhir: Rp${cash.toLocaleString("id-ID")}`, "info", true, "cashier");
       return res.data ?? res;
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        alert(err.message);
-      } else {
-        alert("Gagal mengakhiri sesi");
-      }
       return null;
     }
   };
@@ -348,13 +344,35 @@ export default function POSPage() {
     const init = async () => {
       await fetchTax();
       await loadInitialData();
+      try {
+        const qrisRes = await getQrisSettings();
+        if (qrisRes.success) setQrisSettings(qrisRes.data.filter((q) => q.is_active));
+      } catch (err) { console.error("Gagal fetch QRIS:", err); }
 
       const session = await getActiveSession();
+      const userData = localStorage.getItem("user");
+      const user = userData ? JSON.parse(userData) : null;
 
       if (session?.data?.id) {
         setSessionActive(true);
+        setActiveSessionId(session.data.id);
       } else {
         setSessionActive(false);
+
+        const params = new URLSearchParams(window.location.search);
+        const startSession = params.get("startSession");
+
+        // Cashier login → auto-show modal start session
+        if (user?.role === 2 && startSession === "1") {
+          setShowStartSessionModal(true);
+          window.history.replaceState({}, "", "/cashier");
+          return;
+        }
+
+        // Owner → never auto-show, only via button
+        if (user?.role === 1) {
+          return;
+        }
 
         const hasSeenModal = localStorage.getItem("hasSeenStartSession");
 
@@ -783,15 +801,24 @@ export default function POSPage() {
 
               <div className="flex-1 min-h-[180px] bg-white rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center p-6 mb-8 shadow-inner">
                 {paymentMethod === "QRIS" ? (
-                  <div className="text-center animate-pulse">
-                    <img
-                      src="https://placehold.co/200x200?text=SCAN+QR"
-                      className="w-32 h-32 rounded-2xl mb-3 opacity-80"
-                      alt="QR"
-                    />
-                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                      Menunggu...
-                    </p>
+                  <div className="text-center">
+                    {qrisSettings.length > 0 ? (
+                      <>
+                        <img
+                          src={`http://127.0.0.1:8000/storage/qris/${qrisSettings[0].gambar_qris}`}
+                          className="w-40 h-40 object-contain rounded-2xl mb-3"
+                          alt="QRIS"
+                        />
+                        <p className="text-[10px] font-bold text-gray-500">{qrisSettings[0].nama_bank} - {qrisSettings[0].nama_pemilik}</p>
+                      </>
+                    ) : (
+                      <div className="text-center">
+                        <QrCode size={48} className="mx-auto text-gray-300 mb-2" />
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                          Scan QRIS
+                        </p>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-center">
@@ -821,7 +848,13 @@ export default function POSPage() {
 
                     if (result) {
                       setIsNavigating(true);
-                      alert("Pesanan masuk kitchen!");
+                      addNotification(
+                        "Pesanan Terkirim!",
+                        `${customerName || "Guest"} - ${cart.reduce((s, i) => s + i.qty, 0)} item telah masuk ke kitchen`,
+                        "success",
+                        true,
+                        "cashier"
+                      );
 
                       setMenus((prevMenus) =>
                         prevMenus.map((menu) => {
@@ -844,8 +877,6 @@ export default function POSPage() {
                       setCart([]);
                       setCustomerName("");
                       setTableNumber("");
-                    } else {
-                      alert("Gagal kirim ke kitchen");
                     }
                   }}
                   className="w-full bg-[#ff6b6b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200 active:scale-95 transition-all">
@@ -921,7 +952,9 @@ export default function POSPage() {
                     setSessionResult(data);
                     setShowEndSessionModal(false);
                     setSessionActive(false);
+                    setActiveSessionId(null);
                     setClosingCash("");
+                    localStorage.setItem("lastSessionRecap", JSON.stringify(data));
                   }
                 }}
                 disabled={loadingEnd}

@@ -13,6 +13,7 @@ use App\Models\Pemasukan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class PenjualanController extends Controller
 {
@@ -22,6 +23,7 @@ class PenjualanController extends Controller
     public function index()
     {
         $data = Penjualan::with('detail')
+            ->where('status', '!=', 'done')
             ->latest()
             ->get()
             ->map(function ($p) {
@@ -196,23 +198,23 @@ class PenjualanController extends Controller
             'status' => 'required|in:pending,cooking,done'
         ]);
 
-        $penjualan = Penjualan::with('detail.menu', 'user')->findOrFail($id);
+        $penjualan = Penjualan::with(['detail.menu', 'user' => function ($q) {
+            $q->withTrashed();
+        }])->findOrFail($id);
 
         $penjualan->status = $request->status;
         $penjualan->save();
 
-        // 🔥 TAMBAH INI (KUNCI UTAMA)
         if ($request->status === 'done') {
-
-            // 🔥 CEK biar gak double insert
             $already = Pemasukan::where('penjualan_id', $penjualan->id)->exists();
 
             if (!$already) {
+                $user = $penjualan->user;
                 Pemasukan::create([
                     'penjualan_id' => $penjualan->id,
                     'nama' => 'Order #' . $penjualan->id,
                     'total' => $penjualan->total,
-                    'kasir' => $penjualan->user->name ?? 'Unknown',
+                    'kasir' => $user ? $user->name : 'Unknown',
                     'metode' => $penjualan->metode_pembayaran ?? 'Tidak diketahui',
                     'waktu' => $penjualan->tanggal
                 ]);
@@ -226,18 +228,25 @@ class PenjualanController extends Controller
 
     public function getPemasukan()
     {
-        $data = Pemasukan::with('penjualan.detail.menu', 'penjualan.user')
+        $data = Pemasukan::with(['penjualan.detail.menu', 'penjualan.user' => function ($q) {
+            $q->withTrashed();
+        }])
             ->latest()
             ->get()
             ->map(function ($p) {
 
                 $penjualan = $p->penjualan;
 
+                $kasirName = $p->kasir;
+                if ($kasirName === 'Unknown' || $kasirName === null) {
+                    $kasirName = $penjualan && $penjualan->user ? $penjualan->user->name : 'Unknown';
+                }
+
                 return [
                     'no' => '#' . $p->penjualan_id,
                     'nama' => $penjualan->customer_name ?? 'Guest',
                     'waktu' => $p->waktu,
-                    'kasir' => $p->kasir,
+                    'kasir' => $kasirName,
                     'metode' => $p->metode,
                     'jumlah' => $p->total,
                     'kondisi' => $penjualan->order_type === 'Dine In'

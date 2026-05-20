@@ -12,6 +12,11 @@ use App\Http\Controllers\Api\ProduksiController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\HppCalculatorController;
 use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\LabaRugiController;
+use App\Http\Controllers\Api\LaporanController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\QrisSettingController;
+use App\Http\Controllers\Api\EvidenceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,6 +58,30 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/kategori/{id}/toggle', [MenuKategoriController::class, 'toggleStatus']);
         Route::get('/hpp-history', [HppCalculatorController::class, 'index']);
         Route::post('/calculate-hpp', [HppCalculatorController::class, 'store']);
+        Route::put('/hpp-history/{id}', [HppCalculatorController::class, 'update']);
+
+        // Laba Rugi
+        Route::get('/laba-rugi', [LabaRugiController::class, 'index']);
+
+        // Laporan Detail
+        Route::get('/laporan/pemasukan', [LaporanController::class, 'pemasukanDetail']);
+        Route::get('/laporan/pengeluaran', [LaporanController::class, 'pengeluaranDetail']);
+        Route::get('/laporan/users', [LaporanController::class, 'getUsers']);
+        Route::get('/laporan/menu-items', [LaporanController::class, 'getMenuItems']);
+        Route::get('/laporan/shifts', [LaporanController::class, 'getShifts']);
+        Route::get('/laporan/download-evidence', [LaporanController::class, 'downloadEvidence']);
+
+        // QRIS Settings
+        Route::post('/qris-settings', [QrisSettingController::class, 'store']);
+        Route::put('/qris-settings/{id}', [QrisSettingController::class, 'update']);
+        Route::delete('/qris-settings/{id}', [QrisSettingController::class, 'destroy']);
+
+        // User Management
+        Route::put('/users/{id}', [UserController::class, 'update']);
+        Route::delete('/users/{id}', [UserController::class, 'destroy']);
+
+        // Pengeluaran (create)
+        Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
     });
 
     /*
@@ -90,16 +119,25 @@ Route::middleware('auth:sanctum')->group(function () {
         // Pemasukan
         Route::get('/pemasukan', [PenjualanController::class, 'getPemasukan']);
 
-        // Pengeluaran
+        // Pengeluaran (read only for all roles)
         Route::get('/pengeluaran', [PengeluaranController::class, 'index']);
+        Route::get('/pengeluaran/harian', [PengeluaranController::class, 'harian']);
+
+        // QRIS Settings (read)
+        Route::get('/qris-settings', [QrisSettingController::class, 'index']);
 
         // Stock menu
         Route::patch('/menu/{id}/stock', [MenuController::class, 'updateStock']);
+
+        // Evidence
+        Route::get('/evidence/{type}/{filename}', [EvidenceController::class, 'view']);
+        Route::get('/evidence/{type}/{filename}/download', [EvidenceController::class, 'download']);
 
         // Session
         Route::post('/session/start', [SessionController::class, 'startSession']);
         Route::post('/session/end', [SessionController::class, 'endSession']);
         Route::get('/session/active', [SessionController::class, 'active']);
+        Route::get('/session/last-recap', [SessionController::class, 'lastRecap']);
 
         // Attendance
         Route::get('/attendance/status', [AttendanceController::class, 'status']);

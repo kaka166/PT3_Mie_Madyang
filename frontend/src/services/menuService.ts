@@ -4,6 +4,7 @@ export interface Menu {
   harga_jual: number;
   kategori_id: number;
   is_active: number;
+  is_fast_moving?: boolean;
   gambar?: string;
   kategori?: { nama_kategori: string };
   stock: number;
@@ -15,7 +16,7 @@ export interface Category {
   is_active: number;
 }
 
-const API_BASE_URL = "https://api.farelzy.my.id/api";
+const API_BASE_URL = "http://127.0.0.1:8000/api";
 
 // Helper buat ambil Token & Header
 const getAdminHeaders = (isFormData = false) => {

@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { menuService, Menu, Category } from "@/services/menuService";
 import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
+import { addNotification } from "@/services/notificationService";
 
 export default function InventoryPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
@@ -139,8 +140,10 @@ export default function InventoryPage() {
       if (isEdit && selectedId) {
         formData.append("_method", "PUT");
         await menuService.update(selectedId, formData);
+        addNotification("Menu Diperbarui", `"${form.nama_menu}" berhasil diperbarui`, "success", true, "admin");
       } else {
         await menuService.create(formData);
+        addNotification("Menu Ditambahkan", `"${form.nama_menu}" berhasil ditambahkan`, "success", true, "admin");
       }
       setShowModal(false);
       fetchData();
@@ -300,12 +303,14 @@ export default function InventoryPage() {
             </thead>
             <tbody className="divide-y divide-zinc-50">
               {filteredMenus.map((item) => (
-                <tr
-                  key={item.id}
-                  className="hover:bg-zinc-50/30 transition-colors group">
-                  <td className="px-6 py-4 text-neutral-700">
-                    {item.nama_menu}
-                  </td>
+                  <tr
+                    key={item.id}
+                    className="hover:bg-zinc-50/30 transition-colors group">
+                    <td className="px-6 py-4 text-neutral-700">
+                      <div className="flex items-center gap-2">
+                        {item.nama_menu}
+                      </div>
+                    </td>
                   <td className="px-6 py-4">
                     <span className="bg-zinc-100 text-zinc-500 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight">
                       {item.kategori?.nama_kategori}

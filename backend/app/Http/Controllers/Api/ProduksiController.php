@@ -116,6 +116,16 @@ class ProduksiController extends Controller
 
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'menu_id' => 'required|exists:menu,id',
+            'tanggal_produksi' => 'required|date',
+            'jumlah_porsi' => 'required|integer|min:1',
+            'bahan' => 'required|array|min:1',
+            'bahan.*.bahan_id' => 'required|exists:bahan,id',
+            'bahan.*.qty' => 'required|numeric|min:0',
+            'bahan.*.harga_satuan' => 'required|numeric|min:0',
+        ]);
+
         DB::beginTransaction();
 
         try {

@@ -1,6 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { getLabaRugi } from "@/services/laporanService";
+import { getStockList } from "@/services/stockService";
+import { formatRupiah } from "@/utils/formatRupiah";
+
+interface ReportsRingkasan {
+  total_penjualan: number;
+  total_pengeluaran: number;
+  laba_bersih: number;
+}
+
+interface ReportsStockItem {
+  id: number;
+  nama: string;
+  jumlah: string;
+  stock_limit: number;
+  status: string;
+}
 
 // --- Icons ---
 const SalesIcon = () => (
@@ -75,113 +92,151 @@ const StockIcon = () => (
   </svg>
 );
 
-// --- Badge komponen untuk perubahan persen ---
-const ChangeBadge = ({ value }: { value: string }) => {
-  const isPositive = value.startsWith("+");
-  const isNegative = value.startsWith("-");
-  return (
-    <span
-      className="text-xs font-bold px-2 py-0.5 rounded-full"
-      style={{
-        backgroundColor: isPositive
-          ? "#C2FFD4"
-          : isNegative
-            ? "#FFC2C2"
-            : "#E9E9E9",
-        color: isPositive ? "#2D6A4F" : isNegative ? "#A52A2A" : "#555",
-      }}>
-      {value}
-    </span>
-  );
-};
-
-// --- DATA ---
-const summaryData = {
-  title: "Ringkasan Keuntungan",
-  period: "April 1 - April 30, 2026",
-  profitLabel: "KEUNTUNGAN",
-  profit: "Rp 21.750.500",
-  change: "+12.4%",
-};
-
-const statCards = [
-  {
-    icon: <SalesIcon />,
-    label: "TOTAL PENJUALAN",
-    value: "Rp 4.450.000",
-    change: "+8.2%",
-  },
-  {
-    icon: <ExpenseIcon />,
-    label: "PENGELUARAN",
-    value: "Rp 3.000.000",
-    change: null,
-  },
-  {
-    icon: <HppIcon />,
-    label: "Laba Rugi",
-    value: "Rp 1.890.000",
-    change: "-2.1%",
-  },
-  {
-    icon: <StockIcon />,
-    label: "STOCK BAHAN",
-    value: "33.4%",
-    change: "+3.4%",
-  },
-];
+const DownloadIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+    <polyline points="7 10 12 15 17 10" />
+    <line x1="12" y1="15" x2="12" y2="3" />
+  </svg>
+);
 
 export default function ReportsAnalyticsPage() {
+  const [downloading, setDownloading] = useState(false);
+  const [data, setData] = useState<{ ringkasan: ReportsRingkasan | null; stock: ReportsStockItem[] } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [labaRugiRes, stock] = await Promise.all([
+          getLabaRugi(),
+          getStockList().catch(() => []),
+        ]);
+        setData({
+          ringkasan: labaRugiRes.success ? labaRugiRes.data.ringkasan : null,
+          stock,
+        });
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const ringkasan = data?.ringkasan;
+  const stockList = data?.stock || [];
+  const kritisCount = stockList.filter((s: ReportsStockItem) => s.status === "Kritis").length;
+  const stockPct = stockList.length > 0
+    ? Math.round(((stockList.length - kritisCount) / stockList.length) * 100)
+    : 0;
+
+  const statCards = ringkasan
+    ? [
+        { icon: <SalesIcon />, label: "TOTAL PENJUALAN", value: formatRupiah(ringkasan.total_penjualan) },
+        { icon: <ExpenseIcon />, label: "PENGELUARAN", value: formatRupiah(ringkasan.total_pengeluaran) },
+        { icon: <HppIcon />, label: "LABA RUGI", value: formatRupiah(ringkasan.laba_bersih) },
+        { icon: <StockIcon />, label: "STOK BAHAN AMAN", value: `${stockPct}%` },
+      ]
+    : [];
+
+  const handleDownloadEvidence = async () => {
+    setDownloading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://127.0.0.1:8000/api/laporan/download-evidence?type=all", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) { alert("Tidak ada evidence untuk periode ini"); return; }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "evidence.zip";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-neutral-100 p-8 font-sans">
       <div className="max-w-1xl mx-auto space-y-4">
         {/* --- Header Title --- */}
-        <h1 className="text-3xl font-bold text-[#F53E1B]">
-          Reports &amp; Analytics
-        </h1>
-
-        {/* --- Ringkasan Keuntungan Card --- */}
-        <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-8">
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-[#333]">
-              {summaryData.title}
-            </h2>
-            <p className="text-sm text-gray-400 mt-1">
-              Periode: {summaryData.period}
-            </p>
-          </div>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
-            {summaryData.profitLabel}
-          </p>
-          <div className="flex items-baseline gap-3">
-            <span className="text-5xl font-extrabold text-[#FF7067] tracking-tight">
-              {summaryData.profit}
-            </span>
-            <ChangeBadge value={summaryData.change} />
-          </div>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold text-[#F53E1B]">
+            Reports &amp; Analytics
+          </h1>
+          <button onClick={handleDownloadEvidence} disabled={downloading}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
+            <DownloadIcon /> {downloading ? "Mengunduh..." : "Download Evidence"}
+          </button>
         </div>
 
-        {/* --- Stat Cards Grid --- */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {statCards.map((card, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm p-5 flex flex-col justify-between min-h-[140px]">
-              <div className="flex items-start justify-between">
-                <div className="p-2 bg-gray-50 rounded-xl">{card.icon}</div>
-                {card.change && <ChangeBadge value={card.change} />}
+        {loading ? (
+          <div className="space-y-4 animate-pulse">
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
+              <div className="h-6 bg-gray-200 rounded w-48 mb-4"></div>
+              <div className="h-10 bg-gray-200 rounded w-64 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-32"></div>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[1,2,3,4].map((i) => (
+                <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 min-h-[140px]">
+                  <div className="h-10 w-10 bg-gray-200 rounded-xl mb-4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-28"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : ringkasan ? (
+          <>
+            {/* --- Ringkasan Keuntungan Card --- */}
+            <div className="bg-white rounded-[2rem] border border-gray-100 shadow-sm p-8">
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold text-[#333]">
+                  Ringkasan Keuntungan
+                </h2>
               </div>
-              <div className="mt-4">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                  {card.label}
-                </p>
-                <p className="text-xl font-extrabold text-[#333] leading-tight">
-                  {card.value}
-                </p>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-2">
+                LABA BERSIH
+              </p>
+              <div className="flex items-baseline gap-3">
+                <span className={`text-5xl font-extrabold tracking-tight ${ringkasan.laba_bersih >= 0 ? "text-[#FF7067]" : "text-red-600"}`}>
+                  {formatRupiah(ringkasan.laba_bersih)}
+                </span>
               </div>
             </div>
-          ))}
-        </div>
+
+            {/* --- Stat Cards Grid --- */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {statCards.map((card, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-[1.5rem] border border-gray-100 shadow-sm p-5 flex flex-col justify-between min-h-[140px] transition-all hover:shadow-md">
+                  <div className="flex items-start justify-between">
+                    <div className="p-2 bg-gray-50 rounded-xl">{card.icon}</div>
+                  </div>
+                  <div className="mt-4">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
+                      {card.label}
+                    </p>
+                    <p className="text-xl font-extrabold text-[#333] leading-tight">
+                      {card.value}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="text-center py-20 text-neutral-400">Belum ada data</div>
+        )}
       </div>
     </div>
   );

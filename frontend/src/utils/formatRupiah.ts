@@ -1,9 +1,9 @@
 export const formatRupiah = (value: number | string): string => {
-  if (value === "" || value === null || value === undefined) return "";
+  if (value === "" || value === null || value === undefined) return "-";
 
   const number = Number(value);
 
-  if (isNaN(number) || number <= 0) return "";
+  if (isNaN(number)) return "-";
 
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -11,6 +11,13 @@ export const formatRupiah = (value: number | string): string => {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(number);
+};
+
+export const formatRupiahPlain = (value: number | string): string => {
+  if (value === "" || value === null || value === undefined) return "-";
+  const number = Number(value);
+  if (isNaN(number)) return "-";
+  return number.toLocaleString("id-ID");
 };
 
 // 🔥 khusus untuk ambil angka mentah dari input

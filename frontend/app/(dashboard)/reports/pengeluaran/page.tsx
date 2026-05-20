@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
@@ -13,12 +12,13 @@ import {
   Calendar,
   Search,
   X,
+  User,
+  Printer,
 } from "lucide-react";
 import { getPengeluaran } from "@/services/pengeluaranService";
 import { formatTanggal, formatTanggalRange } from "@/utils/formatTanggal";
 import { formatRupiah } from "@/utils/formatRupiah";
 
-// ─── TYPES ────────────────────────────────────────────────────────────────────
 type FilterPeriod = "Minggu" | "Bulan" | "Tahun";
 
 type Pengeluaran = {
@@ -28,11 +28,9 @@ type Pengeluaran = {
   waktu: string;
   user_id: string;
   jumlah: number;
+  deskripsi?: string;
 };
 
-// ─── SUB COMPONENTS ────────────────────────────────────────────────────────────
-
-/** Dropdown filter Minggu / Bulan / Tahun */
 function FilterDropdown({
   value,
   onChange,
@@ -45,8 +43,7 @@ function FilterDropdown({
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -56,31 +53,17 @@ function FilterDropdown({
 
   return (
     <div ref={ref} className="relative">
-      <button
-        onClick={() => setOpen((o) => !o)}
+      <button onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
         <SlidersHorizontal size={14} className="text-neutral-400" />
         Filter: {value}
-        <ChevronDown
-          size={14}
-          className={`transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
-
       {open && (
         <div className="absolute right-0 mt-2 w-36 bg-white rounded-xl border border-neutral-200 shadow-lg z-20 py-1 overflow-hidden">
           {options.map((opt) => (
-            <button
-              key={opt}
-              onClick={() => {
-                onChange(opt);
-                setOpen(false);
-              }}
-              className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${
-                value === opt
-                  ? "bg-[#FF7067]/10 text-[#FF7067]"
-                  : "text-neutral-700 hover:bg-neutral-50"
-              }`}>
+            <button key={opt} onClick={() => { onChange(opt); setOpen(false); }}
+              className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${value === opt ? "bg-[#FF7067]/10 text-[#FF7067]" : "text-neutral-700 hover:bg-neutral-50"}`}>
               {opt}
             </button>
           ))}
@@ -90,7 +73,6 @@ function FilterDropdown({
   );
 }
 
-/** Inline calendar date picker dengan ikon kalender (Mendukung Date Range) */
 function CalendarPicker({
   value,
   onChange,
@@ -108,8 +90,7 @@ function CalendarPicker({
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node))
-        setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -117,37 +98,21 @@ function CalendarPicker({
 
   const daysInMonth = new Date(viewDate.year, viewDate.month + 1, 0).getDate();
   const firstDay = new Date(viewDate.year, viewDate.month, 1).getDay();
-  const monthNames = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
-
+  const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
   const selectedDay = value.start ? new Date(value.start).getDate() : null;
   const selectedMonth = value.start ? new Date(value.start).getMonth() : null;
   const selectedYear = value.start ? new Date(value.start).getFullYear() : null;
 
-  const prevMonth = () =>
-    setViewDate((v) => {
-      const m = v.month === 0 ? 11 : v.month - 1;
-      const y = v.month === 0 ? v.year - 1 : v.year;
-      return { year: y, month: m };
-    });
-  const nextMonth = () =>
-    setViewDate((v) => {
-      const m = v.month === 11 ? 0 : v.month + 1;
-      const y = v.month === 11 ? v.year + 1 : v.year;
-      return { year: y, month: m };
-    });
+  const prevMonth = () => setViewDate((v) => {
+    const m = v.month === 0 ? 11 : v.month - 1;
+    const y = v.month === 0 ? v.year - 1 : v.year;
+    return { year: y, month: m };
+  });
+  const nextMonth = () => setViewDate((v) => {
+    const m = v.month === 11 ? 0 : v.month + 1;
+    const y = v.month === 11 ? v.year + 1 : v.year;
+    return { year: y, month: m };
+  });
 
   const selectDay = (day: number) => {
     const d = new Date(viewDate.year, viewDate.month, day);
@@ -155,152 +120,78 @@ function CalendarPicker({
       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
     const iso = formatDateLocal(d);
 
+    // Belum ada start, atau sudah punya range lengkap → mulai baru
     if (!value.start || (value.start && value.end)) {
       onChange({ start: iso, end: "" });
+      // Tetap buka, biar user bisa pilih tanggal akhir
+      return;
+    }
+
+    // Start sudah dipilih, sekarang pilih tanggal akhir
+    if (new Date(iso) < new Date(value.start)) {
+      onChange({ start: iso, end: value.start });
     } else {
-      if (new Date(iso) < new Date(value.start)) {
-        onChange({ start: iso, end: value.start });
-      } else {
-        onChange({ start: value.start, end: iso });
-      }
+      onChange({ start: value.start, end: iso });
     }
-
-    if (value.start && !value.end) {
-      setOpen(false);
-    }
-
-    setTimeout(() => setOpen(false), 0);
+    // Range lengkap, tutup kalender
+    setOpen(false);
   };
 
-  const displayLabel =
-    value.start && value.end
-      ? formatTanggalRange(value.start, value.end)
-      : value.start
-        ? formatTanggalRange(value.start, "")
-        : "Hari/Bulan/Tahun";
+  const today = new Date();
+  const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const isSelectingEnd = value.start && !value.end;
+  const displayLabel = value.start && value.end
+    ? value.start === value.end
+      ? formatTanggalRange(value.start, "")
+      : formatTanggalRange(value.start, value.end)
+    : isSelectingEnd ? `Pilih akhir: ${formatTanggalRange(value.start, "")}` : "Pilih tanggal";
+  const isDefault = value.start === todayISO && value.end === todayISO;
 
   return (
     <div ref={ref} className="relative">
-      <button
-        onClick={() => {
-          setOpen((o) => !o);
-
-          const rect = ref.current?.getBoundingClientRect();
-          if (!rect) return;
-
-          const spaceBottom = window.innerHeight - rect.bottom;
-
-          if (spaceBottom < 300) {
-            setPosition("top");
-          } else {
-            setPosition("bottom");
-          }
-        }}
-        className="bg-gray-100 pl-3 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 flex items-center gap-2">
-        <Calendar size={14} className="text-neutral-400" />
-        {displayLabel}
-        {value.start && (
-          <span
-            onClick={(e) => {
-              e.stopPropagation();
-              onChange({ start: "", end: "" });
-            }}
-            className="ml-1 text-neutral-400 hover:text-neutral-600">
-            <X size={12} />
-          </span>
+      <button onClick={() => {
+        setOpen((o) => !o);
+        const rect = ref.current?.getBoundingClientRect();
+        if (!rect) return;
+        setPosition(window.innerHeight - rect.bottom < 300 ? "top" : "bottom");
+      }}
+        className={`bg-gray-100 pl-3 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 flex items-center gap-2 ${isDefault || isSelectingEnd ? "text-red-500 font-semibold" : ""}`}>
+        <Calendar size={14} className={`${isDefault || isSelectingEnd ? "text-red-500" : "text-neutral-400"}`} />
+        {isDefault ? "Hari ini" : isSelectingEnd ? displayLabel : displayLabel}
+        {value.start && !isDefault && !isSelectingEnd && (
+          <span onClick={(e) => { e.stopPropagation(); onChange({ start: todayISO, end: todayISO }); }}
+            className="ml-1 text-neutral-400 hover:text-neutral-600"><X size={12} /></span>
         )}
       </button>
-
       {open && (
-        <div
-          className={`absolute right-0 w-72 bg-white rounded-2xl border border-neutral-200 shadow-xl z-50 p-4
-            ${position === "bottom" ? "mt-2 top-full" : "mb-2 bottom-full"}
-          `}>
-          {/* Nav */}
+        <div className={`absolute right-0 w-72 bg-white rounded-2xl border border-neutral-200 shadow-xl z-50 p-4 ${position === "bottom" ? "mt-2 top-full" : "mb-2 bottom-full"}`}>
           <div className="flex items-center justify-between mb-3">
-            <button
-              onClick={prevMonth}
-              className="p-1 rounded-lg hover:bg-neutral-100 transition-colors">
-              <ChevronLeft size={16} />
-            </button>
-            <span className="text-sm font-bold text-neutral-700">
-              {monthNames[viewDate.month]} {viewDate.year}
-            </span>
-            <button
-              onClick={nextMonth}
-              className="p-1 rounded-lg hover:bg-neutral-100 transition-colors">
-              <ChevronRight size={16} />
-            </button>
+            <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-neutral-100 transition-colors"><ChevronLeft size={16} /></button>
+            <span className="text-sm font-bold text-neutral-700">{monthNames[viewDate.month]} {viewDate.year}</span>
+            <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-neutral-100 transition-colors"><ChevronRight size={16} /></button>
           </div>
-
-          {/* Day labels */}
           <div className="grid grid-cols-7 mb-1">
             {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
-              <div
-                key={d}
-                className="text-center text-[10px] font-bold text-neutral-400 py-1">
-                {d}
-              </div>
+              <div key={d} className="text-center text-[10px] font-bold text-neutral-400 py-1">{d}</div>
             ))}
           </div>
-
-          {/* Days grid */}
           <div className="grid grid-cols-7 gap-y-1">
-            {Array(firstDay)
-              .fill(null)
-              .map((_, i) => (
-                <div key={`e-${i}`} />
-              ))}
-            {Array(daysInMonth)
-              .fill(null)
-              .map((_, i) => {
-                const day = i + 1;
-                const isSelected =
-                  day === selectedDay &&
-                  viewDate.month === selectedMonth &&
-                  viewDate.year === selectedYear;
-                const isToday =
-                  day === new Date().getDate() &&
-                  viewDate.month === new Date().getMonth() &&
-                  viewDate.year === new Date().getFullYear();
-
-                const currentDate = new Date(
-                  viewDate.year,
-                  viewDate.month,
-                  day,
-                );
-
-                const isInRange =
-                  value.start &&
-                  value.end &&
-                  currentDate >= new Date(value.start) &&
-                  currentDate <= new Date(value.end);
-
-                const isStart =
-                  value.start &&
-                  day === new Date(value.start).getDate() &&
-                  viewDate.month === new Date(value.start).getMonth() &&
-                  viewDate.year === new Date(value.start).getFullYear();
-
-                const isEnd =
-                  value.end &&
-                  day === new Date(value.end).getDate() &&
-                  viewDate.month === new Date(value.end).getMonth() &&
-                  viewDate.year === new Date(value.end).getFullYear();
-                return (
-                  <button
-                    key={day}
-                    onClick={() => selectDay(day)}
-                    className={`text-center text-sm h-8 w-full rounded-lg font-medium transition-colors
-                    ${isStart || isEnd ? "bg-[#FF7067] text-white" : ""}
-                    ${isInRange && !isStart && !isEnd ? "bg-red-100 text-red-600" : ""}
-                    ${isToday && !isSelected ? "border border-[#FF7067] text-[#FF7067]" : ""}
-                    ${!isSelected && !isToday ? "text-neutral-700 hover:bg-neutral-100" : ""}
-                  `}>
-                    {day}
-                  </button>
-                );
-              })}
+            {Array(firstDay).fill(null).map((_, i) => <div key={`e-${i}`} />)}
+            {Array(daysInMonth).fill(null).map((_, i) => {
+              const day = i + 1;
+              const isSelected = day === selectedDay && viewDate.month === selectedMonth && viewDate.year === selectedYear;
+              const isToday = day === new Date().getDate() && viewDate.month === new Date().getMonth() && viewDate.year === new Date().getFullYear();
+              const currentDate = new Date(viewDate.year, viewDate.month, day);
+              const isInRange = value.start && value.end && currentDate >= new Date(value.start) && currentDate <= new Date(value.end);
+              const isStart = value.start && day === new Date(value.start).getDate() && viewDate.month === new Date(value.start).getMonth() && viewDate.year === new Date(value.start).getFullYear();
+              const isEnd = value.end && day === new Date(value.end).getDate() && viewDate.month === new Date(value.end).getMonth() && viewDate.year === new Date(value.end).getFullYear();
+              return (
+                <button key={day} onClick={() => selectDay(day)}
+                  className={`text-center text-sm h-8 w-full rounded-lg font-medium transition-colors ${isStart || isEnd ? "bg-[#FF7067] text-white" : ""} ${isInRange && !isStart && !isEnd ? "bg-red-100 text-red-600" : ""} ${isToday && !isSelected ? "border border-[#FF7067] text-[#FF7067]" : ""} ${!isSelected && !isToday ? "text-neutral-700 hover:bg-neutral-100" : ""}`}>
+                  {day}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
@@ -308,14 +199,14 @@ function CalendarPicker({
   );
 }
 
-// ─── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function LaporanPengeluaran() {
   const [rekapFilter, setRekapFilter] = useState<FilterPeriod>("Bulan");
-  const [dateRange, setDateRange] = useState<{
-    start: string;
-    end: string;
-  }>({ start: "", end: "" });
+  const today = new Date();
+  const todayISO = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const [dateRange, setDateRange] = useState<{ start: string; end: string }>({ start: todayISO, end: todayISO });
   const [search, setSearch] = useState("");
+  const [userFilter, setUserFilter] = useState("");
+  const [kategoriFilter, setKategoriFilter] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
@@ -323,48 +214,39 @@ export default function LaporanPengeluaran() {
 
   const [riwayatData, setRiwayatData] = useState<Pengeluaran[]>([]);
 
-  // ── BACKEND FETCHING ──
-  const fetchData = async () => {
-    try {
-      const data = await getPengeluaran();
-      setRiwayatData(data);
-    } catch (error) {
-      console.error("Failed to fetch pengeluaran data", error);
-    }
-  };
-
   useEffect(() => {
-    const load = async () => {
-      await fetchData();
-    };
-
-    load();
-    // Jika tidak butuh real-time polling, interval ini bisa dihapus/di-comment
-    const interval = setInterval(load, 3000);
-    return () => clearInterval(interval);
+    let mounted = true;
+    getPengeluaran()
+      .then((data) => { if (mounted) setRiwayatData(data); })
+      .catch((error) => console.error("Failed to fetch pengeluaran data", error));
+    const interval = setInterval(() => {
+      getPengeluaran()
+        .then((data) => setRiwayatData(data))
+        .catch((error) => console.error("Failed to fetch pengeluaran data", error));
+    }, 3000);
+    return () => { mounted = false; clearInterval(interval); };
   }, []);
 
-  // ── FILTERING DATA UNTUK TABEL DETAIL PENGELUARAN ──
   const filteredRiwayat = riwayatData.filter((item) => {
     if (!item.waktu) return true;
-
     const date = new Date(item.waktu);
     const now = new Date();
 
-    const matchSearch =
-      item.id?.toLowerCase().includes(search.toLowerCase()) ||
+    const matchSearch = item.id?.toLowerCase().includes(search.toLowerCase()) ||
       item.nama?.toLowerCase().includes(search.toLowerCase());
 
-    const matchDate =
-      dateRange.start && dateRange.end
-        ? new Date(item.waktu) >= new Date(dateRange.start) &&
-          new Date(item.waktu) <=
-            (() => {
-              const end = new Date(dateRange.end);
-              end.setHours(23, 59, 59, 999);
-              return end;
-            })()
-        : true;
+    const matchUser = userFilter ? item.user_id?.toLowerCase().includes(userFilter.toLowerCase()) : true;
+
+    const matchKategori = kategoriFilter ? item.kategori === kategoriFilter : true;
+
+    const matchDate = dateRange.start
+      ? new Date(item.waktu) >= new Date(dateRange.start) &&
+        new Date(item.waktu) <= (() => {
+          const end = dateRange.end ? new Date(dateRange.end) : new Date(dateRange.start);
+          end.setHours(23, 59, 59, 999);
+          return end;
+        })()
+      : true;
 
     let matchPeriod = true;
     if (rekapFilter === "Minggu") {
@@ -372,95 +254,63 @@ export default function LaporanPengeluaran() {
       matchPeriod = diff <= 7;
     }
     if (rekapFilter === "Bulan") {
-      matchPeriod =
-        date.getMonth() === now.getMonth() &&
-        date.getFullYear() === now.getFullYear();
+      matchPeriod = date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
     }
     if (rekapFilter === "Tahun") {
       matchPeriod = date.getFullYear() === now.getFullYear();
     }
 
-    return matchSearch && matchDate && matchPeriod;
+    return matchSearch && matchDate && matchPeriod && matchUser && matchKategori;
   });
 
   const totalItems = filteredRiwayat.length;
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = (filteredRiwayat || []).slice(
-    startIndex,
-    startIndex + itemsPerPage,
-  );
+  const paginatedData = (filteredRiwayat || []).slice(startIndex, startIndex + itemsPerPage);
   const totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  // ── FILTERING & GROUPING UNTUK TABEL RINGKASAN PENGELUARAN ──
   const filteredRekap = riwayatData.filter((item) => {
     if (!item.waktu) return true;
-
     const date = new Date(item.waktu);
     const now = new Date();
-
     let matchPeriod = true;
     if (rekapFilter === "Minggu") {
       const diff = (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
       matchPeriod = diff <= 7;
     }
     if (rekapFilter === "Bulan") {
-      matchPeriod =
-        date.getMonth() === now.getMonth() &&
-        date.getFullYear() === now.getFullYear();
+      matchPeriod = date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
     }
     if (rekapFilter === "Tahun") {
       matchPeriod = date.getFullYear() === now.getFullYear();
     }
-
     return matchPeriod;
   });
 
   const groupedRekap = Object.values(
-    filteredRekap.reduce(
-      (
-        acc: Record<
-          string,
-          { rentang: string; total: number; transaksi: number }
-        >,
-        item: Pengeluaran,
-      ) => {
-        const date = new Date(item.waktu);
-        let key = "";
-
-        if (rekapFilter === "Minggu") {
-          const start = new Date(date);
-          start.setDate(date.getDate() - date.getDay());
-          const end = new Date(start);
-          end.setDate(start.getDate() + 6);
-          key = formatTanggalRange(start.toISOString(), end.toISOString());
-        }
-        if (rekapFilter === "Bulan") {
-          key = date.toLocaleDateString("id-ID", {
-            month: "long",
-            year: "numeric",
-          });
-        }
-        if (rekapFilter === "Tahun") {
-          key = date.getFullYear().toString();
-        }
-
-        if (!acc[key]) {
-          acc[key] = { rentang: key, total: 0, transaksi: 0 };
-        }
-
-        acc[key].total += Number(item.jumlah || 0);
-        acc[key].transaksi += 1;
-
-        return acc;
-      },
-      {},
-    ),
+    filteredRekap.reduce((acc: Record<string, { rentang: string; total: number; transaksi: number }>, item: Pengeluaran) => {
+      const date = new Date(item.waktu);
+      let key = "";
+      if (rekapFilter === "Minggu") {
+        const start = new Date(date);
+        start.setDate(date.getDate() - date.getDay());
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        key = formatTanggalRange(start.toISOString(), end.toISOString());
+      }
+      if (rekapFilter === "Bulan") {
+        key = date.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+      }
+      if (rekapFilter === "Tahun") {
+        key = date.getFullYear().toString();
+      }
+      if (!acc[key]) acc[key] = { rentang: key, total: 0, transaksi: 0 };
+      acc[key].total += Number(item.jumlah || 0);
+      acc[key].transaksi += 1;
+      return acc;
+    }, {}),
   );
 
-  const totalPengeluaran = filteredRekap.reduce(
-    (acc, item) => acc + Number(item.jumlah || 0),
-    0,
-  );
+  const totalPengeluaran = filteredRekap.reduce((acc, item) => acc + Number(item.jumlah || 0), 0);
   const totalTransaksi = filteredRekap.length;
   const rataRata = totalTransaksi > 0 ? totalPengeluaran / totalTransaksi : 0;
 
@@ -468,82 +318,68 @@ export default function LaporanPengeluaran() {
   const [rekapLimit, setRekapLimit] = useState(10);
   const totalRekap = groupedRekap.length;
   const startRekap = (rekapPage - 1) * rekapLimit;
-  const paginatedRekap = groupedRekap.slice(
-    startRekap,
-    startRekap + rekapLimit,
-  );
+  const paginatedRekap = groupedRekap.slice(startRekap, startRekap + rekapLimit);
   const totalRekapPages = Math.ceil(totalRekap / rekapLimit);
 
-  // ── RENDER COMPONENT ──
+  const kategoriOptions = ["", "Operasional", "Gaji", "Sewa", "Bahan Baku", "Lain-lain"];
+
+  const exportCSV = () => {
+    const headers = ["ID Transaksi", "Nama", "Kategori", "Waktu", "Dibuat Oleh", "Total"];
+    const rows = filteredRiwayat.map((item) => [
+      item.id || "",
+      item.nama || "",
+      item.kategori || "",
+      item.waktu ? formatTanggal(item.waktu) : "",
+      item.user_id || "",
+      item.jumlah || 0,
+    ]);
+    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `pengeluaran_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24">
       <div className="max-w-1xl mx-auto space-y-6">
-        {/* ── Header ── */}
-        <div>
-          <h1 className="text-3xl font-bold text-[#F53E1B]">
-            Laporan Pengeluaran
-          </h1>
-          <p className="text-sm text-neutral-500 mt-1">
-            Laporan Pengeluaran Mi Madyang
-          </p>
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-3xl font-bold text-[#F53E1B]">Laporan Pengeluaran</h1>
+            <p className="text-sm text-neutral-500 mt-1">Laporan Pengeluaran Mi Madyang</p>
+          </div>
+          <button onClick={exportCSV}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
+            <Printer size={16} /> Export CSV
+          </button>
         </div>
 
-        {/* ── Summary Cards ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[
-            {
-              title: "TOTAL PENGELUARAN",
-              value: formatRupiah(totalPengeluaran),
-              icon: Banknote,
-            },
-            {
-              title: "TOTAL TRANSAKSI",
-              value: totalTransaksi.toLocaleString("id-ID"),
-              icon: Receipt,
-            },
-            {
-              title: "RATA RATA NOMINAL PENGELUARAN",
-              value: formatRupiah(rataRata),
-              icon: Wallet,
-            },
+            { title: "TOTAL PENGELUARAN", value: formatRupiah(totalPengeluaran), icon: Banknote },
+            { title: "TOTAL TRANSAKSI", value: totalTransaksi.toLocaleString("id-ID"), icon: Receipt },
+            { title: "RATA RATA NOMINAL PENGELUARAN", value: formatRupiah(rataRata), icon: Wallet },
           ].map((metric, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px]">
+            <div key={idx} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px] transition-all hover:shadow-md">
               <div className="flex justify-between items-start mb-3">
-                <div className="p-2.5 bg-red-50 text-red-500 rounded-xl">
-                  <metric.icon size={20} />
-                </div>
+                <div className="p-2.5 bg-red-50 text-red-500 rounded-xl"><metric.icon size={20} /></div>
               </div>
-
               <div>
-                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">
-                  {metric.title}
-                </p>
-                <p className="text-2xl font-extrabold text-neutral-800">
-                  {metric.value}
-                </p>
+                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">{metric.title}</p>
+                <p className="text-2xl font-extrabold text-neutral-800">{metric.value}</p>
               </div>
             </div>
           ))}
         </div>
 
-        {/* ── Ringkasan Pengeluaran Table ── */}
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
-          {/* header */}
           <div className="p-6 flex flex-wrap justify-between items-center border-b relative z-20">
-            <h2 className="text-xl font-bold text-neutral-900">
-              Ringkasan Pengeluaran
-            </h2>
-            <FilterDropdown
-              value={rekapFilter}
-              onChange={(v) => {
-                setRekapFilter(v);
-                setCurrentPage(1);
-              }}
-            />
+            <h2 className="text-xl font-bold text-neutral-900">Ringkasan Pengeluaran</h2>
+            <FilterDropdown value={rekapFilter} onChange={(v) => { setRekapFilter(v); setCurrentPage(1); }} />
           </div>
-
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
@@ -554,138 +390,73 @@ export default function LaporanPengeluaran() {
                 </tr>
               </thead>
               <tbody>
-                {paginatedRekap.map(
-                  (
-                    row: { rentang: string; total: number; transaksi: number },
-                    idx: number,
-                  ) => (
-                    <tr
-                      key={idx}
-                      className={idx % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-                      <td className="px-6 py-4 text-neutral-600">
-                        {row.rentang}
-                      </td>
-
-                      <td className="px-6 py-4 font-semibold text-neutral-800">
-                        {formatRupiah(row.total)}
-                      </td>
-
-                      <td className="px-6 py-4 text-neutral-600">
-                        {row.transaksi}
-                      </td>
-                    </tr>
-                  ),
-                )}
+                {paginatedRekap.map((row: { rentang: string; total: number; transaksi: number }, idx: number) => (
+                  <tr key={idx} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-red-50 transition-colors`}>
+                    <td className="px-6 py-3 text-neutral-600">{row.rentang}</td>
+                    <td className="px-6 py-3 font-semibold text-neutral-800">{formatRupiah(row.total)}</td>
+                    <td className="px-6 py-3 text-neutral-600">{row.transaksi}</td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
-
-          {/* pagination ringkasan */}
           <div className="p-4 border-t flex justify-between items-center bg-white">
-            {/* LEFT */}
             <div className="flex items-center gap-4">
               <span className="text-gray-500 font-medium text-sm">
-                Showing {totalRekap === 0 ? 0 : startRekap + 1}-
-                {Math.min(startRekap + rekapLimit, totalRekap)} of {totalRekap}
+                Showing {totalRekap === 0 ? 0 : startRekap + 1}-{Math.min(startRekap + rekapLimit, totalRekap)} of {totalRekap}
               </span>
-
-              <select
-                value={rekapLimit}
-                onChange={(e) => {
-                  setRekapLimit(Number(e.target.value));
-                  setRekapPage(1);
-                }}
+              <select value={rekapLimit} onChange={(e) => { setRekapLimit(Number(e.target.value)); setRekapPage(1); }}
                 className="bg-gray-100 px-2 py-1 rounded text-sm">
-                {[10, 20, 30, 40].map((n) => (
-                  <option key={n} value={n}>
-                    {n}
-                  </option>
-                ))}
+                {[10, 20, 30, 40].map((n) => <option key={n} value={n}>{n}</option>)}
               </select>
             </div>
-
-            {/* RIGHT */}
             <div className="flex items-center gap-1.5 font-bold">
-              <button
-                onClick={() => setRekapPage((p) => Math.max(p - 1, 1))}
-                disabled={rekapPage === 1}
-                className={`w-8 h-8 flex items-center justify-center rounded ${
-                  rekapPage === 1
-                    ? "bg-gray-200 text-gray-400"
-                    : "bg-[#f85656] text-white"
-                }`}>
+              <button onClick={() => setRekapPage((p) => Math.max(p - 1, 1))} disabled={rekapPage === 1}
+                className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === 1 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronLeft size={16} />
               </button>
-
               {Array.from({ length: totalRekapPages }, (_, i) => {
                 const page = i + 1;
                 return (
-                  <button
-                    key={i}
-                    onClick={() => setRekapPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded ${
-                      rekapPage === page
-                        ? "bg-[#f85656] text-white"
-                        : "bg-gray-200"
-                    }`}>
+                  <button key={i} onClick={() => setRekapPage(page)}
+                    className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === page ? "bg-red-400 text-white" : "bg-gray-100"}`}>
                     {page}
                   </button>
                 );
               })}
-
-              <button
-                onClick={() =>
-                  setRekapPage((p) => Math.min(p + 1, totalRekapPages))
-                }
-                disabled={
-                  rekapPage === totalRekapPages || totalRekapPages === 0
-                }
-                className={`w-8 h-8 flex items-center justify-center rounded ${
-                  rekapPage === totalRekapPages || totalRekapPages === 0
-                    ? "bg-gray-200 text-gray-400"
-                    : "bg-[#f85656] text-white"
-                }`}>
+              <button onClick={() => setRekapPage((p) => Math.min(p + 1, totalRekapPages))} disabled={rekapPage === totalRekapPages || totalRekapPages === 0}
+                className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === totalRekapPages || totalRekapPages === 0 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronRight size={16} />
               </button>
             </div>
           </div>
         </div>
 
-        {/* ── Detail Pengeluaran Table ── */}
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-visible">
-          {/* table header bar */}
           <div className="p-6 flex flex-wrap justify-between items-center border-b relative z-20">
-            <h2 className="text-xl font-bold text-neutral-900">
-              Detail Pengeluaran
-            </h2>
+            <h2 className="text-xl font-bold text-neutral-900">Detail Pengeluaran</h2>
             <div className="flex flex-wrap gap-2 items-center">
-              <CalendarPicker
-                value={dateRange}
-                onChange={(v) => {
-                  setDateRange(v);
-                  setCurrentPage(1);
-                }}
-              />
-
+              <select value={kategoriFilter} onChange={(e) => setKategoriFilter(e.target.value)}
+                className="bg-gray-100 px-3 py-2 rounded-lg text-sm focus:outline-none">
+                {kategoriOptions.map((k) => (
+                  <option key={k} value={k}>{k || "Semua Kategori"}</option>
+                ))}
+              </select>
               <div className="relative">
-                <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={16}
-                />
-                <input
-                  type="text"
-                  placeholder="Cari transaksi..."
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200"
-                />
+                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input type="text" placeholder="Filter user..." value={userFilter}
+                  onChange={(e) => setUserFilter(e.target.value)}
+                  className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 w-32" />
+              </div>
+              <CalendarPicker value={dateRange} onChange={(v) => { setDateRange(v); setCurrentPage(1); }} />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input type="text" placeholder="Cari transaksi..." value={search}
+                  onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
+                  className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200" />
               </div>
             </div>
           </div>
-
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
@@ -699,98 +470,56 @@ export default function LaporanPengeluaran() {
                 </tr>
               </thead>
               <tbody>
-                {(paginatedData || []).map((row, idx) => (
-                  <tr
-                    key={idx}
-                    className={idx % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-                    <td className="px-6 py-4 font-semibold text-neutral-700">
-                      {row.id}
-                    </td>
-                    <td className="px-6 py-4 font-bold text-neutral-800">
-                      {row.nama}
-                    </td>
-                    <td className="px-6 py-4 text-neutral-600">
-                      {row.kategori}
-                    </td>
-                    <td className="px-6 py-4 text-neutral-500">
-                      {formatTanggal(row.waktu)}
-                    </td>
-                    <td className="px-6 py-4 text-neutral-600">
-                      {row.user_id}
-                    </td>
-                    <td className="px-6 py-4 font-semibold text-neutral-800">
-                      {formatRupiah(row.jumlah)}
-                    </td>
+                {paginatedData.length > 0 ? (
+                  (paginatedData || []).map((row, idx) => (
+                    <tr key={idx} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-red-50 transition-colors`}>
+                      <td className="px-6 py-4 font-semibold text-neutral-700">{row.id}</td>
+                      <td className="px-6 py-4 font-bold text-neutral-800">{row.nama}</td>
+                      <td className="px-6 py-4">
+                        <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{
+                          backgroundColor: row.kategori === "Operasional" ? "#e0f2fe" : row.kategori === "Gaji" ? "#dcfce7" : row.kategori === "Sewa" ? "#fef3c7" : row.kategori === "Bahan Baku" ? "#fae8ff" : "#f3e8ff",
+                          color: row.kategori === "Operasional" ? "#0369a1" : row.kategori === "Gaji" ? "#166534" : row.kategori === "Sewa" ? "#92400e" : row.kategori === "Bahan Baku" ? "#86198f" : "#5b21b6",
+                        }}>{row.kategori}</span>
+                      </td>
+                      <td className="px-6 py-4 text-neutral-500">{formatTanggal(row.waktu)}</td>
+                      <td className="px-6 py-4 text-neutral-600">{row.user_id}</td>
+                      <td className="px-6 py-4 font-semibold text-neutral-800">{formatRupiah(row.jumlah)}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={6} className="text-center py-10 text-neutral-400 font-medium">Belum ada data pengeluaran</td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
-
-          {/* pagination detail */}
           <div className="p-4 border-t flex justify-between items-center bg-white">
-            {/* LEFT */}
             <div className="flex items-center gap-4">
               <span className="text-gray-500 font-medium text-sm">
-                Showing {totalItems === 0 ? 0 : startIndex + 1}-
-                {Math.min(startIndex + itemsPerPage, totalItems)} of{" "}
-                {totalItems}
+                Showing {totalItems === 0 ? 0 : startIndex + 1}-{Math.min(startIndex + itemsPerPage, totalItems)} of {totalItems}
               </span>
-
-              <select
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
+              <select value={itemsPerPage} onChange={(e) => { setItemsPerPage(Number(e.target.value)); setCurrentPage(1); }}
                 className="bg-gray-100 px-2 py-1 rounded text-sm">
-                {pageSizeOptions.map((size) => (
-                  <option key={size} value={size}>
-                    {size}
-                  </option>
-                ))}
+                {pageSizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
               </select>
             </div>
-
-            {/* RIGHT */}
             <div className="flex items-center gap-1.5 font-bold">
-              <button
-                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                disabled={currentPage === 1}
-                className={`w-8 h-8 flex items-center justify-center rounded ${
-                  currentPage === 1
-                    ? "bg-gray-200 text-gray-400"
-                    : "bg-[#f85656] text-white"
-                }`}>
+              <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}
+                className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === 1 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronLeft size={16} />
               </button>
-
               {Array.from({ length: totalPages }, (_, i) => {
                 const page = i + 1;
                 return (
-                  <button
-                    key={i}
-                    onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded ${
-                      currentPage === page
-                        ? "bg-[#f85656] text-white"
-                        : "bg-gray-200"
-                    }`}>
+                  <button key={i} onClick={() => setCurrentPage(page)}
+                    className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === page ? "bg-red-400 text-white" : "bg-gray-100"}`}>
                     {page}
                   </button>
                 );
               })}
-
-              <button
-                onClick={() =>
-                  setCurrentPage((p) => Math.min(p + 1, totalPages))
-                }
-                disabled={currentPage === totalPages || totalPages === 0}
-                className={`w-8 h-8 flex items-center justify-center rounded ${
-                  currentPage === totalPages || totalPages === 0
-                    ? "bg-gray-200 text-gray-400"
-                    : "bg-[#f85656] text-white"
-                }`}>
+              <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}
+                className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === totalPages || totalPages === 0 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronRight size={16} />
               </button>
             </div>

@@ -10,18 +10,16 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        
         DB::table('users')->insert([
             'name' => 'Super Admin',
             'username' => 'superadmin',
             'email' => 'admin@madyang.com',
             'password' => Hash::make('admin123'),
-            'role' => 1, 
+            'role' => 1,
             'email_verified_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
 
         $owners = [
             ['name' => 'Haikal', 'username' => 'neko'],
@@ -37,11 +35,33 @@ class UserSeeder extends Seeder
                 'username' => $owner['username'],
                 'email' => $owner['username'] . '@madyang.com',
                 'password' => Hash::make('password123'),
-                'role' => 1, 
+                'role' => 1,
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
         }
+
+        DB::table('users')->insert([
+            'name' => 'Kasir 1',
+            'username' => 'kasir1',
+            'email' => 'kasir1@madyang.com',
+            'password' => Hash::make('kasir123'),
+            'role' => 2,
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        DB::table('users')->insert([
+            'name' => 'Dapur 1',
+            'username' => 'dapur1',
+            'email' => 'dapur1@madyang.com',
+            'password' => Hash::make('dapur123'),
+            'role' => 3,
+            'email_verified_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://api.farelzy.my.id/api";
+const API_URL = "http://127.0.0.1:8000/api";
 
 export interface HppHistoryDetail {
   id: number;
@@ -60,6 +60,15 @@ export const hppService = {
   calculateAndSave: async (data: CalculateHppRequest): Promise<HppHistory> => {
     const response = await axios.post(
       `${API_URL}/calculate-hpp`,
+      data,
+      getHeaders(),
+    );
+    return response.data.data;
+  },
+
+  updateHistory: async (id: number, data: CalculateHppRequest): Promise<HppHistory> => {
+    const response = await axios.put(
+      `${API_URL}/hpp-history/${id}`,
       data,
       getHeaders(),
     );

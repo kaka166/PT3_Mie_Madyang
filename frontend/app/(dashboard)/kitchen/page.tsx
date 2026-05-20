@@ -12,6 +12,8 @@ import {
   X,
 } from "lucide-react";
 import { formatTanggal } from "@/utils/formatTanggal";
+import { formatRupiah } from "@/utils/formatRupiah";
+import { addNotification } from "@/services/notificationService";
 
 const getStatusBadge = (status: string) => {
   switch (status) {
@@ -36,9 +38,40 @@ export default function KitchenDashboardPage() {
   // --- STATE UNTUK MODAL ---
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [modalStatus, setModalStatus] = useState<string>("");
+  const [statusError, setStatusError] = useState("");
+  const previousOrderIds = useRef<Set<string>>(new Set());
 
   const fetchOrders = async () => {
     const data = await getOrders();
+    const currentIds = new Set(data.map((o: any) => o.id));
+
+    if (previousOrderIds.current.size > 0) {
+      const newOrderIds = [...currentIds].filter(
+        (id) => !previousOrderIds.current.has(id)
+      );
+      if (newOrderIds.length > 0) {
+        newOrderIds.forEach((id) => {
+          const order = data.find((o: any) => o.id === id);
+          if (order) {
+            addNotification(
+              "Pesanan Baru!",
+              `#${order.id} - ${order.customer} (${order.items} item)`,
+              "success",
+              true,
+              "kitchen"
+            );
+          }
+        });
+      }
+      const removedOrderIds = [...previousOrderIds.current].filter(
+        (id) => !currentIds.has(id)
+      );
+      if (removedOrderIds.length > 0) {
+
+      }
+    }
+
+    previousOrderIds.current = currentIds;
     setOrders(data);
   };
 
@@ -94,25 +127,35 @@ export default function KitchenDashboardPage() {
   };
 
   const handleSimpanStatus = async () => {
+    setStatusError("");
     if (!selectedOrder) return;
 
-    // Deklarasikan tipe secara eksplisit sesuai yang diminta backend
     let statusBackend: "cooking" | "done" | "pending";
 
-    // Mapping status dari bahasa Indonesia ke format backend
     if (modalStatus === "Dimasak") {
       statusBackend = "cooking";
     } else if (modalStatus === "Ready") {
       statusBackend = "done";
     } else {
-      // Jika statusnya "Antri" atau belum diubah, kita jadikan "pending"
       statusBackend = "pending";
     }
 
-    // Eksekusi fungsi update
-    await updateOrderStatus(
+    const ok = await updateOrderStatus(
       Number(selectedOrder.id.replace("#", "")),
       statusBackend,
+    );
+
+    if (!ok) {
+      setStatusError("Gagal memperbarui status pesanan");
+      return;
+    }
+
+    addNotification(
+      `Status #${selectedOrder.id.replace("#", "")} diperbarui`,
+      `${selectedOrder.customer} → ${modalStatus}`,
+      modalStatus === "Ready" ? "success" : "warning",
+      true,
+      "kitchen"
     );
 
     fetchOrders();
@@ -217,12 +260,7 @@ export default function KitchenDashboardPage() {
                   </td>
                   <td className="py-4 px-4 font-medium">{item.items}</td>
                   <td className="py-4 px-4 font-bold text-gray-800">
-                    {new Intl.NumberFormat("id-ID", {
-                      style: "currency",
-                      currency: "IDR",
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 0,
-                    }).format(item.harga)}
+                    {formatRupiah(item.harga)}
                   </td>
                   <td className="py-4 px-4 font-bold text-gray-800">
                     {item.kondisi}
@@ -399,6 +437,11 @@ export default function KitchenDashboardPage() {
               </div>
 
               <div className="mt-6 pt-2">
+                {statusError && (
+                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                    {statusError}
+                  </div>
+                )}
                 <button
                   onClick={handleSimpanStatus}
                   className="w-full bg-[#f85656] hover:bg-[#e04545] text-white py-3.5 rounded-xl font-bold text-lg transition-colors shadow-sm">

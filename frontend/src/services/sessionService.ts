@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://api.farelzy.my.id/api";
+const API_BASE_URL = "http://127.0.0.1:8000/api";
 
 const getHeaders = () => {
   const token =
@@ -35,6 +35,16 @@ export const endSession = async (closing_cash: number) => {
   const data = await res.json();
   if (!res.ok) throw new Error(data.message);
   return data;
+};
+
+export const getLastSessionRecap = async () => {
+  const res = await fetch(`${API_BASE_URL}/session/last-recap`, {
+    headers: getHeaders(),
+  });
+
+  if (!res.ok) return null;
+
+  return await res.json();
 };
 
 export const getActiveSession = async () => {

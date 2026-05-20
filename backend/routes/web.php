@@ -9,6 +9,7 @@ use App\Http\Controllers\PembelianBahanController;
 use App\Http\Controllers\ProduksiController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\PengeluaranController;
+use App\Http\Controllers\KonsultasiController;
 
 Route::get('/', function () { return view('welcome'); });
 
@@ -20,6 +21,7 @@ Route::prefix('dashboard')->group(function() {
     Route::resource('menu', MenuController::class);
     Route::resource('bahan', BahanController::class);
     Route::resource('resep-menu', ResepMenuController::class);
+    Route::resource('konsultasi', KonsultasiController::class);
 
     Route::prefix('kasir')->group(function() {
         Route::get('/', [PenjualanController::class, 'index'])->name('kasir.index');

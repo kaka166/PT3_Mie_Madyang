@@ -41,6 +41,7 @@ export default function Penyesuaian({
   const [tipe, setTipe] = useState<"plus" | "minus">("minus");
 
   const [riwayat, setRiwayat] = useState<any[]>([]);
+  const [error, setError] = useState("");
 
   // ================= FETCH BAHAN =================
   useEffect(() => {
@@ -62,16 +63,32 @@ export default function Penyesuaian({
 
   // ================= SUBMIT =================
   const handleSubmit = async () => {
-    if (!selectedBahan) return alert("Pilih barang dulu");
+    setError("");
 
-    await createStockMovement({
-      bahan_id: selectedBahan.id,
-      jumlah: Number(jumlah),
-      satuan,
-      tipe,
-      kategori: "penyesuaian",
-      alasan,
-    });
+    if (!selectedBahan) return alert("Pilih barang dulu");
+    if (!jumlah || Number(jumlah) <= 0) {
+      setError("Jumlah harus lebih dari 0");
+      return;
+    }
+    if (tipe === "minus" && Number(jumlah) > (selectedBahan?.qty ?? 0)) {
+      setError(`Stok ${selectedBahan.nama} tidak mencukupi. Sisa stok: ${selectedBahan.qty} ${satuan}`);
+      return;
+    }
+
+    try {
+      await createStockMovement({
+        bahan_id: selectedBahan.id,
+        jumlah: Number(jumlah),
+        satuan,
+        tipe,
+        kategori: "penyesuaian",
+        alasan,
+      });
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Gagal menyimpan penyesuaian";
+      setError(msg);
+      return;
+    }
 
     await fetchRiwayat(selectedBahan.id);
 
@@ -108,6 +125,7 @@ export default function Penyesuaian({
             <select
               className="w-full bg-gray-100 border-none rounded-lg p-3 text-sm"
               onChange={(e) => {
+                setError("");
                 const id = Number(e.target.value);
                 const bahan = bahanList.find((b) => b.id === id);
 
@@ -143,7 +161,7 @@ export default function Penyesuaian({
                 <input
                   type="number"
                   value={jumlah}
-                  onChange={(e) => setJumlah(e.target.value)}
+                  onChange={(e) => { setError(""); setJumlah(e.target.value); }}
                   className="w-full bg-transparent p-2 text-sm outline-none"
                 />
                 <select
@@ -177,6 +195,11 @@ export default function Penyesuaian({
             </div>
           </div>
 
+          {error && (
+            <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+              {error}
+            </div>
+          )}
           <button
             onClick={handleSubmit}
             className="mt-auto w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl">

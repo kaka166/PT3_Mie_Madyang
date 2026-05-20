@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://api.farelzy.my.id/api";
+const API_BASE_URL = "http://127.0.0.1:8000/api";
 
 // ==========================
 // TYPES
@@ -64,12 +64,14 @@ export const getPengeluaran = async (): Promise<Pengeluaran[]> => {
 export const createPengeluaran = async (payload: {
   nama_pengeluaran: string;
   jumlah: number;
+  kategori?: string;
   tanggal?: string;
+  session_id?: number;
 }) => {
   const res = await fetch(`${API_BASE_URL}/pengeluaran`, {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, kategori: payload.kategori || "Operasional" }),
   });
 
   return handleResponse(res);

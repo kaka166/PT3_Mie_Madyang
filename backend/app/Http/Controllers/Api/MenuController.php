@@ -25,6 +25,7 @@ class MenuController extends Controller
                     'harga_jual' => $m->harga_jual,
                     'gambar' => $m->gambar,
                     'is_active' => $m->is_active,
+                    'is_fast_moving' => $m->is_fast_moving ?? false,
                     'kategori' => $m->kategori,
                     'stock' => $m->stokPorsi->qty ?? 0,
                 ];
@@ -56,7 +57,7 @@ class MenuController extends Controller
         $request->validate([
             'kategori_id' => 'required|exists:menu_kategori,id',
             'nama_menu' => 'required',
-            'harga_jual' => 'required',
+            'harga_jual' => 'required|numeric|min:0',
             'gambar' => 'image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -74,6 +75,7 @@ class MenuController extends Controller
             'gambar' => $namaFile,
             'deskripsi' => $request->deskripsi,
             'is_featured' => $request->is_featured ?? 0,
+            'is_fast_moving' => $request->is_fast_moving ?? false,
             'is_active' => 1 // default tampil di POS
         ]);
 
@@ -122,6 +124,9 @@ class MenuController extends Controller
         $menu->kategori_id = $request->kategori_id;
         $menu->nama_menu = $request->nama_menu;
         $menu->harga_jual = $request->harga_jual;
+        if ($request->has('is_fast_moving')) {
+            $menu->is_fast_moving = $request->is_fast_moving;
+        }
 
         if ($request->hasFile('gambar')) {
             $namaFile = time() . '.' . $request->gambar->extension();

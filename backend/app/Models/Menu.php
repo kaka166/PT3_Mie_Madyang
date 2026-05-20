@@ -15,6 +15,7 @@ class Menu extends Model
         'deskripsi',
         'gambar',
         'is_featured',
+        'is_fast_moving',
         'is_active'
     ];
 
