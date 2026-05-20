@@ -918,7 +918,6 @@ export default function POSPage() {
               </div>
             </div>
           </div>
-          </div>
         </div>
       )}
 

@@ -79,7 +79,7 @@ export const getOrders = async (): Promise<Order[]> => {
 // 🔥 CREATE ORDER (Cashier)
 export const createOrder = async (
   payload: CreateOrderPayload,
-): Promise<boolean> => {
+): Promise<any> => {
   try {
     const res = await fetch(`${API_BASE_URL}/orders`, {
       method: "POST",
@@ -95,10 +95,10 @@ export const createOrder = async (
       throw new Error(data.message || "Gagal create order");
     }
 
-    return true;
+    return data;
   } catch (error) {
     console.error("Error createOrder:", error);
-    return false;
+    return null;
   }
 };
 
