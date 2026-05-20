@@ -292,10 +292,10 @@ export default function InventoryPage() {
 
       {/* 3. MENU TABLE */}
       <div className="bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden mb-12">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead>
-              <tr className="text-gray-500 text-xs font-semibold uppercase tracking-wider border-b">
+        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <table className="w-full text-sm text-left whitespace-nowrap">
+            <thead className="bg-gray-50/50">
+              <tr className="text-gray-400 text-xs font-black uppercase tracking-widest border-b border-gray-100">
                 <th className="py-3 px-4 text-left">Nama Makanan</th>
                 <th className="py-3 px-4 text-left">Kategori</th>
                 <th className="py-3 px-4 text-left">Harga Jual</th>
@@ -308,7 +308,7 @@ export default function InventoryPage() {
               {filteredMenus.map((item) => (
                   <tr
                     key={item.id}
-                    className="hover:bg-zinc-50/30 transition-colors group">
+                    className="hover:bg-red-50/20 border-b border-gray-50 transition-colors group">
                     <td className="px-6 py-4 text-neutral-700">
                       <div className="flex items-center gap-3">
                         {item.gambar ? (

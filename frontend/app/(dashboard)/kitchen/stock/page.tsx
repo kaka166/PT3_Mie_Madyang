@@ -176,9 +176,9 @@ export default function StockBahanPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-center">
-            <thead className="text-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
+        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <table className="w-full text-sm text-left whitespace-nowrap">
+            <thead className="bg-gray-50/50">
               <tr>
                 <th className="py-3 px-4 text-left">ID</th>
                 <th className="py-3 px-4 text-left">Nama Barang</th>
@@ -295,9 +295,9 @@ export default function StockBahanPage() {
           <h2 className="text-lg font-bold">Riwayat Perubahan</h2>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead>
+        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <table className="w-full text-sm text-left whitespace-nowrap">
+            <thead className="bg-gray-50/50">
               <tr className="text-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
                 <th className="px-6 py-3">ID</th>
                 <th className="px-6 py-3">Item ID</th>

@@ -282,14 +282,14 @@ export default function AdminDashboardPage() {
               <UserPlus size={15} /> Tambah User
             </button>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
             {loadingUsers ? (
               <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
             ) : users.length === 0 ? (
               <div className="py-12 text-center text-gray-400">Belum ada data staf</div>
             ) : (
-              <table className="w-full text-sm">
-                <thead className="text-gray-500 bg-gray-50 border-b border-neutral-100">
+              <table className="w-full text-sm text-left whitespace-nowrap">
+                <thead className="bg-gray-50/50">
                   <tr>
                     <th className="py-3 px-4 font-semibold text-left">Nama</th>
                     <th className="py-3 px-4 font-semibold text-left">Username</th>
@@ -373,14 +373,14 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           )}
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
             {loadingShifts ? (
               <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
             ) : filteredShifts.length === 0 ? (
               <div className="py-12 text-center text-gray-400">Belum ada data shift</div>
             ) : (
-              <table className="w-full text-sm">
-                <thead className="text-gray-500 bg-gray-50 border-b border-neutral-100">
+              <table className="w-full text-sm text-left whitespace-nowrap">
+                <thead className="bg-gray-50/50">
                   <tr>
                     <th className="py-3 px-4 font-semibold text-left">ID</th>
                     <th className="py-3 px-4 font-semibold text-left">Kasir</th>
@@ -434,14 +434,14 @@ export default function AdminDashboardPage() {
             <h2 className="text-lg font-bold text-gray-900">Riwayat Absensi</h2>
             <PeriodFilter value={attendanceDateRange} onChange={setAttendanceDateRange} />
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
             {loadingAttendance ? (
               <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
             ) : filteredAttendance.length === 0 ? (
               <div className="py-12 text-center text-gray-400">Belum ada data absensi</div>
             ) : (
-              <table className="w-full text-sm">
-                <thead className="text-gray-500 bg-gray-50 border-b border-neutral-100">
+              <table className="w-full text-sm text-left whitespace-nowrap">
+                <thead className="bg-gray-50/50">
                   <tr>
                     <th className="py-3 px-4 font-semibold text-left">Tanggal</th>
                     <th className="py-3 px-4 font-semibold text-left">Nama Staf</th>
@@ -520,9 +520,9 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-gray-500 bg-gray-50 border-b border-neutral-100">
+            <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+              <table className="w-full text-sm text-left whitespace-nowrap">
+                <thead className="bg-gray-50/50">
                   <tr>
                     <th className="py-3 px-4 font-semibold text-left">ID</th>
                     <th className="py-3 px-4 font-semibold text-left">Nama</th>

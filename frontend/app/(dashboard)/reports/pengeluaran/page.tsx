@@ -256,9 +256,9 @@ export default function LaporanPengeluaran() {
             <h2 className="text-xl font-bold text-neutral-900">Ringkasan Pengeluaran</h2>
             <FilterDropdown value={rekapFilter} onChange={(v) => { setRekapFilter(v); setCurrentPage(1); }} />
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead>
+          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="bg-gray-50/50">
                 <tr className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
                   <th className="px-6 py-3">Rentang Waktu</th>
                   <th className="px-6 py-3">Total Pengeluaran</th>
@@ -357,9 +357,9 @@ export default function LaporanPengeluaran() {
               </div>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead>
+          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="bg-gray-50/50">
                 <tr className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
                   <th className="px-6 py-3">ID Transaksi</th>
                   <th className="px-6 py-3">Nama Pengeluaran</th>

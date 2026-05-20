@@ -165,7 +165,7 @@ export default function LabaRugiPage() {
                 <h2 className="text-xl font-bold text-neutral-900">Ringkasan Laba Rugi</h2>
               </div>
               <div className="p-6">
-                <table className="w-full text-sm">
+                <table className="w-full text-sm text-left whitespace-nowrap">
                   <tbody>
                     {[
                       { label: "Total Penjualan", value: ringkasan?.total_penjualan, type: "plus" },

@@ -233,8 +233,8 @@ export default function KitchenDashboardPage() {
 
         {/* Tabel - Desktop */}
         <div className="hidden md:block overflow-x-auto">
-          <table className="w-full text-sm text-center">
-            <thead className="text-gray-400 border border-neutral-100 bg-white">
+          <table className="w-full text-sm text-left whitespace-nowrap">
+            <thead className="bg-gray-50/50">
               <tr>
                 <th className="py-4 px-4 font-medium">Order ID</th>
                 <th className="py-4 px-4 font-medium">Waktu</th>

@@ -79,9 +79,9 @@ export default function StockBahanPage() {
               />
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
+          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="bg-gray-50/50">
                 <tr className="text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-neutral-100">
                   <th className="py-3 px-4 text-left">ID</th>
                   <th className="py-3 px-4 text-left">Nama Barang</th>

@@ -332,9 +332,9 @@ export default function AbsensiPage() {
         </div>
 
         {/* Tabel Riwayat */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-center">
-            <thead className="text-gray-400 bg-gray-50 border-b border-neutral-100">
+        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <table className="w-full text-sm text-left whitespace-nowrap">
+            <thead className="bg-gray-50/50">
               <tr>
                 <th className="py-4 px-4 font-semibold">Tanggal</th>
                 {roleId === 1 && (

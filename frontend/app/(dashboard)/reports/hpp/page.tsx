@@ -226,9 +226,9 @@ export default function HPPPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
+        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <table className="w-full text-sm text-left whitespace-nowrap">
+            <thead className="bg-gray-50/50">
               <tr>
                 <th className="py-4 px-6 font-semibold">ID</th>
                 <th className="py-4 px-6 font-semibold">Nama Menu</th>

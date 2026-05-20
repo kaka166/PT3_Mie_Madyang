@@ -184,9 +184,9 @@ export default function LaporanPemasukan() {
             <h2 className="text-lg font-bold text-neutral-900">Ringkasan Penjualan</h2>
             <FilterDropdown value={rekapFilter} onChange={setRekapFilter} />
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100 bg-gray-50">
+          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="bg-gray-50/50">
                 <tr>
                   <th className="px-5 py-3">Rentang Waktu</th>
                   <th className="px-5 py-3">Total Penghasilan</th>
@@ -235,9 +235,9 @@ export default function LaporanPemasukan() {
               </div>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100 bg-gray-50">
+          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+            <table className="w-full text-sm text-left whitespace-nowrap">
+              <thead className="bg-gray-50/50">
                 <tr>
                   <th className="px-5 py-3">No. Transaksi</th>
                   <th className="px-5 py-3">Customer</th>
