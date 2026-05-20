@@ -13,6 +13,12 @@ export default function LandingPage() {
     hero_cta: "Pesan Sekarang",
     hero_image: "",
     mascot_image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCFbe8lwjOheNtzzhrq-94x0FnX2aDlhGrS1nU3VnBvrcq0lUFPZStUoftz5N8W5lmJkDhNzu_eeeUv__yOb69bFh1SC3-3PafvXSnPCQxMaEebV_FtdLcCdSSXDreXa7VmUryo6UBgoRzju25gXe_ixUZiwB_7-AZ__aA61qb6Cut-jFHUAv6gjDcA9CGcC25Sh_LsnobkPcUshJq846E7B8-ZyWZNv5Gi1QRkdxeXldaRofD603bbWogbfOo-aqMtHJWixBguQyo",
+    stats_customers: "12,000+",
+    favorite_menu_title: "Menu Favorit Kita",
+    about_text: "Dapatkan info menu baru dan diskon eksklusif setiap minggunya langsung di inbox Anda.",
+    footer_address: "Jl. Madyang Raya No. 1, Yogyakarta",
+    contact_phone: "+62 812-3456-7890",
+    contact_email: "halo@miemadyang.com",
   });
 
   useEffect(() => {
@@ -21,12 +27,17 @@ export default function LandingPage() {
       .then(res => {
         if (res.success && res.data) {
           setSettings(prev => ({
-            ...prev,
             hero_title: res.data.hero_title || prev.hero_title,
             hero_subtitle: res.data.hero_subtitle || prev.hero_subtitle,
             hero_cta: res.data.hero_cta || prev.hero_cta,
             hero_image: res.data.hero_image_url || prev.hero_image,
             mascot_image: res.data.mascot_image_url || prev.mascot_image,
+            stats_customers: res.data.stats_customers || prev.stats_customers,
+            favorite_menu_title: res.data.favorite_menu_title || prev.favorite_menu_title,
+            about_text: res.data.about_text || prev.about_text,
+            footer_address: res.data.footer_address || prev.footer_address,
+            contact_phone: res.data.contact_phone || prev.contact_phone,
+            contact_email: res.data.contact_email || prev.contact_email,
           }));
         }
       })
@@ -79,7 +90,7 @@ export default function LandingPage() {
                   ))}
                 </div>
                 <p className="text-sm text-[#564241] font-medium">
-                  <span className="text-[#1a1c1c] font-bold">12,000+</span>{" "}
+                  <span className="text-[#1a1c1c] font-bold">{settings.stats_customers}</span>{" "}
                   Pelanggan Puas
                 </p>
               </div>
@@ -124,7 +135,7 @@ export default function LandingPage() {
             <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
               <div className="space-y-4">
                 <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs">
-                  Menu Favorit Kita
+                  {settings.favorite_menu_title}
                 </span>
                 <h2 className="text-4xl md:text-5xl font-bold text-[#1a1c1c]">
                   Kurasi Rasa <br />
@@ -259,11 +270,10 @@ export default function LandingPage() {
           <div className="bg-primary rounded-[2.5rem] p-12 md:p-20 relative overflow-hidden shadow-2xl bg-gradient-to-b from-[#a0383b] to-[#c05051] text-white">
             <div className="relative z-10 max-w-2xl">
               <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-                Jangan Lewatkan Promo Menarik Kami!
+                Lebih Dekat dengan Kami
               </h2>
               <p className="text-white/80 mb-10 text-lg">
-                Dapatkan info menu baru dan diskon eksklusif setiap minggunya
-                langsung di inbox Anda.
+                {settings.about_text}
               </p>
               <form className="flex flex-col sm:flex-row gap-3 w-full max-w-xl">
                 <div className="relative flex-1 group">
@@ -313,15 +323,18 @@ export default function LandingPage() {
             >
               Support
             </Link>
-            <Link
-              href="#"
-              className="text-stone-500 hover:underline decoration-orange-500 underline-offset-4 font-sans text-xs uppercase tracking-widest font-semibold"
-            >
-              Instagram
-            </Link>
+            <div className="flex flex-col items-center sm:items-start gap-1">
+              <Link href={`tel:${settings.contact_phone}`} className="text-stone-500 hover:text-orange-500 font-sans text-xs uppercase tracking-widest font-semibold">
+                Tel: {settings.contact_phone}
+              </Link>
+              <Link href={`mailto:${settings.contact_email}`} className="text-stone-500 hover:text-orange-500 font-sans text-xs uppercase tracking-widest font-semibold">
+                Email: {settings.contact_email}
+              </Link>
+            </div>
           </div>
-          <div className="text-stone-500 text-[10px] font-sans uppercase tracking-widest font-semibold">
-            © 2026 Mie Ayam Ma-Dyang. The Culinary Curator System.
+          <div className="text-stone-500 text-[10px] font-sans uppercase tracking-widest font-semibold flex flex-col items-center md:items-end">
+            <span>© 2026 Mie Ayam Ma-Dyang. All Rights Reserved.</span>
+            <span className="mt-1">{settings.footer_address}</span>
           </div>
         </div>
       </footer>

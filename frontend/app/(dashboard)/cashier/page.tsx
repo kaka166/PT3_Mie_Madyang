@@ -491,7 +491,7 @@ export default function POSPage() {
                   Math.min(100, Math.max(0, parseInt(e.target.value) || 0)),
                 )
               }
-              className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 mb-4 outline-none focus:border-[#ff6b6b] transition-all"
+              className="w-full border-2 border-gray-100 rounded-xl px-4 py-3 mb-4 outline-none focus:border-[#b93b3b] transition-all"
             />
             <div className="flex gap-2">
               <button
@@ -512,7 +512,7 @@ export default function POSPage() {
                     console.error("Gagal update tax:", err);
                   }
                 }}
-                className="flex-1 py-3 bg-[#ff6b6b] text-white rounded-xl font-bold shadow-lg shadow-red-100">
+                className="flex-1 py-3 bg-[#b93b3b] text-white rounded-xl font-bold shadow-lg shadow-red-100">
                 Simpan
               </button>
             </div>
@@ -550,7 +550,7 @@ export default function POSPage() {
                   setOpeningCash(raw);
                 }}
                 placeholder="Masukkan uang awal"
-                className="w-full mt-2 border-2 border-gray-100 rounded-2xl px-4 py-3 outline-none focus:border-[#ff6b6b]"
+                className="w-full mt-2 border-2 border-gray-100 rounded-2xl px-4 py-3 outline-none focus:border-[#b93b3b]"
               />
             </div>
 
@@ -579,7 +579,7 @@ export default function POSPage() {
                   }
                 }}
                 disabled={loadingStart}
-                className="w-full bg-[#ff6b6b] text-white py-4 rounded-2xl font-black shadow-xl disabled:opacity-50">
+                className="w-full bg-[#b93b3b] text-white py-4 rounded-2xl font-black shadow-xl disabled:opacity-50">
                 {loadingStart ? "Memproses..." : "Mulai Sesi"}
               </button>
             </div>
@@ -601,7 +601,7 @@ export default function POSPage() {
                 setShowSessionWarning(false);
                 setShowStartSessionModal(true);
               }}
-              className="w-full bg-[#ff6b6b] text-white py-3 rounded-xl font-bold">
+              className="w-full bg-[#b93b3b] text-white py-3 rounded-xl font-bold">
               Mulai Sesi
             </button>
           </div>
@@ -689,7 +689,7 @@ export default function POSPage() {
 
               <button
                 onClick={() => setSessionResult(null)}
-                className="w-full bg-[#ff6b6b] text-white py-4 rounded-2xl font-black shadow-xl">
+                className="w-full bg-[#b93b3b] text-white py-4 rounded-2xl font-black shadow-xl">
                 Tutup
               </button>
             </div>
@@ -735,7 +735,7 @@ export default function POSPage() {
                     key={idx}
                     className="flex justify-between items-center bg-gray-50/50 p-3 rounded-2xl">
                     <div className="flex gap-3 items-center">
-                      <span className="font-bold text-[#ff6b6b] text-sm">
+                      <span className="font-bold text-[#b93b3b] text-sm">
                         {item.qty}x
                       </span>
                       <p className="font-bold text-sm text-gray-800">
@@ -772,7 +772,7 @@ export default function POSPage() {
                   </span>
                 </div>
                 <div className="flex justify-between items-center pt-2">
-                  <span className="text-lg font-black text-[#ff6b6b]">
+                  <span className="text-lg font-black text-[#b93b3b]">
                     TOTAL
                   </span>
                   <span className="text-3xl font-black text-gray-900 tracking-tighter">
@@ -790,17 +790,17 @@ export default function POSPage() {
               <div className="grid grid-cols-2 gap-3 mb-8">
                 <button
                   onClick={() => setPaymentMethod("QRIS")}
-                  className={`py-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === "QRIS" ? "bg-white border-[#ff6b6b] shadow-xl shadow-red-100" : "bg-white/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-200"}`}>
+                  className={`py-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === "QRIS" ? "bg-white border-[#b93b3b] shadow-xl shadow-red-100" : "bg-white/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-200"}`}>
                   <span
-                    className={`font-black text-sm ${paymentMethod === "QRIS" ? "text-[#ff6b6b]" : "text-gray-400"}`}>
+                    className={`font-black text-sm ${paymentMethod === "QRIS" ? "text-[#b93b3b]" : "text-gray-400"}`}>
                     QRIS
                   </span>
                 </button>
                 <button
                   onClick={() => setPaymentMethod("Tunai")}
-                  className={`py-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === "Tunai" ? "bg-white border-[#ff6b6b] shadow-xl shadow-red-100" : "bg-white/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-200"}`}>
+                  className={`py-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === "Tunai" ? "bg-white border-[#b93b3b] shadow-xl shadow-red-100" : "bg-white/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-200"}`}>
                   <span
-                    className={`font-black text-sm ${paymentMethod === "Tunai" ? "text-[#ff6b6b]" : "text-gray-400"}`}>
+                    className={`font-black text-sm ${paymentMethod === "Tunai" ? "text-[#b93b3b]" : "text-gray-400"}`}>
                     TUNAI
                   </span>
                 </button>
@@ -904,7 +904,7 @@ export default function POSPage() {
                       setTableNumber("");
                     }
                   }}
-                  className="w-full bg-[#ff6b6b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200 active:scale-95 transition-all">
+                  className="w-full bg-[#b93b3b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200/50 active:scale-95 transition-all">
                   Selesaikan Pesanan
                 </button>
                 <button
@@ -939,7 +939,7 @@ export default function POSPage() {
                 onClick={() => {
                   printReceipt(checkoutSuccessOrder);
                 }}
-                className="w-full bg-[#ff6b6b] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200 active:scale-95 transition-all">
+                className="w-full bg-[#b93b3b] text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200/50 active:scale-95 transition-all">
                 Cetak Struk
               </button>
               
@@ -1029,7 +1029,7 @@ export default function POSPage() {
       <main className="flex-1 flex flex-col min-w-0 bg-white lg:bg-transparent relative z-10 overflow-hidden">
         <header className="bg-white px-6 py-5 flex flex-col lg:flex-row justify-between items-center gap-4 border-b border-gray-100 shadow-sm">
           <div className="flex items-center justify-between w-full sm:w-auto">
-            <h1 className="text-xl font-black text-[#F53E1B] tracking-tighter uppercase italic">
+            <h1 className="text-xl font-black text-[#b93b3b] tracking-tighter uppercase italic">
               Ma-Dyang <span className="text-gray-300 not-italic">POS</span>
             </h1>
             <button
@@ -1049,7 +1049,7 @@ export default function POSPage() {
                 />
               </svg>
               {cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#ff6b6b] text-white text-[10px] w-6 h-6 flex items-center justify-center rounded-full border-4 border-white font-black">
+                <span className="absolute -top-1 -right-1 bg-[#b93b3b] text-white text-[10px] w-6 h-6 flex items-center justify-center rounded-full border-4 border-white font-black">
                   {cart.length}
                 </span>
               )}
@@ -1095,7 +1095,7 @@ export default function POSPage() {
 
                   <button
                     onClick={() => setShowStartSessionModal(true)}
-                    className="bg-[#ff6b6b] text-white px-3 py-2 rounded-lg text-xs font-bold">
+                    className="bg-[#b93b3b] text-white px-3 py-2 rounded-lg text-xs font-bold">
                     Mulai Sesi
                   </button>
                 </div>
@@ -1110,7 +1110,7 @@ export default function POSPage() {
               <button
                 key={i}
                 onClick={() => setFilter(c)}
-                className={`whitespace-nowrap px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${filter === c ? "bg-[#F53E1B] text-white shadow-xl shadow-red-100 scale-105" : "bg-white border-2 border-gray-100 text-gray-400  hover:text-[#F53E1B]"}`}>
+                className={`whitespace-nowrap px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${filter === c ? "bg-[#b93b3b] text-white shadow-xl shadow-red-100 scale-105" : "bg-white border-2 border-gray-100 text-gray-400  hover:text-[#b93b3b]"}`}>
                 {c}
               </button>
             ))}
@@ -1147,7 +1147,7 @@ export default function POSPage() {
                     {item.name}
                   </h3>
                   <div className="flex justify-between items-center pt-3 border-t-2 border-gray-50">
-                    <span className="text-[#F53E1B] font-black text-base">
+                    <span className="text-[#b93b3b] font-black text-base">
                       {formatRupiah(item.price)}
                     </span>
                     <button
@@ -1159,7 +1159,7 @@ export default function POSPage() {
                         addToCart(item);
                       }}
                       disabled={item.stock === 0}
-                      className="w-10 h-10 rounded-2xl bg-red-50 text-[#a0383b] flex items-center justify-center font-black text-xl hover:bg-[#F53E1B] hover:text-white transition-all shadow-sm active:scale-90">
+                      className="w-10 h-10 rounded-2xl bg-red-50 text-[#a0383b] flex items-center justify-center font-black text-xl hover:bg-[#b93b3b] hover:text-white transition-all shadow-sm active:scale-90">
                       +
                     </button>
                   </div>
@@ -1184,7 +1184,7 @@ export default function POSPage() {
           <div className="p-10 lg:p-8 pb-3 flex justify-between items-center">
             <h2 className="text-xl lg:text-2xl font-black tracking-tight flex items-center gap-2">
               Pesanan{" "}
-              <span className="text-[9px] bg-[#ff6b6b] text-white px-2 py-0.5 rounded-full shadow-md uppercase tracking-widest">
+              <span className="text-[9px] bg-[#b93b3b] text-white px-2 py-0.5 rounded-full shadow-md uppercase tracking-widest">
                 {cart.length} ITEM
               </span>
             </h2>
@@ -1224,7 +1224,7 @@ export default function POSPage() {
                       <X size={14} strokeWidth={3} />
                     </button>
                   </div>
-                  <p className="text-[10px] lg:text-xs font-black text-[#F53E1B] mb-3">
+                  <p className="text-[10px] lg:text-xs font-black text-[#b93b3b] mb-3">
                     {formatRupiah(item.price * item.qty)}
                   </p>
 
@@ -1283,13 +1283,13 @@ export default function POSPage() {
                           onKeyDown={(e) =>
                             e.key === "Enter" && setEditingNoteId(null)
                           }
-                          className="text-[9px] w-full border-b border-[#ff6b6b] bg-transparent outline-none py-1 font-bold italic"
+                          className="text-[9px] w-full border-b border-[#b93b3b] bg-transparent outline-none py-1 font-bold italic"
                           placeholder="Catatan..."
                         />
                       ) : (
                         <button
                           onClick={() => setEditingNoteId(item.id)}
-                          className="text-[9px] text-gray-400 hover:text-[#F53E1B] flex items-center gap-1 font-bold italic truncate">
+                          className="text-[9px] text-gray-400 hover:text-[#b93b3b] flex items-center gap-1 font-bold italic truncate">
                           {item.note ? `"${item.note}"` : "+ Catatan"}
                         </button>
                       )}
@@ -1314,7 +1314,7 @@ export default function POSPage() {
                   onClick={() => isTaxEnabled && setShowTaxModal(true)}
                   className={`cursor-pointer font-bold text-xs ${
                     isTaxEnabled
-                      ? "text-gray-600 hover:text-[#F53E1B]"
+                      ? "text-gray-600 hover:text-[#b93b3b]"
                       : "text-gray-400"
                   }`}>
                   Pajak ({taxPercent}%)
@@ -1334,7 +1334,7 @@ export default function POSPage() {
                         console.error(err);
                       }
                     }}
-                    className={`w-8 h-4 rounded-full p-0.5 transition-all duration-300 ${isTaxEnabled ? "bg-[#ff6b6b]" : "bg-gray-300"}`}>
+                    className={`w-8 h-4 rounded-full p-0.5 transition-all duration-300 ${isTaxEnabled ? "bg-[#b93b3b]" : "bg-gray-300"}`}>
                     <div
                       className={`bg-white w-3 h-3 rounded-full transition-transform duration-300 ${isTaxEnabled ? "translate-x-3.5" : ""}`}
                     />
@@ -1349,13 +1349,13 @@ export default function POSPage() {
                 <span className="text-sm font-black text-gray-900 tracking-tight">
                   TOTAL
                 </span>
-                <span className="text-xl font-black text-[#F53E1B] tracking-tighter">
+                <span className="text-xl font-black text-[#b93b3b] tracking-tighter">
                   {formatRupiah(total)}
                 </span>
               </div>
             </div>
 
-            <div className="bg-[#ff6b6b] rounded-[1.2rem] overflow-hidden shadow-xl shadow-red-100">
+            <div className="bg-[#b93b3b] rounded-[1.2rem] overflow-hidden shadow-xl shadow-red-100">
               <select
                 value={orderType}
                 onChange={(e) => setOrderType(e.target.value)}
@@ -1415,7 +1415,7 @@ export default function POSPage() {
                   placeholder="Cari Customer / ID..."
                   value={searchHistory}
                   onChange={(e) => setSearchHistory(e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#ff6b6b] transition-all text-xs font-bold text-gray-700"
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#b93b3b] transition-all text-xs font-bold text-gray-700"
                 />
               </div>
 
@@ -1443,7 +1443,7 @@ export default function POSPage() {
                         onClick={() => setSelectedHistoryOrder(item)}
                         className={`w-full text-left p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 ${
                           selectedHistoryOrder?.no === item.no
-                            ? "bg-white border-[#ff6b6b] shadow-lg shadow-red-50/50"
+                            ? "bg-white border-[#b93b3b] shadow-lg shadow-red-50/50"
                             : "bg-white border-transparent hover:border-gray-200"
                         }`}
                       >
@@ -1459,7 +1459,7 @@ export default function POSPage() {
                           <span className="font-bold text-sm text-gray-600 truncate max-w-[120px]">
                             {item.nama}
                           </span>
-                          <span className="font-black text-sm text-[#ff6b6b]">
+                          <span className="font-black text-sm text-[#b93b3b]">
                             {formatRupiah(item.jumlah)}
                           </span>
                         </div>
@@ -1490,7 +1490,7 @@ export default function POSPage() {
                       <h2 className="text-2xl font-black text-gray-800">
                         Detail Transaksi
                       </h2>
-                      <span className="font-black text-[#ff6b6b] bg-red-50 px-3 py-1 rounded-full text-xs">
+                      <span className="font-black text-[#b93b3b] bg-red-50 px-3 py-1 rounded-full text-xs">
                         {selectedHistoryOrder.no}
                       </span>
                     </div>
@@ -1551,7 +1551,7 @@ export default function POSPage() {
 
                       <button
                         onClick={() => printReceipt(selectedHistoryOrder)}
-                        className="bg-[#ff6b6b] hover:bg-[#e85a5a] text-white px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg shadow-red-100 active:scale-95 transition-all flex items-center gap-2"
+                        className="bg-[#b93b3b] hover:bg-[#e85a5a] text-white px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg shadow-red-100 active:scale-95 transition-all flex items-center gap-2"
                       >
                         🖨️ Cetak Struk
                       </button>
