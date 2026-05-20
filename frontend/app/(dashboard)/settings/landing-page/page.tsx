@@ -274,7 +274,7 @@ export default function LandingPageSettings() {
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-4 bg-[#b93b3b] text-white rounded-2xl font-black shadow-lg shadow-red-200 hover:bg-[#a12f2f] active:scale-95 transition-all flex items-center gap-2"
+              className="px-8 py-4 bg-[#b93b3b] text-white rounded-2xl font-black shadow-lg shadow-emerald-200 hover:bg-[#a12f2f] active:scale-95 transition-all flex items-center gap-2"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

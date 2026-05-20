@@ -267,7 +267,7 @@ export default function InventoryPage() {
 
               setShowModal(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-red-600/20">
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-emerald-600/20">
             <Plus size={16} /> Tambah Menu
           </button>
         </div>
@@ -277,14 +277,14 @@ export default function InventoryPage() {
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide">
         <button
           onClick={() => setFilter("All Items")}
-          className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === "All Items" ? "bg-red-600 text-white shadow-md shadow-red-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}>
+          className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === "All Items" ? "bg-emerald-600 text-white shadow-md shadow-emerald-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}>
           Semua
         </button>
         {categories.map((cat) => (
           <button
             key={cat.id}
             onClick={() => setFilter(cat.nama_kategori)}
-            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === cat.nama_kategori ? "bg-red-600 text-white shadow-md shadow-red-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}>
+            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${filter === cat.nama_kategori ? "bg-emerald-600 text-white shadow-md shadow-emerald-200" : "bg-white border text-zinc-500 hover:bg-zinc-50"}`}>
             {cat.nama_kategori}
           </button>
         ))}
@@ -427,7 +427,7 @@ export default function InventoryPage() {
               </button>
               <button
                 onClick={confirmPopup.onConfirm}
-                className={`flex-1 py-3 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all ${confirmPopup.type === "danger" ? "bg-red-600 shadow-red-200" : "bg-amber-600 shadow-amber-200"}`}>
+                className={`flex-1 py-3 rounded-2xl text-sm font-bold text-white shadow-lg active:scale-95 transition-all ${confirmPopup.type === "danger" ? "bg-red-600 shadow-emerald-200" : "bg-amber-600 shadow-amber-200"}`}>
                 Ya, Lanjutkan
               </button>
             </div>

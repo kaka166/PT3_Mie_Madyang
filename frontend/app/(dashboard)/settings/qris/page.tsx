@@ -110,7 +110,7 @@ export default function QrisSettingsPage() {
           <h1 className="text-2xl font-bold text-[#F53E1B] tracking-tight">Pengaturan QRIS</h1>
           <p className="text-sm text-zinc-500">Kelola QRIS untuk pembayaran di POS</p>
         </div>
-        <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-red-600/20">
+        <button onClick={openCreate} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold active:scale-95 transition-all shadow-lg shadow-emerald-600/20">
           <Plus size={16} /> Tambah QRIS
         </button>
       </div>

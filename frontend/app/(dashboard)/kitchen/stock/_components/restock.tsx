@@ -169,14 +169,14 @@ export default function RestockModal({
               <button
                 onClick={() => setIsBahanBaru(true)}
                 className={`px-6 py-2 rounded-lg ${
-                  isBahanBaru ? "bg-red-500 text-white" : "bg-gray-200"
+                  isBahanBaru ? "bg-emerald-500 text-white" : "bg-gray-200"
                 }`}>
                 Ya
               </button>
               <button
                 onClick={() => setIsBahanBaru(false)}
                 className={`px-6 py-2 rounded-lg ${
-                  !isBahanBaru ? "bg-red-500 text-white" : "bg-gray-200"
+                  !isBahanBaru ? "bg-emerald-500 text-white" : "bg-gray-200"
                 }`}>
                 Tidak
               </button>
@@ -319,8 +319,8 @@ export default function RestockModal({
 
           <button
             onClick={handleTambah}
-            className="mt-auto w-full bg-red-500 text-white py-3 rounded-xl">
-            Tambahkan ke keranjang
+            className="mt-auto w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
+            + Tambahkan ke Keranjang
           </button>
         </div>
 
@@ -364,7 +364,7 @@ export default function RestockModal({
           )}
           <button
             onClick={handleSubmit}
-            className="mt-auto w-full bg-red-500 text-white py-3 rounded-xl">
+            className="mt-auto w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
             Simpan Data Restock
           </button>
         </div>

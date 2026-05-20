@@ -1027,8 +1027,9 @@ export default function POSPage() {
 
       {/* ================= MAIN CONTENT ================= */}
       <main className="flex-1 flex flex-col min-w-0 bg-white lg:bg-transparent relative z-10 overflow-hidden">
-        <header className="bg-white px-6 py-5 flex flex-col lg:flex-row justify-between items-center gap-4 border-b border-gray-100 shadow-sm">
-          <div className="flex items-center justify-between w-full sm:w-auto">
+        <header className="bg-white px-4 py-3 flex flex-col gap-3 border-b border-gray-100 shadow-sm">
+          {/* ROW 1 - Logo + Cart (mobile) */}
+          <div className="flex items-center justify-between">
             <h1 className="text-xl font-black text-[#b93b3b] tracking-tighter uppercase italic">
               Ma-Dyang <span className="text-gray-300 not-italic">POS</span>
             </h1>
@@ -1055,52 +1056,51 @@ export default function POSPage() {
               )}
             </button>
           </div>
-          <div className="flex flex-col lg:flex-row items-center gap-3 w-full lg:w-auto">
+
+          {/* ROW 2 - Search + Actions */}
+          <div className="flex flex-wrap items-center gap-2">
             {/* SEARCH */}
-            <div className="w-full sm:w-80 relative group">
+            <div className="flex-1 min-w-[160px] relative">
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-5 pr-5 py-3 bg-gray-50 border-2 border-transparent focus:border-red-100 focus:bg-white rounded-2xl text-sm font-bold outline-none transition-all shadow-inner"
+                className="w-full pl-4 pr-4 py-2.5 bg-gray-50 border-2 border-transparent focus:border-[#b93b3b]/20 focus:bg-white rounded-xl text-sm font-bold outline-none transition-all"
                 placeholder="Cari menu..."
               />
             </div>
-            {/* RIWAYAT TRANSAKSI BUTTON */}
+
+            {/* RIWAYAT */}
             <button
               onClick={() => setShowHistoryModal(true)}
-              className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 active:scale-95 shadow-sm"
+              className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-3 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap"
             >
               Riwayat
             </button>
 
             {/* SESSION STATUS */}
-            <div className="flex gap-2 items-center">
-              {sessionActive ? (
-                <>
-                  <span className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
-                    Sesi Aktif
-                  </span>
-
-                  <button
-                    onClick={handleEndSession}
-                    className="bg-red-500 text-white px-3 py-2 rounded-lg text-xs font-bold">
-                    Tutup Sesi
-                  </button>
-                </>
-              ) : (
-                <div className="flex gap-2 items-center">
-                  <span className="text-xs text-gray-400 italic">
-                    Belum ada sesi
-                  </span>
-
-                  <button
-                    onClick={() => setShowStartSessionModal(true)}
-                    className="bg-[#b93b3b] text-white px-3 py-2 rounded-lg text-xs font-bold">
-                    Mulai Sesi
-                  </button>
-                </div>
-              )}
-            </div>
+            {sessionActive ? (
+              <>
+                <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-2 rounded-xl whitespace-nowrap">
+                  ✓ Sesi Aktif
+                </span>
+                <button
+                  onClick={handleEndSession}
+                  className="bg-red-500 hover:bg-red-600 text-white px-3 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap">
+                  Tutup Sesi
+                </button>
+              </>
+            ) : (
+              <>
+                <span className="text-xs text-gray-400 italic whitespace-nowrap hidden sm:inline">
+                  Belum ada sesi
+                </span>
+                <button
+                  onClick={() => setShowStartSessionModal(true)}
+                  className="bg-[#b93b3b] hover:bg-[#a12e2e] text-white px-3 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 whitespace-nowrap">
+                  Mulai Sesi
+                </button>
+              </>
+            )}
           </div>
         </header>
 

@@ -187,7 +187,7 @@ export default function Penyesuaian({
                   key={a}
                   onClick={() => setAlasan(a)}
                   className={`px-4 py-2 rounded-lg text-sm ${
-                    alasan === a ? "bg-red-500 text-white" : "bg-gray-100"
+                    alasan === a ? "bg-emerald-500 text-white" : "bg-gray-100"
                   }`}>
                   {a}
                 </button>
@@ -202,8 +202,8 @@ export default function Penyesuaian({
           )}
           <button
             onClick={handleSubmit}
-            className="mt-auto w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-xl">
-            Simpan
+            className="mt-auto w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
+            Simpan Penyesuaian
           </button>
         </div>
 
