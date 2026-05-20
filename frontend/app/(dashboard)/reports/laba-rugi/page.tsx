@@ -39,122 +39,7 @@ interface LabaRugiData {
   riwayat_pengeluaran: RiwayatItem[];
 }
 
-function CalendarPicker({
-  value,
-  onChange,
-}: {
-  value: { start: string; end: string };
-  onChange: (v: { start: string; end: string }) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [position, setPosition] = useState<"top" | "bottom">("bottom");
-  const [viewDate, setViewDate] = useState(() => {
-    const d = value.start ? new Date(value.start) : new Date();
-    return { year: d.getFullYear(), month: d.getMonth() };
-  });
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const daysInMonth = new Date(viewDate.year, viewDate.month + 1, 0).getDate();
-  const firstDay = new Date(viewDate.year, viewDate.month, 1).getDay();
-  const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-
-  const selectedDay = value.start ? new Date(value.start).getDate() : null;
-  const selectedMonth = value.start ? new Date(value.start).getMonth() : null;
-  const selectedYear = value.start ? new Date(value.start).getFullYear() : null;
-
-  const prevMonth = () => setViewDate((v) => {
-    const m = v.month === 0 ? 11 : v.month - 1;
-    const y = v.month === 0 ? v.year - 1 : v.year;
-    return { year: y, month: m };
-  });
-  const nextMonth = () => setViewDate((v) => {
-    const m = v.month === 11 ? 0 : v.month + 1;
-    const y = v.month === 11 ? v.year + 1 : v.year;
-    return { year: y, month: m };
-  });
-
-  const selectDay = (day: number) => {
-    const d = new Date(viewDate.year, viewDate.month, day);
-    const formatDateLocal = (date: Date) =>
-      `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-    const iso = formatDateLocal(d);
-
-    if (!value.start || (value.start && value.end)) {
-      onChange({ start: iso, end: "" });
-    } else {
-      if (new Date(iso) < new Date(value.start)) {
-        onChange({ start: iso, end: value.start });
-      } else {
-        onChange({ start: value.start, end: iso });
-      }
-    }
-    if (value.start && !value.end) setOpen(false);
-    setTimeout(() => setOpen(false), 0);
-  };
-
-  const displayLabel = value.start && value.end
-    ? formatTanggalRange(value.start, value.end)
-    : value.start ? formatTanggalRange(value.start, "") : "Hari/Bulan/Tahun";
-
-  return (
-    <div ref={ref} className="relative">
-      <button onClick={() => {
-        setOpen((o) => !o);
-        const rect = ref.current?.getBoundingClientRect();
-        if (!rect) return;
-        setPosition(window.innerHeight - rect.bottom < 300 ? "top" : "bottom");
-      }}
-        className="bg-white border border-neutral-200 pl-3 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 flex items-center gap-2 shadow-sm">
-        <Calendar size={14} className="text-neutral-400" />
-        {displayLabel}
-        {value.start && (
-          <span onClick={(e) => { e.stopPropagation(); onChange({ start: "", end: "" }); }}
-            className="ml-1 text-neutral-400 hover:text-neutral-600"><X size={12} /></span>
-        )}
-      </button>
-      {open && (
-        <div className={`absolute right-0 w-72 bg-white rounded-2xl border border-neutral-200 shadow-xl z-[9999] p-4 ${position === "bottom" ? "mt-2 top-full" : "mb-2 bottom-full"}`}>
-          <div className="flex items-center justify-between mb-3">
-            <button onClick={prevMonth} className="p-1 rounded-lg hover:bg-neutral-100 transition-colors"><ChevronLeft size={16} /></button>
-            <span className="text-sm font-bold text-neutral-700">{monthNames[viewDate.month]} {viewDate.year}</span>
-            <button onClick={nextMonth} className="p-1 rounded-lg hover:bg-neutral-100 transition-colors"><ChevronRight size={16} /></button>
-          </div>
-          <div className="grid grid-cols-7 mb-1">
-            {["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"].map((d) => (
-              <div key={d} className="text-center text-[10px] font-bold text-neutral-400 py-1">{d}</div>
-            ))}
-          </div>
-          <div className="grid grid-cols-7 gap-y-1">
-            {Array(firstDay).fill(null).map((_, i) => <div key={`e-${i}`} />)}
-            {Array(daysInMonth).fill(null).map((_, i) => {
-              const day = i + 1;
-              const isSelected = day === selectedDay && viewDate.month === selectedMonth && viewDate.year === selectedYear;
-              const isToday = day === new Date().getDate() && viewDate.month === new Date().getMonth() && viewDate.year === new Date().getFullYear();
-              const currentDate = new Date(viewDate.year, viewDate.month, day);
-              const isInRange = value.start && value.end && currentDate >= new Date(value.start) && currentDate <= new Date(value.end);
-              const isStart = value.start && day === new Date(value.start).getDate() && viewDate.month === new Date(value.start).getMonth() && viewDate.year === new Date(value.start).getFullYear();
-              const isEnd = value.end && day === new Date(value.end).getDate() && viewDate.month === new Date(value.end).getMonth() && viewDate.year === new Date(value.end).getFullYear();
-              return (
-                <button key={day} onClick={() => selectDay(day)}
-                  className={`text-center text-sm h-8 w-full rounded-lg font-medium transition-colors ${isStart || isEnd ? "bg-[#FF7067] text-white" : ""} ${isInRange && !isStart && !isEnd ? "bg-red-100 text-red-600" : ""} ${isToday && !isSelected ? "border border-[#FF7067] text-[#FF7067]" : ""} ${!isSelected && !isToday ? "text-neutral-700 hover:bg-neutral-100" : ""}`}>
-                  {day}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+import { PeriodFilter, PERIOD_PRESETS } from "@/components/common/PeriodFilter";
 
 export default function LabaRugiPage() {
   const [data, setData] = useState<LabaRugiData | null>(null);
@@ -205,8 +90,30 @@ export default function LabaRugiPage() {
               Laporan Laba Rugi Mi Madyang
             </p>
           </div>
-          <div className="flex-shrink-0">
-            <CalendarPicker value={dateRange} onChange={setDateRange} />
+          <div className="flex flex-wrap items-center gap-2">
+            {PERIOD_PRESETS.map((p) => {
+              const today = new Date();
+              const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+              const startDate = p.days === 0 ? todayStr : (() => { const d = new Date(); d.setDate(d.getDate() - p.days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
+              const isActive = dateRange.start === startDate && dateRange.end === todayStr;
+              return (
+                <button
+                  key={p.label}
+                  onClick={() => setDateRange({ start: startDate, end: todayStr })}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all ${
+                    isActive ? "bg-[#F53E1B] text-white border-[#F53E1B]" : "bg-white border-neutral-200 text-neutral-600 hover:border-red-300 hover:text-red-500"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+            <div className="flex-shrink-0">
+              <PeriodFilter value={dateRange} onChange={setDateRange} showPresets={false} />
+            </div>
+            {(dateRange.start || dateRange.end) && (
+              <button onClick={() => setDateRange({ start: "", end: "" })} className="text-xs text-gray-400 hover:text-red-500 underline">Reset</button>
+            )}
           </div>
         </div>
 

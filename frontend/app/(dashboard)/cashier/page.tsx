@@ -520,14 +520,16 @@ export default function POSPage() {
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60">
           <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex overflow-hidden relative">
             {/* 🔥 TOMBOL CLOSE */}
-            <button
-              onClick={() => {
-                setShowStartSessionModal(false);
-                localStorage.setItem("hasSeenStartSession", "true");
-              }}
-              className="absolute top-4 right-4 bg-red-100 hover:bg-red-200 text-red-500 w-8 h-8 flex items-center justify-center rounded-full font-bold">
-              ×
-            </button>
+            {user?.role !== 2 && (
+              <button
+                onClick={() => {
+                  setShowStartSessionModal(false);
+                  localStorage.setItem("hasSeenStartSession", "true");
+                }}
+                className="absolute top-4 right-4 bg-red-100 hover:bg-red-200 text-red-500 w-8 h-8 flex items-center justify-center rounded-full font-bold">
+                ×
+              </button>
+            )}
             {/* LEFT */}
             <div className="flex-1 p-8">
               <h2 className="text-2xl font-black mb-6">Mulai Sesi Kasir</h2>
@@ -1060,8 +1062,8 @@ export default function POSPage() {
 
           {/* Container Menu - iso di scroll */}
           <div className="flex-1 overflow-y-auto no-scrollbar pb-32 lg:pb-8 px-1">
-            {/* Grid diset 2 kolom mobile dan 4 kolom desktop sesuai permintaan */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+            {/* Grid diset 2 kolom mobile, 3 kolom tablet, dan 4 kolom desktop sesuai permintaan */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {filteredMenus.map((item) => (
                 <div
                   key={item.id}
