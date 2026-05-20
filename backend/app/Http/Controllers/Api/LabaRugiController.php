@@ -8,6 +8,7 @@ use App\Models\Pengeluaran;
 use App\Models\Penjualan;
 use App\Models\PenjualanDetail;
 use App\Models\Menu;
+use App\Models\HppHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -41,14 +42,30 @@ class LabaRugiController extends Controller
         // Total porsi terjual
         $totalPorsiTerjual = PenjualanDetail::whereIn('penjualan_id', $penjualanIds)->sum('qty');
 
-        // ── HPP per menu dari kolom hpp_default ────────────
+        // ── HPP per menu dari hpp_histories ─────────────────
         $perMenu = PenjualanDetail::whereIn('penjualan_id', $penjualanIds)
             ->select('menu_id', DB::raw('SUM(qty) as total_qty'))
             ->groupBy('menu_id')
             ->get();
 
-        $menuHpps  = Menu::pluck('hpp_default', 'id');
-        $totalHpp  = $perMenu->sum(fn($item) => ($menuHpps[$item->menu_id] ?? 0) * $item->total_qty);
+        // Get latest HPP per menu name from hpp_histories
+        $latestHpp = HppHistory::select('nama_menu', 'total_hpp')
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('hpp_histories')
+                    ->groupBy('nama_menu');
+            })
+            ->pluck('total_hpp', 'nama_menu');
+
+        // Get menu id => nama_menu mapping
+        $menuNames = Menu::pluck('nama_menu', 'id');
+
+        // Calculate total HPP
+        $totalHpp = $perMenu->sum(function ($item) use ($menuNames, $latestHpp) {
+            $menuName = $menuNames[$item->menu_id] ?? null;
+            $hppPerPorsi = $menuName ? ($latestHpp[$menuName] ?? 0) : 0;
+            return $hppPerPorsi * $item->total_qty;
+        });
         $hppPerPorsi = $totalPorsiTerjual > 0 ? round($totalHpp / $totalPorsiTerjual, 2) : 0;
 
         $labaKotor = $totalPenjualan - $totalHpp;

@@ -26,6 +26,7 @@ class MenuController extends Controller
                     'gambar' => $m->gambar,
                     'is_active' => $m->is_active,
                     'is_fast_moving' => $m->is_fast_moving ?? false,
+                    'kategori_id' => $m->kategori_id,
                     'kategori' => $m->kategori,
                     'stock' => $m->stokPorsi->qty ?? 0,
                 ];

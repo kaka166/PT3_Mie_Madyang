@@ -261,6 +261,7 @@ export default function POSPage() {
   const [loadingStart, setLoadingStart] = useState(false);
 
   const [showSessionWarning, setShowSessionWarning] = useState(false);
+  const [user, setUser] = useState<{role: number; name: string} | null>(null);
 
   const handleStartSession = async () => {
     const cash = Number(openingCash);
@@ -352,7 +353,8 @@ export default function POSPage() {
 
       const session = await getActiveSession();
       const userData = localStorage.getItem("user");
-      const user = userData ? JSON.parse(userData) : null;
+      const parsedUser = userData ? JSON.parse(userData) : null;
+      setUser(parsedUser);
 
       if (session?.data?.id) {
         setSessionActive(true);
@@ -364,14 +366,14 @@ export default function POSPage() {
         const startSession = params.get("startSession");
 
         // Cashier login → auto-show modal start session
-        if (user?.role === 2 && startSession === "1") {
+        if (parsedUser?.role === 2 && startSession === "1") {
           setShowStartSessionModal(true);
           window.history.replaceState({}, "", "/cashier");
           return;
         }
 
         // Owner → never auto-show, only via button
-        if (user?.role === 1) {
+        if (parsedUser?.role === 1) {
           return;
         }
 

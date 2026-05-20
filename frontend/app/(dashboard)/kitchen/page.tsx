@@ -231,8 +231,8 @@ export default function KitchenDashboardPage() {
           </div>
         </div>
 
-        {/* Tabel */}
-        <div className="overflow-x-auto">
+        {/* Tabel - Desktop */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm text-center">
             <thead className="text-gray-400 border border-neutral-100 bg-white">
               <tr>
@@ -312,6 +312,61 @@ export default function KitchenDashboardPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-3 px-2 py-4">
+          {currentData.map((item, index) => (
+            <div key={index} className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm">
+              <div className="flex justify-between items-start mb-3">
+                <div>
+                  <p className="font-bold text-gray-800 text-base">{item.id}</p>
+                  <p className="text-sm font-semibold text-gray-600">{item.customer}</p>
+                </div>
+                <span className={`px-3 py-1.5 rounded-full text-xs font-bold ${getStatusBadge(item.status)}`}>
+                  {item.status}
+                </span>
+              </div>
+              <div className="flex items-center gap-4 text-xs text-gray-400 mb-3">
+                <span>{formatTanggal(item.waktu)}</span>
+                <span>{item.items} item</span>
+                <span className="font-bold text-gray-700">{formatRupiah(item.harga)}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {item.status === 'Antri' && (
+                  <button
+                    onClick={async () => {
+                      const ok = await updateOrderStatus(Number(item.id.replace("#", "")), "cooking");
+                      if (ok) {
+                        addNotification(`#${item.id.replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
+                        fetchOrders();
+                      }
+                    }}
+                    className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+                    🍳 Proses
+                  </button>
+                )}
+                {item.status === 'Dimasak' && (
+                  <button
+                    onClick={async () => {
+                      const ok = await updateOrderStatus(Number(item.id.replace("#", "")), "done");
+                      if (ok) {
+                        addNotification(`#${item.id.replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
+                        fetchOrders();
+                      }
+                    }}
+                    className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
+                    ✅ Selesai
+                  </button>
+                )}
+                <button
+                  onClick={() => handleOpenModal(item)}
+                  className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+                  <MoreHorizontal size={16} className="text-gray-500" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Footer & Pagination */}
