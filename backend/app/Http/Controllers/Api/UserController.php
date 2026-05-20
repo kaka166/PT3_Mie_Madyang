@@ -10,6 +10,48 @@ use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'username' => 'required|string|unique:users,username',
+            'name'     => 'required|string',
+            'email'    => 'required|email|unique:users,email',
+            'phone'    => 'nullable|string',
+            'password' => 'required|string|min:8',
+            'role'     => 'required|integer|in:1,2,3',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors'  => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $user = User::create([
+                'username' => $request->username,
+                'name'     => $request->name,
+                'email'    => $request->email,
+                'phone'    => $request->phone,
+                'password' => Hash::make($request->password),
+                'role'     => $request->role,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User berhasil dibuat',
+                'data'    => $user
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal membuat user: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function update(Request $request, $id)
     {
         $user = User::find($id);

@@ -16,76 +16,79 @@ class LabaRugiController extends Controller
     public function index(Request $request)
     {
         $startDate = $request->query('start_date');
-        $endDate = $request->query('end_date');
+        $endDate   = $request->query('end_date');
 
+        // ── Pemasukan ──────────────────────────────────────
         $pemasukanQuery = Pemasukan::query();
+        if ($startDate) $pemasukanQuery->whereDate('waktu', '>=', $startDate);
+        if ($endDate)   $pemasukanQuery->whereDate('waktu', '<=', $endDate);
+        $totalPemasukan = (clone $pemasukanQuery)->sum('total');
+
+        // ── Pengeluaran ────────────────────────────────────
         $pengeluaranQuery = Pengeluaran::query();
+        if ($startDate) $pengeluaranQuery->whereDate('tanggal', '>=', $startDate);
+        if ($endDate)   $pengeluaranQuery->whereDate('tanggal', '<=', $endDate);
+        $totalPengeluaran = (clone $pengeluaranQuery)->sum('jumlah');
+
+        // ── Penjualan selesai ──────────────────────────────
         $penjualanQuery = Penjualan::where('status', 'done');
+        if ($startDate) $penjualanQuery->whereDate('tanggal', '>=', $startDate);
+        if ($endDate)   $penjualanQuery->whereDate('tanggal', '<=', $endDate);
 
-        if ($startDate) {
-            $pemasukanQuery->whereDate('waktu', '>=', $startDate);
-            $pengeluaranQuery->whereDate('tanggal', '>=', $startDate);
-            $penjualanQuery->whereDate('tanggal', '>=', $startDate);
-        }
-        if ($endDate) {
-            $pemasukanQuery->whereDate('waktu', '<=', $endDate);
-            $pengeluaranQuery->whereDate('tanggal', '<=', $endDate);
-            $penjualanQuery->whereDate('tanggal', '<=', $endDate);
-        }
+        $totalPenjualan    = (clone $penjualanQuery)->sum('total');
+        $penjualanIds      = (clone $penjualanQuery)->pluck('id');
 
-        $totalPemasukan = $pemasukanQuery->sum('total');
-        $totalPengeluaran = $pengeluaranQuery->sum('jumlah');
+        // Total porsi terjual
+        $totalPorsiTerjual = PenjualanDetail::whereIn('penjualan_id', $penjualanIds)->sum('qty');
 
-        $totalPenjualan = $penjualanQuery->sum('total');
-        $totalPorsiTerjual = $penjualanQuery->withSum('detail as qty_sum', 'qty')->get()->sum('qty_sum');
-
-        // HPP dihitung per menu dari hpp_default (data produksi, direct cost saja)
-        $penjualanIds = $penjualanQuery->pluck('id');
+        // ── HPP per menu dari kolom hpp_default ────────────
         $perMenu = PenjualanDetail::whereIn('penjualan_id', $penjualanIds)
             ->select('menu_id', DB::raw('SUM(qty) as total_qty'))
             ->groupBy('menu_id')
             ->get();
-        $menuHpps = Menu::pluck('hpp_default', 'id');
-        $totalHpp = $perMenu->sum(fn($item) => ($menuHpps[$item->menu_id] ?? 0) * $item->total_qty);
-        $hppPerPorsi = $totalPorsiTerjual > 0 ? $totalHpp / $totalPorsiTerjual : 0;
+
+        $menuHpps  = Menu::pluck('hpp_default', 'id');
+        $totalHpp  = $perMenu->sum(fn($item) => ($menuHpps[$item->menu_id] ?? 0) * $item->total_qty);
+        $hppPerPorsi = $totalPorsiTerjual > 0 ? round($totalHpp / $totalPorsiTerjual, 2) : 0;
 
         $labaKotor = $totalPenjualan - $totalHpp;
         $labaBersih = $labaKotor - $totalPengeluaran;
 
-        $riwayatPemasukan = $pemasukanQuery->latest()->get()->map(function ($p) {
+        // ── Riwayat ────────────────────────────────────────
+        $riwayatPemasukan = (clone $pemasukanQuery)->latest('waktu')->take(50)->get()->map(function ($p) {
             return [
-                'id' => '#' . $p->id,
-                'nama' => $p->nama,
-                'total' => $p->total,
-                'waktu' => $p->waktu,
+                'id'     => '#' . $p->id,
+                'nama'   => $p->nama,
+                'total'  => $p->total,
+                'waktu'  => $p->waktu,
                 'metode' => $p->metode,
             ];
         });
 
-        $riwayatPengeluaran = $pengeluaranQuery->latest()->get()->map(function ($p) {
+        $riwayatPengeluaran = (clone $pengeluaranQuery)->latest('tanggal')->take(50)->get()->map(function ($p) {
             return [
-                'id' => '#' . $p->id,
-                'nama' => $p->nama_pengeluaran,
+                'id'       => '#' . $p->id,
+                'nama'     => $p->nama_pengeluaran,
                 'kategori' => $p->kategori ?? 'Operasional',
-                'total' => $p->jumlah,
-                'tanggal' => $p->tanggal,
+                'total'    => $p->jumlah,
+                'tanggal'  => $p->tanggal,
             ];
         });
 
         return response()->json([
             'success' => true,
-            'data' => [
+            'data'    => [
                 'ringkasan' => [
-                    'total_penjualan' => $totalPenjualan,
-                    'total_pemasukan' => $totalPemasukan,
-                    'total_pengeluaran' => $totalPengeluaran,
-                    'total_hpp' => $totalHpp,
-                    'hpp_per_porsi' => $hppPerPorsi,
+                    'total_penjualan'    => $totalPenjualan,
+                    'total_pemasukan'    => $totalPemasukan,
+                    'total_pengeluaran'  => $totalPengeluaran,
+                    'total_hpp'          => $totalHpp,
+                    'hpp_per_porsi'      => $hppPerPorsi,
                     'total_porsi_terjual' => $totalPorsiTerjual,
-                    'laba_kotor' => $labaKotor,
-                    'laba_bersih' => $labaBersih,
+                    'laba_kotor'         => $labaKotor,
+                    'laba_bersih'        => $labaBersih,
                 ],
-                'riwayat_pemasukan' => $riwayatPemasukan,
+                'riwayat_pemasukan'   => $riwayatPemasukan,
                 'riwayat_pengeluaran' => $riwayatPengeluaran,
             ]
         ]);

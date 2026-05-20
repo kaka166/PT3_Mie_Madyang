@@ -12,6 +12,7 @@ import {
 import { menuService, Menu, Category } from "@/services/menuService";
 import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
 import { addNotification } from "@/services/notificationService";
+import { STORAGE_BASE_URL } from "@/config";
 
 export default function InventoryPage() {
   const [menus, setMenus] = useState<Menu[]>([]);
@@ -25,6 +26,7 @@ export default function InventoryPage() {
   const [showCatModal, setShowCatModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const [confirmPopup, setConfirmPopup] = useState<{
     isOpen: boolean;
@@ -248,6 +250,7 @@ export default function InventoryPage() {
           <button
             onClick={() => {
               setIsEdit(false);
+              setPreviewUrl(null);
 
               setCalc({
                 hpp: 0,
@@ -307,7 +310,17 @@ export default function InventoryPage() {
                     key={item.id}
                     className="hover:bg-zinc-50/30 transition-colors group">
                     <td className="px-6 py-4 text-neutral-700">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-3">
+                        {item.gambar ? (
+                          <img
+                            src={`${STORAGE_BASE_URL}/menu/${item.gambar}`}
+                            alt={item.nama_menu}
+                            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg flex-shrink-0">🍜</div>
+                        )}
                         {item.nama_menu}
                       </div>
                     </td>
@@ -361,6 +374,7 @@ export default function InventoryPage() {
                         onClick={() => {
                           setIsEdit(true);
                           setSelectedId(item.id);
+                          setPreviewUrl(item.gambar ? `${STORAGE_BASE_URL}/menu/${item.gambar}` : null);
                           setForm({
                             nama_menu: item.nama_menu,
                             harga_jual: String(item.harga_jual),
@@ -652,21 +666,34 @@ export default function InventoryPage() {
                 <div className="border-2 border-dashed border-zinc-200 rounded-3xl p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
                   <input
                     type="file"
+                    accept="image/*"
                     className="absolute inset-0 opacity-0 cursor-pointer"
-                    onChange={(e) =>
-                      setForm({
-                        ...form,
-                        gambar: e.target.files ? e.target.files[0] : null,
-                      })
-                    }
+                    onChange={(e) => {
+                      const file = e.target.files ? e.target.files[0] : null;
+                      setForm({ ...form, gambar: file });
+                      if (file) {
+                        const url = URL.createObjectURL(file);
+                        setPreviewUrl(url);
+                      }
+                    }}
                   />
                   <div className="flex flex-col items-center gap-2">
-                    <div className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <Plus size={24} />
-                    </div>
+                    {previewUrl ? (
+                      <img
+                        src={previewUrl}
+                        alt="Preview"
+                        className="w-24 h-24 object-cover rounded-2xl mb-1 shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <Plus size={24} />
+                      </div>
+                    )}
                     <p className="text-xs font-bold text-zinc-400">
                       {form.gambar
                         ? form.gambar.name
+                        : previewUrl
+                        ? "Klik untuk ganti foto"
                         : "Klik untuk upload foto menu"}
                     </p>
                   </div>

@@ -16,7 +16,8 @@ class Menu extends Model
         'gambar',
         'is_featured',
         'is_fast_moving',
-        'is_active'
+        'is_active',
+        'hpp_default'
     ];
 
     public function stokPorsi()

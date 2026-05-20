@@ -72,11 +72,15 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/qris-settings/{id}', [QrisSettingController::class, 'destroy']);
 
         // User Management
+        Route::post('/users', [UserController::class, 'store']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
 
         // Pengeluaran (create)
         Route::post('/pengeluaran', [PengeluaranController::class, 'store']);
+
+        // Session monitoring (admin)
+        Route::get('/session/all-active', [SessionController::class, 'getAllActive']);
     });
 
     /*

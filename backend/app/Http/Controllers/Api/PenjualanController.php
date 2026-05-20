@@ -226,44 +226,59 @@ class PenjualanController extends Controller
         ]);
     }
 
-    public function getPemasukan()
+    public function getPemasukan(Request $request)
     {
-        $data = Pemasukan::with(['penjualan.detail.menu', 'penjualan.user' => function ($q) {
+        $user = Auth::user();
+
+        $query = Pemasukan::with(['penjualan.detail.menu', 'penjualan.user' => function ($q) {
             $q->withTrashed();
-        }])
-            ->latest()
-            ->get()
-            ->map(function ($p) {
+        }]);
 
-                $penjualan = $p->penjualan;
+        // Role kasir (role 2): filter hanya transaksi sesi aktif hari ini
+        if ($user && $user->role === 2) {
+            $activeSession = \App\Models\PosSession::where('user_id', $user->id)
+                ->whereNull('ended_at')
+                ->latest()
+                ->first();
 
-                $kasirName = $p->kasir;
-                if ($kasirName === 'Unknown' || $kasirName === null) {
-                    $kasirName = $penjualan && $penjualan->user ? $penjualan->user->name : 'Unknown';
-                }
+            if ($activeSession) {
+                $query->whereHas('penjualan', function ($q) use ($activeSession) {
+                    $q->where('session_id', $activeSession->id);
+                });
+            } else {
+                // Tidak ada sesi aktif → kembalikan array kosong
+                return response()->json([]);
+            }
+        }
+        // Role admin (role 1): tampilkan semua transaksi
 
-                return [
-                    'no' => '#' . $p->penjualan_id,
-                    'nama' => $penjualan->customer_name ?? 'Guest',
-                    'waktu' => $p->waktu,
-                    'kasir' => $kasirName,
-                    'metode' => $p->metode,
-                    'jumlah' => $p->total,
-                    'kondisi' => $penjualan->order_type === 'Dine In'
-                        ? 'Makan di Tempat'
-                        : 'Bungkus',
+        $data = $query->latest()->get()->map(function ($p) {
+            $penjualan = $p->penjualan;
 
-                    'details' => $penjualan->detail->map(function ($d) {
-                        return [
-                            'nama' => $d->menu->nama_menu ?? '-',
-                            'qty' => $d->qty,
-                            'note' => $d->note ?? '',
-                            'harga' => $d->harga,
-                            'subtotal' => $d->subtotal,
-                        ];
-                    }),
-                ];
-            });
+            $kasirName = $p->kasir;
+            if ($kasirName === 'Unknown' || $kasirName === null) {
+                $kasirName = $penjualan && $penjualan->user ? $penjualan->user->name : 'Unknown';
+            }
+
+            return [
+                'no'      => '#' . $p->penjualan_id,
+                'nama'    => $penjualan->customer_name ?? 'Guest',
+                'waktu'   => $p->waktu,
+                'kasir'   => $kasirName,
+                'metode'  => $p->metode,
+                'jumlah'  => $p->total,
+                'kondisi' => $penjualan->order_type === 'Dine In' ? 'Makan di Tempat' : 'Bungkus',
+                'details' => $penjualan->detail->map(function ($d) {
+                    return [
+                        'nama'     => $d->menu->nama_menu ?? '-',
+                        'qty'      => $d->qty,
+                        'note'     => $d->note ?? '',
+                        'harga'    => $d->harga,
+                        'subtotal' => $d->subtotal,
+                    ];
+                }),
+            ];
+        });
 
         return response()->json($data);
     }

@@ -22,6 +22,35 @@ class SessionController extends Controller
             'data' => $session
         ]);
     }
+    public function getAllActive()
+    {
+        $sessions = PosSession::with(['user' => function ($q) {
+                $q->withTrashed()->select('id', 'name', 'username', 'role');
+            }])
+            ->whereNull('ended_at')
+            ->latest('started_at')
+            ->get()
+            ->map(function ($s) {
+                $totalTransaksi = $s->penjualan()->where('status', 'done')->count();
+                $totalPemasukan = $s->penjualan()->where('status', 'done')->sum('total');
+                return [
+                    'id'              => $s->id,
+                    'user_id'         => $s->user_id,
+                    'user_name'       => $s->user ? $s->user->name : 'Unknown',
+                    'user_role'       => $s->user ? $s->user->role : null,
+                    'started_at'      => $s->started_at,
+                    'opening_cash'    => $s->opening_cash,
+                    'total_transaksi' => $totalTransaksi,
+                    'total_pemasukan' => $totalPemasukan,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data'    => $sessions,
+        ]);
+    }
+
     public function startSession(Request $request)
     {
         // 🔥 HANDLE USER

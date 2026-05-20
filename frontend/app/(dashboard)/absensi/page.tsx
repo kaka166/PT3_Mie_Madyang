@@ -117,6 +117,23 @@ export default function AbsensiPage() {
   };
 
   const handleCheckOut = async () => {
+    // Cek sesi kasir aktif terlebih dahulu
+    try {
+      const { getActiveSession } = await import("@/services/sessionService");
+      const sessionRes = await getActiveSession();
+      if (sessionRes?.data?.id) {
+        await Swal.fire({
+          title: "Sesi Kasir Masih Aktif!",
+          text: "Tutup sesi kasir terlebih dahulu sebelum melakukan absen keluar.",
+          icon: "error",
+          confirmButtonColor: "#F53E1B",
+        });
+        return;
+      }
+    } catch (e) {
+      console.error("Gagal cek sesi:", e);
+    }
+
     const confirm = await Swal.fire({
       title: "Absen Keluar?",
       text: "Apakah Anda yakin ingin mengakhiri jam kerja sekarang?",

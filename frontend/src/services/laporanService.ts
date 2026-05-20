@@ -102,3 +102,28 @@ export const deleteUser = async (id: number) => {
   });
   return res.json();
 };
+
+export const getAttendanceHistory = async (params?: { start_date?: string; end_date?: string }) => {
+  const query = new URLSearchParams();
+  if (params?.start_date) query.set("start_date", params.start_date);
+  if (params?.end_date) query.set("end_date", params.end_date);
+  const qs = query.toString();
+  const res = await fetch(`${API_BASE_URL}/attendance/history${qs ? "?" + qs : ""}`, { headers: getHeaders() });
+  return res.json();
+};
+
+export const createUser = async (data: {
+  username: string;
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  role: number;
+}) => {
+  const res = await fetch(`${API_BASE_URL}/users`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};

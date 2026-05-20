@@ -141,14 +141,15 @@ class LaporanController extends Controller
             $user = $s->user;
 
             return [
-                'id' => '#' . $s->id,
-                'user_id' => $s->user_id,
-                'nama' => $user ? $user->name : 'Unknown',
-                'role' => $user ? $user->role : null,
-                'mulai' => $s->started_at,
-                'selesai' => $s->ended_at,
-                'durasi' => $durasi,
-                'total_pemasukan' => $s->total_pemasukan,
+                'id'                => '#' . $s->id,
+                'user_id'           => $s->user_id,
+                'nama'              => $user ? $user->name : 'Unknown',
+                'role'              => $user ? $user->role : null,
+                'mulai'             => $s->started_at,
+                'selesai'           => $s->ended_at,
+                'durasi'            => $durasi,
+                'opening_cash'      => $s->opening_cash ?? 0,
+                'total_pemasukan'   => $s->total_pemasukan,
                 'total_pengeluaran' => $s->total_pengeluaran,
             ];
         });

@@ -10,6 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  CheckCircle2,
+  Flame,
 } from "lucide-react";
 import { formatTanggal } from "@/utils/formatTanggal";
 import { formatRupiah } from "@/utils/formatRupiah";
@@ -271,13 +273,40 @@ export default function KitchenDashboardPage() {
                       {item.status}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-gray-500 flex justify-center items-center h-full">
-                    {/* BUTTON AKSI DIGANTI MENJADI TITIK TIGA */}
-                    <button
-                      onClick={() => handleOpenModal(item)}
-                      className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-500 hover:text-gray-800">
-                      <MoreHorizontal size={20} />
-                    </button>
+                  <td className="py-4 px-4 text-gray-500">
+                    <div className="flex items-center justify-center gap-2">
+                      {item.status === "Antri" && (
+                        <button
+                          onClick={async () => {
+                            const ok = await updateOrderStatus(Number(item.id.replace("#", "")), "cooking");
+                            if (ok) {
+                              addNotification(`#${item.id.replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
+                              fetchOrders();
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
+                          🍳 Proses
+                        </button>
+                      )}
+                      {item.status === "Dimasak" && (
+                        <button
+                          onClick={async () => {
+                            const ok = await updateOrderStatus(Number(item.id.replace("#", "")), "done");
+                            if (ok) {
+                              addNotification(`#${item.id.replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
+                              fetchOrders();
+                            }
+                          }}
+                          className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
+                          ✅ Selesai
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleOpenModal(item)}
+                        className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700">
+                        <MoreHorizontal size={18} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

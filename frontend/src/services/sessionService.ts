@@ -56,3 +56,12 @@ export const getActiveSession = async () => {
 
   return await res.json();
 };
+
+export const getAllActiveSessions = async () => {
+  const res = await fetch(`${API_BASE_URL}/session/all-active`, {
+    headers: getHeaders(),
+  });
+
+  if (!res.ok) return null;
+  return await res.json();
+};

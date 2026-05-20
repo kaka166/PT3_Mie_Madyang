@@ -97,6 +97,18 @@ class AttendanceController extends Controller
             ], 400);
         }
 
+        // Cek apakah ada sesi kasir yang masih aktif
+        $hasActiveSession = \App\Models\PosSession::where('user_id', $userId)
+            ->whereNull('ended_at')
+            ->exists();
+
+        if ($hasActiveSession) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tutup sesi kasir terlebih dahulu sebelum absen keluar!'
+            ], 400);
+        }
+
         $attendance->update([
             'jam_keluar' => now()->toTimeString()
         ]);
@@ -111,17 +123,26 @@ class AttendanceController extends Controller
     // ==========================================
     // 4. RIWAYAT ABSENSI
     // ==========================================
-    public function history()
+    public function history(Request $request)
     {
         $user = Auth::user();
 
         // Jika Admin (Role 1), ambil semua riwayat absensi beserta nama staf
         if ($user->role === 1) {
-            $data = Attendance::with('user')
-                ->latest('tanggal')
-                ->get();
+            $query = Attendance::with(['user' => function ($q) {
+                $q->withTrashed()->select('id', 'name', 'role');
+            }]);
+
+            if ($request->start_date) {
+                $query->whereDate('tanggal', '>=', $request->start_date);
+            }
+            if ($request->end_date) {
+                $query->whereDate('tanggal', '<=', $request->end_date);
+            }
+
+            $data = $query->latest('tanggal')->get();
         } else {
-            // Jika staf biasa (Role 2 / 3), ambil riwayat absensinya sendiri
+            // Staf biasa: riwayat sendiri
             $data = Attendance::where('user_id', $user->id)
                 ->latest('tanggal')
                 ->get();
@@ -129,7 +150,7 @@ class AttendanceController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $data
+            'data'    => $data
         ]);
     }
 }
