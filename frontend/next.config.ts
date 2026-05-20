@@ -16,10 +16,15 @@ const nextConfig = {
         port: "8000",
         pathname: "/storage/**",
       },
+      {
+        protocol: "https",
+        hostname: "api.farelzy.my.id",
+        pathname: "/storage/**",
+      },
     ],
   },
 
   allowedDevOrigins: ["192.168.56.1"],
 };
 
-export default nextConfig;
+export default nextConfig;
