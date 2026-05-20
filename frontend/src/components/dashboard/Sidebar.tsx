@@ -89,6 +89,7 @@ export default function Sidebar({
       allowedRoles: [1],
       subItems: [
         { label: "QRIS", href: "/settings/qris" },
+        { label: "Landing Page", href: "/settings/landing-page" },
       ],
     },
   ];
@@ -188,10 +189,10 @@ export default function Sidebar({
       <aside
         className={`
           fixed left-0 top-16 h-[calc(100%-4rem)] w-64 
-          bg-neutral-100 shadow-sm flex flex-col 
+          bg-white shadow-[2px_0_8px_rgba(0,0,0,0.02)] flex flex-col 
           z-40 transform transition-transform duration-300 ease-in-out 
           ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-          lg:translate-x-0 border-r border-neutral-200
+          lg:translate-x-0 border-r border-neutral-100
         `}>
         {/* MOBILE HEADER */}
         <div className="lg:hidden flex items-center justify-between px-6 py-5 border-b border-neutral-200">
@@ -225,9 +226,9 @@ export default function Sidebar({
                 <LinkNext
                   href={item.href}
                   onClick={() => !hasSubItems && closeSidebar()}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${isParentActive
-                      ? "bg-white text-primary shadow-sm border-l-4 border-primary font-bold"
-                      : "text-neutral-500 hover:bg-neutral-200"
+                  className={`flex items-center gap-3 px-4 py-3.5 mx-3 rounded-2xl transition-all duration-200 ${isParentActive
+                      ? "bg-primary/5 text-primary shadow-sm font-black"
+                      : "text-neutral-500 hover:bg-neutral-50 font-bold"
                     }`}>
                   <item.icon size={20} />
                   <span className="text-sm">{item.label}</span>
@@ -242,8 +243,8 @@ export default function Sidebar({
                         href={sub.href}
                         onClick={closeSidebar}
                         className={`px-4 py-2 text-sm rounded-lg transition-all ${pathname === sub.href
-                            ? "text-neutral-900 font-bold bg-neutral-200 shadow-inner"
-                            : "text-neutral-600 hover:bg-neutral-200"
+                            ? "text-[#b93b3b] font-bold bg-red-50"
+                            : "text-neutral-500 hover:bg-neutral-100"
                           }`}>
                         {sub.label}
                       </LinkNext>

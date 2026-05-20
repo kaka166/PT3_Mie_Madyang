@@ -660,8 +660,9 @@ export default function InventoryPage() {
               </div>
 
               <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-3">
-                  Foto Produk
+                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-between mb-3">
+                  <span>Foto Produk</span>
+                  <span className="text-[9px] bg-red-50 text-[#b93b3b] px-2 py-1 rounded">Rekomendasi: 400x400px (1:1)</span>
                 </label>
                 <div className="border-2 border-dashed border-zinc-200 rounded-3xl p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
                   <input

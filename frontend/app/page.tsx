@@ -3,8 +3,35 @@
 import Link from "next/link";
 import Navbar from "../src/components/navbar";
 import Image from "next/image";
+import { useEffect, useState } from "react";
+import { API_BASE_URL } from "@/config";
 
 export default function LandingPage() {
+  const [settings, setSettings] = useState({
+    hero_title: "Cita Rasa Legendaris di Setiap Suapan.",
+    hero_subtitle: "Nikmati kelezatan mie ayam dengan resep warisan yang dikurasi secara profesional untuk memanjakan lidah Anda. Kualitas bahan premium, rasa tak terlupakan.",
+    hero_cta: "Pesan Sekarang",
+    hero_image: "",
+    mascot_image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCFbe8lwjOheNtzzhrq-94x0FnX2aDlhGrS1nU3VnBvrcq0lUFPZStUoftz5N8W5lmJkDhNzu_eeeUv__yOb69bFh1SC3-3PafvXSnPCQxMaEebV_FtdLcCdSSXDreXa7VmUryo6UBgoRzju25gXe_ixUZiwB_7-AZ__aA61qb6Cut-jFHUAv6gjDcA9CGcC25Sh_LsnobkPcUshJq846E7B8-ZyWZNv5Gi1QRkdxeXldaRofD603bbWogbfOo-aqMtHJWixBguQyo",
+  });
+
+  useEffect(() => {
+    fetch(`${API_BASE_URL}/landing-page`)
+      .then(res => res.json())
+      .then(res => {
+        if (res.success && res.data) {
+          setSettings(prev => ({
+            ...prev,
+            hero_title: res.data.hero_title || prev.hero_title,
+            hero_subtitle: res.data.hero_subtitle || prev.hero_subtitle,
+            hero_cta: res.data.hero_cta || prev.hero_cta,
+            hero_image: res.data.hero_image_url || prev.hero_image,
+            mascot_image: res.data.mascot_image_url || prev.mascot_image,
+          }));
+        }
+      })
+      .catch(err => console.error("Error fetching landing page settings:", err));
+  }, []);
   return (
     <div className="bg-background text-on-background min-h-screen">
       {/* Memanggil Navbar Komponen */}
@@ -12,27 +39,24 @@ export default function LandingPage() {
 
       <main className="pt-20">
         {/* Hero Section */}
-        <section className="relative overflow-hidden min-h-[870px] flex items-center bg-background">
+        <section 
+          className="relative overflow-hidden min-h-[870px] flex items-center bg-background bg-cover bg-center"
+          style={settings.hero_image ? { backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 100%), url(${settings.hero_image})` } : {}}
+        >
           <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">
             <div className="space-y-8">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-[#ffdad8] text-[#842327] font-medium text-xs tracking-widest uppercase">
                 Authentic Flavors since 1998
               </div>
-              <h1 className="text-6xl md:text-7xl font-bold text-[#1a1c1c] leading-[1.1] tracking-tight">
-                Cita Rasa{" "}
-                <span className="text-primary italic font-black">
-                  Legendaris
-                </span>{" "}
-                di Setiap Suapan.
+              <h1 className="text-6xl md:text-7xl font-bold text-[#1a1c1c] leading-[1.1] tracking-tight whitespace-pre-wrap">
+                {settings.hero_title}
               </h1>
               <p className="text-lg text-[#564241] max-w-lg leading-relaxed">
-                Nikmati kelezatan mie ayam dengan resep warisan yang dikurasi
-                secara profesional untuk memanjakan lidah Anda. Kualitas bahan
-                premium, rasa tak terlupakan.
+                {settings.hero_subtitle}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button className="px-8 py-4 bg-primary text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2 bg-gradient-to-b from-[#a0383b] to-[#c05051]">
-                  Pesan Sekarang
+                  {settings.hero_cta}
                   <span className="material-symbols-outlined">
                     shopping_basket
                   </span>
@@ -62,11 +86,11 @@ export default function LandingPage() {
             </div>
             <div className="relative">
               <div className="absolute -top-20 -right-20 w-96 h-96 bg-primary/10 rounded-full blur-3xl opacity-50"></div>
-              <div className="relative z-20 transform scale-110">
+              <div className="relative z-20 transform scale-110 flex justify-center">
                 <img
                   alt="Mascot Ma-Dyang"
-                  className="w-full h-auto drop-shadow-2xl"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuCFbe8lwjOheNtzzhrq-94x0FnX2aDlhGrS1nU3VnBvrcq0lUFPZStUoftz5N8W5lmJkDhNzu_eeeUv__yOb69bFh1SC3-3PafvXSnPCQxMaEebV_FtdLcCdSSXDreXa7VmUryo6UBgoRzju25gXe_ixUZiwB_7-AZ__aA61qb6Cut-jFHUAv6gjDcA9CGcC25Sh_LsnobkPcUshJq846E7B8-ZyWZNv5Gi1QRkdxeXldaRofD603bbWogbfOo-aqMtHJWixBguQyo"
+                  className="w-full max-w-[500px] h-auto drop-shadow-2xl object-contain"
+                  src={settings.mascot_image}
                 />
               </div>
               {/* <div className="absolute bottom-10 -left-10 bg-white/80 p-6 rounded-2xl shadow-2xl backdrop-blur-md max-w-[200px] z-30">

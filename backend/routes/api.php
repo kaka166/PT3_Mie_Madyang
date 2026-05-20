@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\LaporanController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\QrisSettingController;
 use App\Http\Controllers\Api\EvidenceController;
+use App\Http\Controllers\Api\LandingPageSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,7 @@ use App\Http\Controllers\Api\EvidenceController;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/login-error', [AuthController::class, 'unauthenticated'])->name('login');
+Route::get('/landing-page', [LandingPageSettingController::class, 'index']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -81,6 +83,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Session monitoring (admin)
         Route::get('/session/all-active', [SessionController::class, 'getAllActive']);
+
+        // Landing Page Settings (Admin)
+        Route::post('/landing-page', [LandingPageSettingController::class, 'update']);
     });
 
     /*

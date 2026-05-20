@@ -139,6 +139,17 @@ class SessionController extends Controller
                 ], 400);
             }
 
+            $pendingOrders = $session->penjualan()
+                ->whereIn('status', ['pending', 'cooking'])
+                ->exists();
+
+            if ($pendingOrders) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Masih ada pesanan yang belum diselesaikan di Dapur. Sesi tidak dapat ditutup!'
+                ], 400);
+            }
+
             $totalPenjualan = $session->penjualan()->sum('total');
             $totalPengeluaran = $session->pengeluaran()->sum('jumlah');
 
