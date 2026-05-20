@@ -67,7 +67,10 @@ export default function Sidebar({
       label: "Kitchen",
       href: "/kitchen",
       allowedRoles: [1, 2, 3],
-      subItems: [{ label: "Stok Bahan", href: "/kitchen/stock" }],
+      subItems: [
+        { label: "Pesanan Masuk", href: "/kitchen" },
+        { label: "Stok Bahan", href: "/kitchen/stock" },
+      ],
     },
     {
       icon: Clock,
@@ -81,6 +84,7 @@ export default function Sidebar({
       href: "/reports",
       allowedRoles: [1],
       subItems: [
+        { label: "Ringkasan", href: "/reports" },
         { label: "Penjualan", href: "/reports/penjualan" },
         { label: "Pengeluaran", href: "/reports/pengeluaran" },
         { label: "Laba Rugi", href: "/reports/laba-rugi" },
@@ -264,21 +268,26 @@ export default function Sidebar({
                 {/* SUBMENU */}
                 {hasSubItems && isExpanded && (
                   <div className="mt-0.5 ml-4 pl-4 border-l border-white/10 space-y-0.5 pb-1">
-                    {item.subItems!.map((sub) => (
-                      <LinkNext
-                        key={sub.label}
-                        href={sub.href}
-                        onClick={closeSidebar}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
-                          pathname === sub.href
-                            ? "text-white font-bold bg-white/10"
-                            : "text-white/40 hover:text-white/70 hover:bg-white/5 font-medium"
-                        }`}
-                      >
-                        <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${pathname === sub.href ? 'bg-[#b93b3b]' : 'bg-white/20'}`} />
-                        {sub.label}
-                      </LinkNext>
-                    ))}
+                    {item.subItems!.map((sub) => {
+                        const isSubActive = sub.href === item.href
+                          ? pathname === sub.href
+                          : pathname.startsWith(sub.href);
+                        return (
+                          <LinkNext
+                            key={sub.label}
+                            href={sub.href}
+                            onClick={closeSidebar}
+                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                              isSubActive
+                                ? "text-white font-bold bg-white/10"
+                                : "text-white/40 hover:text-white/70 hover:bg-white/5 font-medium"
+                            }`}
+                          >
+                            <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${isSubActive ? 'bg-[#b93b3b]' : 'bg-white/20'}`} />
+                            {sub.label}
+                          </LinkNext>
+                        );
+                      })}
                   </div>
                 )}
               </div>
