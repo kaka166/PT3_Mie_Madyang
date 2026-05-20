@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, X, QrCode, Trash2 } from "lucide-react";
 import { getQrisSettings, createQrisSetting, updateQrisSetting, deleteQrisSetting, QrisSetting } from "@/services/qrisService";
 import { addNotification } from "@/services/notificationService";
+import { STORAGE_BASE_URL } from "@/config";
 
 export default function QrisSettingsPage() {
   const [settings, setSettings] = useState<QrisSetting[]>([]);
@@ -51,7 +52,7 @@ export default function QrisSettingsPage() {
       is_active: item.is_active,
     });
     setGambar(null);
-    setPreview(item.gambar_qris ? `http://127.0.0.1:8000/storage/qris/${item.gambar_qris}` : null);
+    setPreview(item.gambar_qris ? `${STORAGE_BASE_URL}/qris/${item.gambar_qris}` : null);
     setShowModal(true);
   };
 
@@ -128,7 +129,7 @@ export default function QrisSettingsPage() {
             <div key={item.id} className="bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden">
               <div className="p-6 flex flex-col items-center">
                 {item.gambar_qris ? (
-                  <img src={`http://127.0.0.1:8000/storage/qris/${item.gambar_qris}`} alt="QRIS" className="w-40 h-40 object-contain rounded-2xl mb-4 bg-zinc-50" />
+                  <img src={`${STORAGE_BASE_URL}/qris/${item.gambar_qris}`} alt="QRIS" className="w-40 h-40 object-contain rounded-2xl mb-4 bg-zinc-50" />
                 ) : (
                   <div className="w-40 h-40 rounded-2xl mb-4 bg-zinc-100 flex items-center justify-center">
                     <QrCode size={48} className="text-zinc-300" />

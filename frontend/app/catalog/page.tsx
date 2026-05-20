@@ -5,6 +5,7 @@ import Navbar from "../../src/components/navbar";
 import Image from "next/image";
 // Import service dan interface
 import { menuService, Menu } from "@/services/menuService";
+import { STORAGE_BASE_URL } from "@/config";
 
 export default function MenuPage() {
   const [mie, setMie] = useState<Menu[]>([]);
@@ -12,7 +13,7 @@ export default function MenuPage() {
   const [minuman, setMinuman] = useState<Menu[]>([]);
 
   // Base URL untuk gambar agar rapi
-  const IMAGE_BASE_URL = "http://localhost:8000/storage/menu/";
+  const IMAGE_BASE_URL = `${STORAGE_BASE_URL}/menu/`;
 
   useEffect(() => {
     const loadMenu = async () => {

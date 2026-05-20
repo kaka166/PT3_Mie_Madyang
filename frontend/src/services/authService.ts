@@ -35,7 +35,9 @@ export interface ErrorResponse {
   errors?: Record<string, string[]>;
 }
 
-const API_URL = "http://127.0.0.1:8000/api";
+import { API_BASE_URL } from "@/config";
+
+const API_URL = API_BASE_URL;
 
 export const authService = {
   async login(identifier: string, password: string): Promise<LoginResponse> {

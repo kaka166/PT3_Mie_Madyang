@@ -21,6 +21,7 @@ import { getPengeluaran, createPengeluaran } from "@/services/pengeluaranService
 import { getLaporanUsers, getLaporanShifts, updateUser, deleteUser } from "@/services/laporanService";
 import { addNotification } from "@/services/notificationService";
 import Swal from "sweetalert2";
+import { API_BASE_URL } from "@/config";
 
 function CalendarPicker({
   value,
@@ -234,7 +235,7 @@ export default function AdminDashboardPage() {
       if (evidenceFile) fd.append("evidence", evidenceFile);
 
       const token = localStorage.getItem("token");
-      const res = await fetch("http://127.0.0.1:8000/api/pengeluaran", {
+      const res = await fetch(`${API_BASE_URL}/pengeluaran`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: fd,

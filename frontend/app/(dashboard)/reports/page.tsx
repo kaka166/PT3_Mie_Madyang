@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { getLabaRugi } from "@/services/laporanService";
 import { getStockList } from "@/services/stockService";
 import { formatRupiah } from "@/utils/formatRupiah";
+import { API_BASE_URL } from "@/config";
 
 interface ReportsRingkasan {
   total_penjualan: number;
@@ -145,7 +146,7 @@ export default function ReportsAnalyticsPage() {
     setDownloading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://127.0.0.1:8000/api/laporan/download-evidence?type=all", {
+      const res = await fetch(`${API_BASE_URL}/laporan/download-evidence?type=all`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) { alert("Tidak ada evidence untuk periode ini"); return; }

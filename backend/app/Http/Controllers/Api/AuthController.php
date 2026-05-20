@@ -126,4 +126,13 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function unauthenticated()
+    {
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Unauthenticated.'
+        ], 401);
+    }
 }
+

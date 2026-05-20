@@ -12,6 +12,7 @@ import {
 import { getQrisSettings, QrisSetting } from "@/services/qrisService";
 import { X, QrCode } from "lucide-react";
 import { addNotification } from "@/services/notificationService";
+import { STORAGE_BASE_URL } from "@/config";
 
 /* ================= TYPES ================= */
 type CartItem = {
@@ -805,7 +806,7 @@ export default function POSPage() {
                     {qrisSettings.length > 0 ? (
                       <>
                         <img
-                          src={`http://127.0.0.1:8000/storage/qris/${qrisSettings[0].gambar_qris}`}
+                          src={`${STORAGE_BASE_URL}/qris/${qrisSettings[0].gambar_qris}`}
                           className="w-40 h-40 object-contain rounded-2xl mb-3"
                           alt="QRIS"
                         />
@@ -1069,7 +1070,7 @@ export default function POSPage() {
                     <img
                       src={
                         item.gambar
-                          ? `http://127.0.0.1:8000/storage/menu/${item.gambar}`
+                          ? `${STORAGE_BASE_URL}/menu/${item.gambar}`
                           : `https://placehold.co/400x400?text=${item.name}`
                       }
                       className={`w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 ${item.stock === 0 ? "opacity-40 grayscale" : ""}`}

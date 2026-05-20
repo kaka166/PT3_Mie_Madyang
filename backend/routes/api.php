@@ -26,12 +26,7 @@ use App\Http\Controllers\Api\EvidenceController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/login-error', function () {
-    return response()->json([
-        'status'  => 'error',
-        'message' => 'Unauthenticated.'
-    ], 401);
-})->name('login');
+Route::get('/login-error', [AuthController::class, 'unauthenticated'])->name('login');
 
 
 Route::middleware('auth:sanctum')->group(function () {
