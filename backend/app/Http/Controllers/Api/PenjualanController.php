@@ -33,20 +33,22 @@ class PenjualanController extends Controller
             ->latest()
             ->get()
             ->map(function ($p) {
+                $dt = \Carbon\Carbon::parse($p->tanggal ?? now())->setTimezone('Asia/Jakarta');
+                $noTrx = $dt->format('Ymd') . str_pad($p->id, 3, '0', STR_PAD_LEFT);
                 return [
-                    'id' => '#' . $p->id,
-                    'waktu' => $p->tanggal,
+                    'id'       => $noTrx,
+                    'waktu'    => $p->tanggal,
                     'customer' => $p->customer_name ?? 'Guest',
-                    'items' => $p->detail->sum('qty'),
-                    'harga' => $p->total,
-                    'kondisi' => $p->order_type === 'Dine In'
+                    'items'    => $p->detail->sum('qty'),
+                    'harga'    => $p->total,
+                    'kondisi'  => $p->order_type === 'Dine In'
                         ? 'Makan Disini'
                         : 'Bungkus',
-                    'status' => match ($p->status) {
+                    'status'   => match ($p->status) {
                         'pending' => 'Antri',
                         'cooking' => 'Dimasak',
-                        'done' => 'Ready',
-                        default => 'Antri'
+                        'done'    => 'Ready',
+                        default   => 'Antri'
                     },
 
                     'details' => $p->detail->map(function ($d) {
@@ -267,7 +269,12 @@ class PenjualanController extends Controller
             }
 
             return [
-                'no'      => '#' . $p->penjualan_id,
+                'no'      => (function() use ($p) {
+                    // Format: YYYYMMDDNNN  e.g. 2026052006
+                    $waktu = $p->waktu ?? now();
+                    $dt = \Carbon\Carbon::parse($waktu)->setTimezone('Asia/Jakarta');
+                    return $dt->format('Ymd') . str_pad($p->penjualan_id, 3, '0', STR_PAD_LEFT);
+                })(),
                 'nama'    => $penjualan->customer_name ?? 'Guest',
                 'waktu'   => $p->waktu,
                 'kasir'   => $kasirName,
