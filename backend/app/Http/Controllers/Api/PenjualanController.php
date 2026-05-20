@@ -23,7 +23,13 @@ class PenjualanController extends Controller
     public function index()
     {
         $data = Penjualan::with('detail')
-            ->where('status', '!=', 'done')
+            ->where(function ($q) {
+                $q->where('status', '!=', 'done')
+                  ->orWhere(function ($q2) {
+                      $q2->where('status', 'done')
+                         ->whereDate('tanggal', now()->toDateString());
+                  });
+            })
             ->latest()
             ->get()
             ->map(function ($p) {

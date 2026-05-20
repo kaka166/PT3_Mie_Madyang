@@ -11,26 +11,25 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [valid] = useState(() => {
-    if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
-      const user = localStorage.getItem("user");
-      return !!(token && user);
-    }
-    return false;
-  });
+  const [isMounted, setIsMounted] = useState(false);
+  const [valid, setValid] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
-    if (!valid) {
+    setIsMounted(true);
+    const token = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    if (token && user) {
+      setValid(true);
+    } else {
       document.cookie = "token=; path=/; max-age=0; SameSite=Lax";
       router.push("/login");
     }
-  }, [valid, router]);
+  }, [router]);
 
-  if (!valid) {
+  if (!isMounted || !valid) {
     return (
-      <div className="flex items-center justify-center h-screen">
+      <div className="flex items-center justify-center h-screen bg-[#f9f9f9]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#c93535]" />
       </div>
     );
