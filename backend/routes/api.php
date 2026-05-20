@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\SessionController;
 use App\Http\Controllers\Api\ProduksiController;
 use App\Http\Controllers\Api\PengeluaranController;
 use App\Http\Controllers\Api\HppCalculatorController;
+use App\Http\Controllers\Api\AttendanceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,12 @@ use App\Http\Controllers\Api\HppCalculatorController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/login-error', function () {
+    return response()->json([
+        'status'  => 'error',
+        'message' => 'Unauthenticated.'
+    ], 401);
+})->name('login');
 
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -93,5 +100,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/session/start', [SessionController::class, 'startSession']);
         Route::post('/session/end', [SessionController::class, 'endSession']);
         Route::get('/session/active', [SessionController::class, 'active']);
+
+        // Attendance
+        Route::get('/attendance/status', [AttendanceController::class, 'status']);
+        Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn']);
+        Route::post('/attendance/check-out', [AttendanceController::class, 'checkOut']);
+        Route::get('/attendance/history', [AttendanceController::class, 'history']);
     });
 });

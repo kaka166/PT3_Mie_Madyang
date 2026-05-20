@@ -13,6 +13,7 @@ import {
   HelpCircle,
   LogOut,
   X,
+  Clock,
 } from "lucide-react";
 import { authService } from "@/services/authService";
 import { getActiveSession } from "@/services/sessionService";
@@ -59,6 +60,12 @@ export default function Sidebar({
       href: "/kitchen",
       allowedRoles: [1, 2, 3],
       subItems: [{ label: "Stock", href: "/kitchen/stock" }],
+    },
+    {
+      icon: Clock,
+      label: "Absensi",
+      href: "/absensi",
+      allowedRoles: [1, 2, 3],
     },
     {
       icon: BarChart3,

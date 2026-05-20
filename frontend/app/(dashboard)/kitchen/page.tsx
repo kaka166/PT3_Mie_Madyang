@@ -31,6 +31,7 @@ export default function KitchenDashboardPage() {
   const [searchId, setSearchId] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [activeTab, setActiveTab] = useState<"aktif" | "riwayat">("aktif");
 
   // --- STATE UNTUK MODAL ---
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
@@ -63,7 +64,13 @@ export default function KitchenDashboardPage() {
       const matchSearch = searchId
         ? item.id.replace("#", "").includes(searchId)
         : true;
-      return matchSearch;
+
+      const matchTab =
+        activeTab === "aktif"
+          ? item.status === "Antri" || item.status === "Dimasak"
+          : item.status === "Ready";
+
+      return matchSearch && matchTab;
     });
 
   const totalItems = filteredOrders.length;
@@ -127,11 +134,43 @@ export default function KitchenDashboardPage() {
       {/* Main Card */}
       <div className="bg-white rounded-xl shadow-sm">
         {/* Toolbar Card */}
-        <div className="p-4 flex justify-between items-center border-b relative z-20">
-          <h2 className="text-xl font-bold text-gray-900">Pesanan</h2>
+        <div className="p-4 flex flex-col sm:flex-row justify-between items-center gap-4 border-b relative z-20">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <h2 className="text-xl font-bold text-gray-900">Pesanan</h2>
+            
+            {/* Tabs */}
+            <div className="flex bg-gray-100 p-1 rounded-xl">
+              <button
+                onClick={() => {
+                  setActiveTab("aktif");
+                  setCurrentPage(1);
+                }}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  activeTab === "aktif"
+                    ? "bg-white text-[#F53E1B] shadow-sm"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                Pesanan Aktif
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("riwayat");
+                  setCurrentPage(1);
+                }}
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  activeTab === "riwayat"
+                    ? "bg-white text-[#F53E1B] shadow-sm"
+                    : "text-gray-500 hover:text-gray-800"
+                }`}
+              >
+                Riwayat Selesai
+              </button>
+            </div>
+          </div>
 
-          <div className="flex gap-3">
-            <div className="relative">
+          <div className="flex gap-3 w-full sm:w-auto justify-end">
+            <div className="relative w-full sm:w-auto">
               <Search
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                 size={16}
@@ -141,7 +180,7 @@ export default function KitchenDashboardPage() {
                 placeholder="Cari Pesanan (ID)"
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
-                className="bg-gray-200 text-gray-700 placeholder-gray-500 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-44"
+                className="bg-gray-200 text-gray-700 placeholder-gray-500 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 font-medium w-full sm:w-44"
               />
             </div>
           </div>

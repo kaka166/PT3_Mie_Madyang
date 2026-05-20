@@ -3,7 +3,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { formatRupiah } from "@/utils/formatRupiah";
 import { getMenus, getCategories, MenuItem } from "@/services/cashierService";
 import { getTax, updateTax } from "@/services/taxService";
-import { createOrder } from "@/services/penjualanService";
+import { createOrder, getPemasukan, Pemasukan } from "@/services/penjualanService";
 import {
   startSession,
   endSession,
@@ -40,6 +40,198 @@ export default function POSPage() {
   const [showTaxModal, setShowTaxModal] = useState(false);
 
   const [isNavigating, setIsNavigating] = useState(false);
+
+  // --- TRANSAKSI RIWAYAT & PRINT STRUK ---
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [historyList, setHistoryList] = useState<Pemasukan[]>([]);
+  const [searchHistory, setSearchHistory] = useState("");
+  const [selectedHistoryOrder, setSelectedHistoryOrder] = useState<Pemasukan | null>(null);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const fetchHistory = async () => {
+    setLoadingHistory(true);
+    try {
+      const data = await getPemasukan();
+      setHistoryList(data || []);
+      if (data && data.length > 0) {
+        setSelectedHistoryOrder(data[0]);
+      }
+    } catch (error) {
+      console.error("Gagal fetch history:", error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    if (showHistoryModal) {
+      fetchHistory();
+    }
+  }, [showHistoryModal]);
+
+  const printReceipt = (order: Pemasukan) => {
+    const printWindow = window.open("", "_blank", "width=320,height=600");
+    if (!printWindow) {
+      alert("Popup diblokir oleh browser! Harap izinkan popup untuk mencetak.");
+      return;
+    }
+
+    const itemSubtotal = order.details.reduce((sum, item) => sum + (item.subtotal || (item.qty * item.harga)), 0);
+    const taxVal = order.jumlah - itemSubtotal;
+
+    const receiptHtml = `
+      <html>
+      <head>
+        <title>Cetak Struk - ${order.no}</title>
+        <style>
+          @page {
+            size: 80mm auto;
+            margin: 0;
+          }
+          body {
+            font-family: 'Courier New', Courier, monospace;
+            width: 72mm;
+            margin: 0 auto;
+            padding: 4mm 0;
+            font-size: 11px;
+            color: #000;
+            line-height: 1.3;
+          }
+          .text-center { text-align: center; }
+          .text-right { text-align: right; }
+          .bold { font-weight: bold; }
+          .separator {
+            border-top: 1px dashed #000;
+            margin: 3px 0;
+          }
+          .double-separator {
+            border-top: 1px double #000;
+            margin: 4px 0;
+          }
+          .title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 2px;
+            text-transform: uppercase;
+          }
+          .subtitle {
+            font-size: 10px;
+            margin-bottom: 6px;
+          }
+          .flex {
+            display: flex;
+            justify-content: space-between;
+          }
+          .items-container {
+            margin: 5px 0;
+          }
+          .item-row {
+            margin-bottom: 3px;
+          }
+          .item-note {
+            font-size: 9px;
+            font-style: italic;
+            padding-left: 3px;
+            margin-top: -2px;
+            margin-bottom: 2px;
+          }
+          .footer {
+            margin-top: 8px;
+            font-size: 10px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="text-center">
+          <div class="title">MIE MADYANG</div>
+          <div class="subtitle">Jl. Raya Madyang No. 16, Malang<br>Telp: 0812-3456-7890</div>
+        </div>
+        
+        <div class="separator"></div>
+        
+        <div class="flex">
+          <span>No. Nota:</span>
+          <span class="bold">${order.no}</span>
+        </div>
+        <div class="flex">
+          <span>Waktu   :</span>
+          <span>${order.waktu}</span>
+        </div>
+        <div class="flex">
+          <span>Kasir   :</span>
+          <span>${order.kasir}</span>
+        </div>
+        <div class="flex">
+          <span>Tipe    :</span>
+          <span>${order.kondisi}</span>
+        </div>
+        <div class="flex">
+          <span>Pelanggan:</span>
+          <span>${order.nama}</span>
+        </div>
+        
+        <div class="separator"></div>
+        
+        <div class="bold">ITEMS</div>
+        <div class="items-container">
+          ${order.details.map(item => `
+            <div class="item-row">
+              <div>${item.nama}</div>
+              <div class="flex">
+                <span>  ${item.qty} x ${new Intl.NumberFormat("id-ID").format(item.harga)}</span>
+                <span>${new Intl.NumberFormat("id-ID").format(item.subtotal || (item.qty * item.harga))}</span>
+              </div>
+              ${item.note ? `<div class="item-note">* Note: ${item.note}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+        
+        <div class="separator"></div>
+        
+        <div class="flex">
+          <span>Subtotal:</span>
+          <span>${new Intl.NumberFormat("id-ID").format(itemSubtotal)}</span>
+        </div>
+        ${taxVal > 0 ? `
+        <div class="flex">
+          <span>Pajak:</span>
+          <span>${new Intl.NumberFormat("id-ID").format(taxVal)}</span>
+        </div>
+        ` : ''}
+        
+        <div class="double-separator"></div>
+        
+        <div class="flex bold" style="font-size: 12px;">
+          <span>TOTAL:</span>
+          <span>Rp ${new Intl.NumberFormat("id-ID").format(order.jumlah)}</span>
+        </div>
+        
+        <div class="flex">
+          <span>Metode Pembayaran:</span>
+          <span class="bold">${order.metode}</span>
+        </div>
+        
+        <div class="double-separator"></div>
+        
+        <div class="text-center footer">
+          <strong>TERIMA KASIH</strong><br>
+          Sudah Madyang di Mie Madyang!<br>
+          Silakan datang kembali.
+        </div>
+        
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          }
+        </script>
+      </body>
+      </html>
+    `;
+
+    printWindow.document.write(receiptHtml);
+    printWindow.document.close();
+  };
 
   type SessionResult = {
     opening_cash: number;
@@ -781,6 +973,14 @@ export default function POSPage() {
                 placeholder="Cari menu..."
               />
             </div>
+            {/* RIWAYAT TRANSAKSI BUTTON */}
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white px-3 py-2 rounded-lg text-xs font-bold transition-all duration-200 active:scale-95 shadow-sm"
+            >
+              Riwayat
+            </button>
+
             {/* SESSION STATUS */}
             <div className="flex gap-2 items-center">
               {sessionActive ? (
@@ -1098,6 +1298,185 @@ export default function POSPage() {
           onClick={() => setIsCartOpenMobile(false)}
           className="lg:hidden fixed inset-0 bg-black/50  z-[140] animate-in fade-in duration-300"
         />
+      )}
+
+      {/* ================= MODAL RIWAYAT TRANSAKSI ================= */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
+          <div className="bg-white rounded-3xl w-full max-w-5xl h-[600px] flex flex-col md:flex-row shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* PANEL KIRI: LIST NOTA / RIWAYAT */}
+            <div className="w-full md:w-[35%] bg-gray-50 border-r border-gray-100 flex flex-col h-full">
+              <div className="p-6 border-b border-gray-200/60">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="text-xl font-black text-gray-800">
+                    Riwayat Transaksi
+                  </h3>
+                  <button 
+                    onClick={() => setShowHistoryModal(false)}
+                    className="md:hidden text-gray-400 hover:text-gray-600 transition"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Cari Customer / ID..."
+                  value={searchHistory}
+                  onChange={(e) => setSearchHistory(e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 outline-none focus:border-[#ff6b6b] transition-all text-xs font-bold text-gray-700"
+                />
+              </div>
+
+              {/* List Container */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-2 no-scrollbar">
+                {loadingHistory ? (
+                  <div className="h-full flex items-center justify-center text-gray-400 font-bold text-xs uppercase tracking-widest animate-pulse">
+                    Memuat...
+                  </div>
+                ) : historyList.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center text-gray-400 p-6">
+                    <span className="text-2xl mb-2">📄</span>
+                    <p className="text-[10px] font-black uppercase tracking-widest">Belum ada transaksi</p>
+                  </div>
+                ) : (
+                  historyList
+                    .filter(
+                      (item) =>
+                        item.nama.toLowerCase().includes(searchHistory.toLowerCase()) ||
+                        item.no.toLowerCase().includes(searchHistory.toLowerCase())
+                    )
+                    .map((item) => (
+                      <button
+                        key={item.no}
+                        onClick={() => setSelectedHistoryOrder(item)}
+                        className={`w-full text-left p-4 rounded-2xl border-2 transition-all flex flex-col gap-1 ${
+                          selectedHistoryOrder?.no === item.no
+                            ? "bg-white border-[#ff6b6b] shadow-lg shadow-red-50/50"
+                            : "bg-white border-transparent hover:border-gray-200"
+                        }`}
+                      >
+                        <div className="flex justify-between items-center w-full">
+                          <span className="font-black text-xs text-gray-800">
+                            {item.no}
+                          </span>
+                          <span className="text-[10px] font-black text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                            {item.kondisi}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center w-full">
+                          <span className="font-bold text-sm text-gray-600 truncate max-w-[120px]">
+                            {item.nama}
+                          </span>
+                          <span className="font-black text-sm text-[#ff6b6b]">
+                            {formatRupiah(item.jumlah)}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-gray-400 font-medium">
+                          {item.waktu}
+                        </span>
+                      </button>
+                    ))
+                )}
+              </div>
+            </div>
+
+            {/* PANEL KANAN: DETAIL NOTA */}
+            <div className="flex-1 bg-white flex flex-col h-full relative">
+              {/* Close Button Desktop */}
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="hidden md:flex absolute top-6 right-6 bg-red-50 hover:bg-red-100 text-red-500 rounded-full w-8 h-8 items-center justify-center font-bold transition-colors"
+              >
+                ×
+              </button>
+
+              {selectedHistoryOrder ? (
+                <div className="flex-1 flex flex-col h-full overflow-hidden p-8">
+                  {/* Header Detail */}
+                  <div className="border-b border-gray-100 pb-5 mb-5 flex-shrink-0">
+                    <div className="flex items-center gap-3 mb-4">
+                      <h2 className="text-2xl font-black text-gray-800">
+                        Detail Transaksi
+                      </h2>
+                      <span className="font-black text-[#ff6b6b] bg-red-50 px-3 py-1 rounded-full text-xs">
+                        {selectedHistoryOrder.no}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-bold text-gray-500">
+                      <div>
+                        <p className="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Pelanggan</p>
+                        <p className="text-gray-800 text-sm mt-0.5">{selectedHistoryOrder.nama}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Waktu</p>
+                        <p className="text-gray-800 mt-0.5">{selectedHistoryOrder.waktu}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Kasir</p>
+                        <p className="text-gray-800 mt-0.5">{selectedHistoryOrder.kasir}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-400 font-semibold uppercase tracking-wider text-[10px]">Metode</p>
+                        <p className="text-gray-800 mt-0.5">{selectedHistoryOrder.metode}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Items List */}
+                  <div className="flex-1 overflow-y-auto space-y-3 pr-2 mb-5 no-scrollbar">
+                    {selectedHistoryOrder.details.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="bg-gray-50/50 border border-gray-100 rounded-2xl p-4 flex justify-between items-center transition hover:bg-gray-50"
+                      >
+                        <div>
+                          <p className="font-bold text-sm text-gray-800">{item.nama}</p>
+                          <p className="text-[10px] text-gray-400 font-bold mt-1">
+                            {item.qty}x @ {formatRupiah(item.harga)}
+                          </p>
+                          {item.note && (
+                            <p className="text-[10px] text-red-500 font-semibold italic mt-0.5">
+                              * Note: &quot;{item.note}&quot;
+                            </p>
+                          )}
+                        </div>
+                        <span className="font-black text-sm text-gray-800">
+                          {formatRupiah(item.subtotal || item.qty * item.harga)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Ringkasan Total */}
+                  <div className="border-t border-dashed border-gray-200 pt-5 flex-shrink-0">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Pembayaran</p>
+                        <p className="text-3xl font-black text-gray-900 tracking-tight mt-0.5">
+                          {formatRupiah(selectedHistoryOrder.jumlah)}
+                        </p>
+                      </div>
+
+                      <button
+                        onClick={() => printReceipt(selectedHistoryOrder)}
+                        className="bg-[#ff6b6b] hover:bg-[#e85a5a] text-white px-6 py-3.5 rounded-2xl font-black text-xs uppercase tracking-wider shadow-lg shadow-red-100 active:scale-95 transition-all flex items-center gap-2"
+                      >
+                        🖨️ Cetak Struk
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex-1 flex flex-col items-center justify-center text-center text-gray-400">
+                  <span className="text-4xl mb-3">🔍</span>
+                  <p className="text-sm font-black uppercase tracking-wider">
+                    Pilih transaksi dari daftar di samping kiri
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
