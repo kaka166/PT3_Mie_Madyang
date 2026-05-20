@@ -790,17 +790,17 @@ export default function POSPage() {
               <div className="grid grid-cols-2 gap-3 mb-8">
                 <button
                   onClick={() => setPaymentMethod("QRIS")}
-                  className={`py-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === "QRIS" ? "bg-white border-[#b93b3b] shadow-xl shadow-red-100" : "bg-white/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-200"}`}>
+                  className={`py-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === "QRIS" ? "bg-white border-[#1a1a2e] shadow-xl shadow-slate-200" : "bg-white/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-200"}`}>
                   <span
-                    className={`font-black text-sm ${paymentMethod === "QRIS" ? "text-[#b93b3b]" : "text-gray-400"}`}>
+                    className={`font-black text-sm ${paymentMethod === "QRIS" ? "text-[#1a1a2e]" : "text-gray-400"}`}>
                     QRIS
                   </span>
                 </button>
                 <button
                   onClick={() => setPaymentMethod("Tunai")}
-                  className={`py-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === "Tunai" ? "bg-white border-[#b93b3b] shadow-xl shadow-red-100" : "bg-white/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-200"}`}>
+                  className={`py-6 rounded-3xl border-2 transition-all flex flex-col items-center gap-2 ${paymentMethod === "Tunai" ? "bg-white border-[#1a1a2e] shadow-xl shadow-slate-200" : "bg-white/50 border-transparent text-gray-400 hover:bg-white hover:border-gray-200"}`}>
                   <span
-                    className={`font-black text-sm ${paymentMethod === "Tunai" ? "text-[#b93b3b]" : "text-gray-400"}`}>
+                    className={`font-black text-sm ${paymentMethod === "Tunai" ? "text-[#1a1a2e]" : "text-gray-400"}`}>
                     TUNAI
                   </span>
                 </button>
@@ -1037,7 +1037,7 @@ export default function POSPage() {
               className="lg:hidden relative p-3 bg-gray-50 rounded-2xl active:scale-90 transition-all border border-gray-100">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-[#a0383b]"
+                className="h-6 w-6 text-[#b93b3b]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -1110,7 +1110,7 @@ export default function POSPage() {
               <button
                 key={i}
                 onClick={() => setFilter(c)}
-                className={`whitespace-nowrap px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${filter === c ? "bg-[#b93b3b] text-white shadow-xl shadow-red-100 scale-105" : "bg-white border-2 border-gray-100 text-gray-400  hover:text-[#b93b3b]"}`}>
+                className={`whitespace-nowrap px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all ${filter === c ? "bg-[#1a1a2e] text-white shadow-lg" : "bg-white border-2 border-gray-100 text-gray-500 hover:border-[#b93b3b]/30 hover:text-[#b93b3b]"}`}>
                 {c}
               </button>
             ))}
@@ -1159,7 +1159,7 @@ export default function POSPage() {
                         addToCart(item);
                       }}
                       disabled={item.stock === 0}
-                      className="w-10 h-10 rounded-2xl bg-red-50 text-[#a0383b] flex items-center justify-center font-black text-xl hover:bg-[#b93b3b] hover:text-white transition-all shadow-sm active:scale-90">
+                      className="w-10 h-10 rounded-2xl bg-red-50 text-[#b93b3b] flex items-center justify-center font-black text-xl hover:bg-[#b93b3b] hover:text-white transition-all shadow-sm active:scale-90">
                       +
                     </button>
                   </div>

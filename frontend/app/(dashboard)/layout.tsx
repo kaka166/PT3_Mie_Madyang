@@ -36,21 +36,17 @@ export default function DashboardLayout({
   }
 
   return (
-    // Tambahkan h-screen dan overflow-hidden di sini agar scroll hanya di area konten
-    <div className="h-screen flex flex-col bg-[#f9f9f9] overflow-hidden">
-      {/* 1. Navbar: Naikkan z-index ke 100 agar mutlak di atas */}
-      <div className="fixed top-0 left-0 right-0 z-[100] h-16">
+    <div className="h-screen flex bg-[#f4f5f7] overflow-hidden">
+      {/* Sidebar: full height from top */}
+      <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
+
+      {/* Main area: everything to the right of sidebar */}
+      <div className="flex-1 flex flex-col lg:ml-64 min-w-0 overflow-hidden">
+        {/* Navbar at top of content area */}
         <Navbar onMenuClick={() => setIsOpen(!isOpen)} />
-      </div>
 
-      {/* 2. Wrapper Utama: Beri pt-16 agar konten tidak terpotong Navbar */}
-      <div className="flex flex-1 pt-16 overflow-hidden">
-        {/* Sidebar */}
-        <Sidebar isOpen={isOpen} setIsOpen={setIsOpen} />
-
-        {/* 3. Area Konten: Hilangkan padding p-6 md:p-8 KHUSUS untuk halaman POS */}
-        {/* Agar halaman POS bisa full sampai pinggir dan mengontrol scroll sendiri */}
-        <main className="flex-1 overflow-hidden lg:ml-64 relative">
+        {/* Page content */}
+        <main className="flex-1 overflow-auto">
           {children}
         </main>
       </div>

@@ -15,6 +15,8 @@ import {
   X,
   Clock,
   Settings,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { authService } from "@/services/authService";
 import { getActiveSession } from "@/services/sessionService";
@@ -30,13 +32,17 @@ export default function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
 
-  // Ambil roleId sekali saja saat inisialisasi state
   const [roleId] = useState<number | null>(() => authService.getRole());
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
 
   const closeSidebar = () => setIsOpen(false);
 
-  // Daftar Menu dengan Aturan Akses Role ID
-  // 1 = Owner, 2 = Kasir, 3 = Dapur
+  const toggleExpanded = (label: string) => {
+    setExpandedMenus((prev) =>
+      prev.includes(label) ? prev.filter((l) => l !== label) : [...prev, label]
+    );
+  };
+
   const menuItems = [
     {
       icon: LayoutDashboard,
@@ -46,13 +52,13 @@ export default function Sidebar({
     },
     {
       icon: CreditCard,
-      label: "Cashier",
+      label: "Kasir",
       href: "/cashier",
       allowedRoles: [1, 2],
     },
     {
       icon: Package2,
-      label: "Menu",
+      label: "Inventory",
       href: "/menu",
       allowedRoles: [1],
     },
@@ -61,7 +67,7 @@ export default function Sidebar({
       label: "Kitchen",
       href: "/kitchen",
       allowedRoles: [1, 2, 3],
-      subItems: [{ label: "Stock", href: "/kitchen/stock" }],
+      subItems: [{ label: "Stok Bahan", href: "/kitchen/stock" }],
     },
     {
       icon: Clock,
@@ -71,7 +77,7 @@ export default function Sidebar({
     },
     {
       icon: BarChart3,
-      label: "Reports",
+      label: "Laporan",
       href: "/reports",
       allowedRoles: [1],
       subItems: [
@@ -94,17 +100,14 @@ export default function Sidebar({
     },
   ];
 
-  // Filter menu berdasarkan roleId user
   const filteredMenu = menuItems.filter(
-    (item) => roleId !== null && item.allowedRoles.includes(roleId),
+    (item) => roleId !== null && item.allowedRoles.includes(roleId)
   );
 
   const handleLogout = async () => {
     closeSidebar();
-
     try {
       const session = await getActiveSession();
-
       if (session?.data?.id) {
         await Swal.fire({
           title: "Sesi masih aktif!",
@@ -114,7 +117,6 @@ export default function Sidebar({
         return;
       }
 
-      // Dapur (role 3) tidak perlu rekap
       let recapHtml = "";
       if (roleId !== 3) {
         try {
@@ -136,17 +138,9 @@ export default function Sidebar({
                   <span style="font-weight:600;color:#555;">Pengeluaran</span>
                   <span style="font-weight:800;color:#dc2626;">-${formatRupiah(d.total_pengeluaran)}</span>
                 </div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee;">
+                <div style="display:flex;justify-content:space-between;padding:8px 0;">
                   <span style="font-weight:600;color:#555;">Uang Akhir</span>
                   <span style="font-weight:800;color:#333;">${formatRupiah(d.closing_cash)}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;">
-                  <span style="font-weight:600;color:#555;">Selisih</span>
-                  <span style="font-weight:800;color:${(d.selisih ?? 0) < 0 ? '#dc2626' : '#16a34a'};">${formatRupiah(d.selisih ?? 0)}</span>
-                </div>
-                <div style="display:flex;justify-content:space-between;padding:8px 0;border-top:1px dashed #ddd;margin-top:8px;">
-                  <span style="font-weight:600;color:#555;">Seharusnya</span>
-                  <span style="font-weight:800;color:#333;">${formatRupiah(d.expected_cash)}</span>
                 </div>
               </div>
             `;
@@ -161,7 +155,7 @@ export default function Sidebar({
         html: recapHtml,
         icon: "warning",
         showCancelButton: true,
-        confirmButtonColor: "#c93535",
+        confirmButtonColor: "#b93b3b",
         confirmButtonText: "Ya, Keluar!",
         cancelButtonText: "Batal",
       });
@@ -177,10 +171,10 @@ export default function Sidebar({
 
   return (
     <>
-      {/* OVERLAY */}
+      {/* OVERLAY (mobile) */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
           onClick={closeSidebar}
         />
       )}
@@ -188,64 +182,100 @@ export default function Sidebar({
       {/* SIDEBAR */}
       <aside
         className={`
-          fixed left-0 top-16 h-[calc(100%-4rem)] w-64 
-          bg-white shadow-[2px_0_8px_rgba(0,0,0,0.02)] flex flex-col 
-          z-40 transform transition-transform duration-300 ease-in-out 
-          ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-          lg:translate-x-0 border-r border-neutral-100
-        `}>
-        {/* MOBILE HEADER */}
-        <div className="lg:hidden flex items-center justify-between px-6 py-5 border-b border-neutral-200">
-          <span className="font-bold text-primary italic">MA-DYANG POS</span>
-          <button onClick={closeSidebar} className="text-neutral-400">
-            <X size={20} />
+          fixed left-0 top-0 h-screen w-64
+          bg-[#1a1a2e] flex flex-col
+          z-40 transform transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          lg:translate-x-0
+        `}
+      >
+        {/* LOGO AREA */}
+        <div className="flex items-center gap-3 px-6 h-16 border-b border-white/5 flex-shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-[#b93b3b] flex items-center justify-center flex-shrink-0 shadow-lg shadow-red-900/30">
+            <span className="text-white font-black text-sm">M</span>
+          </div>
+          <div>
+            <p className="text-white font-black text-sm leading-none">Ma-Dyang</p>
+            <p className="text-white/30 text-[10px] font-medium uppercase tracking-widest">POS System</p>
+          </div>
+          <button
+            onClick={closeSidebar}
+            className="ml-auto lg:hidden text-white/40 hover:text-white/70 transition-colors"
+          >
+            <X size={18} />
           </button>
         </div>
 
-        {/* ROLE INFO AREA */}
-        <div className="px-6 pt-5 pb-3">
-          <p className="font-medium text-[10px] text-neutral-400 uppercase tracking-[0.2em]">
-            The Culinary Curator
-          </p>
-          <div className="mt-1 flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-xs font-bold text-neutral-600">
-              Role: {roleId ? authService.getRoleName(roleId) : "Unauthorized"}
+        {/* ROLE BADGE */}
+        <div className="px-5 pt-5 pb-2">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5">
+            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
+            <span className="text-white/50 text-xs font-semibold">
+              {roleId ? authService.getRoleName(roleId) : "Unauthorized"}
             </span>
           </div>
         </div>
 
         {/* NAVIGATION */}
-        <nav className="flex-1 px-3 space-y-1 overflow-y-auto no-scrollbar">
+        <nav className="flex-1 px-3 py-2 overflow-y-auto no-scrollbar space-y-0.5">
+          <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.2em] px-3 py-2 mt-1">
+            Menu Utama
+          </p>
+
           {filteredMenu.map((item) => {
             const hasSubItems = !!item.subItems;
             const isParentActive = pathname.startsWith(item.href);
+            const isExpanded = expandedMenus.includes(item.label) || isParentActive;
 
             return (
-              <div key={item.label} className="flex flex-col">
-                <LinkNext
-                  href={item.href}
-                  onClick={() => !hasSubItems && closeSidebar()}
-                  className={`flex items-center gap-3 px-4 py-3.5 mx-3 rounded-2xl transition-all duration-200 ${isParentActive
-                      ? "bg-primary/5 text-primary shadow-sm font-black"
-                      : "text-neutral-500 hover:bg-neutral-50 font-bold"
-                    }`}>
-                  <item.icon size={20} />
-                  <span className="text-sm">{item.label}</span>
-                </LinkNext>
+              <div key={item.label}>
+                {hasSubItems ? (
+                  <button
+                    onClick={() => toggleExpanded(item.label)}
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${
+                      isParentActive
+                        ? "bg-[#b93b3b] text-white shadow-lg shadow-red-900/20"
+                        : "text-white/50 hover:bg-white/5 hover:text-white/80"
+                    }`}
+                  >
+                    <item.icon size={18} className="flex-shrink-0" />
+                    <span className="text-sm font-semibold flex-1 text-left">{item.label}</span>
+                    {isExpanded ? (
+                      <ChevronDown size={14} className="opacity-60" />
+                    ) : (
+                      <ChevronRight size={14} className="opacity-60" />
+                    )}
+                  </button>
+                ) : (
+                  <LinkNext
+                    href={item.href}
+                    onClick={closeSidebar}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 ${
+                      isParentActive
+                        ? "bg-[#b93b3b] text-white shadow-lg shadow-red-900/20"
+                        : "text-white/50 hover:bg-white/5 hover:text-white/80"
+                    }`}
+                  >
+                    <item.icon size={18} className="flex-shrink-0" />
+                    <span className="text-sm font-semibold">{item.label}</span>
+                  </LinkNext>
+                )}
 
-                {/* SUBMENU LOGIC */}
-                {hasSubItems && isParentActive && (
-                  <div className="flex flex-col gap-1 mt-1 ml-6 mb-2">
-                    {item.subItems.map((sub) => (
+                {/* SUBMENU */}
+                {hasSubItems && isExpanded && (
+                  <div className="mt-0.5 ml-4 pl-4 border-l border-white/10 space-y-0.5 pb-1">
+                    {item.subItems!.map((sub) => (
                       <LinkNext
                         key={sub.label}
                         href={sub.href}
                         onClick={closeSidebar}
-                        className={`px-4 py-2 text-sm rounded-lg transition-all ${pathname === sub.href
-                            ? "text-[#b93b3b] font-bold bg-red-50"
-                            : "text-neutral-500 hover:bg-neutral-100"
-                          }`}>
+                        className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-all ${
+                          pathname === sub.href
+                            ? "text-white font-bold bg-white/10"
+                            : "text-white/40 hover:text-white/70 hover:bg-white/5 font-medium"
+                        }`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${pathname === sub.href ? 'bg-[#b93b3b]' : 'bg-white/20'}`} />
                         {sub.label}
                       </LinkNext>
                     ))}
@@ -257,19 +287,21 @@ export default function Sidebar({
         </nav>
 
         {/* FOOTER */}
-        <div className="px-3 border-t border-neutral-200 py-4  space-y-1">
+        <div className="px-3 pb-4 pt-3 border-t border-white/5 space-y-0.5 flex-shrink-0">
           <LinkNext
             href="#"
-            className="flex items-center gap-3 text-neutral-500 px-4 py-3 hover:bg-neutral-200 rounded-xl transition-all">
-            <HelpCircle size={20} />
-            <span className="text-sm font-semibold">Help Center</span>
+            className="flex items-center gap-3 px-3 py-2.5 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all"
+          >
+            <HelpCircle size={18} />
+            <span className="text-sm font-semibold">Bantuan</span>
           </LinkNext>
 
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 text-red-500 px-4 py-3 hover:bg-red-50 rounded-xl transition-all">
-            <LogOut size={20} />
-            <span className="text-sm font-semibold">Logout</span>
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-red-400/70 hover:text-red-300 hover:bg-red-900/20 rounded-xl transition-all"
+          >
+            <LogOut size={18} />
+            <span className="text-sm font-semibold">Keluar</span>
           </button>
         </div>
       </aside>

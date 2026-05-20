@@ -69,45 +69,42 @@ export default function Navbar({
   return (
     <>
       {/* NAVBAR */}
-      <header className="bg-white/80 backdrop-blur-md h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 border-b border-neutral-100">
-        {/* LEFT */}
+      <header className="bg-white h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 border-b border-gray-100 shadow-sm">
+        {/* LEFT — hamburger (mobile only) */}
         <div className="flex items-center gap-3">
           <button
             onClick={onMenuClick}
-            className="lg:hidden p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+            className="lg:hidden p-2 hover:bg-gray-100 rounded-xl transition-colors"
           >
-            <span className="text-xl">☰</span>
+            <span className="text-xl leading-none">☰</span>
           </button>
-
-          <div className="relative lg:w-[120px] w-[90px] h-[40px]">
-            <Image
-              src={BANNER_SRC}
-              alt="Logo Ma-Dyang"
-              fill
-              className="object-contain"
-              priority
-            />
+          {/* On desktop, title area is empty since sidebar handles branding */}
+          <div className="hidden lg:block">
+            <p className="text-xs font-bold text-gray-300 uppercase tracking-widest">
+              {/* reserved for page-level breadcrumb if needed */}
+            </p>
           </div>
         </div>
 
         {/* RIGHT */}
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:block text-right leading-tight">
-            <p className="text-sm font-bold text-neutral-800 capitalize">
-              {user?.name || "Guest"}
-            </p>
-            <p className="text-[10px] font-black text-primary uppercase tracking-widest">
-              {getRoleName(user?.role)}
-            </p>
-          </div>
-
+        <div className="flex items-center gap-2 ml-auto">
           <NotificationCenter />
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="p-2 text-neutral-600 hover:bg-neutral-100 rounded-full active:scale-90 transition-all"
+            className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl hover:bg-gray-50 transition-all border border-transparent hover:border-gray-100 group"
           >
-            <Settings size={20} />
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#b93b3b] to-[#8b1f1f] flex items-center justify-center shadow text-white text-sm font-black">
+              {user?.name?.[0]?.toUpperCase() || "U"}
+            </div>
+            <div className="hidden sm:block text-left leading-tight">
+              <p className="text-sm font-bold text-gray-800 capitalize">
+                {user?.name || "Guest"}
+              </p>
+              <p className="text-[10px] font-black text-[#b93b3b] uppercase tracking-widest">
+                {getRoleName(user?.role)}
+              </p>
+            </div>
           </button>
         </div>
       </header>
