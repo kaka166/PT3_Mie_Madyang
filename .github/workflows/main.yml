@@ -16,10 +16,19 @@ jobs:
           port: 22
           password: 'MieenakPol@!'
           script: |
-            echo 'MieenakPol@!' | sudo -S -u www-data git -C /var/www/PT3_Mie_Madyang/backend pull origin main
+            echo 'MieenakPol@!' | sudo -S -u www-data git -C /var/www/PT3_Mie_Madyang reset --hard origin/main
+            echo 'MieenakPol@!' | sudo -S -u www-data git -C /var/www/PT3_Mie_Madyang pull origin main
+            
+            # --- Deploy Backend ---
             echo 'MieenakPol@!' | sudo -S -u www-data composer --working-dir=/var/www/PT3_Mie_Madyang/backend install --no-dev --optimize-autoloader
             echo 'MieenakPol@!' | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan migrate --force
             echo 'MieenakPol@!' | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan config:cache
             echo 'MieenakPol@!' | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan route:cache
             echo 'MieenakPol@!' | sudo -S systemctl restart php8.2-fpm
-            echo "Anjay, Deploy Berhasil, Lur!"
+            
+            # --- Deploy Frontend ---
+            echo 'MieenakPol@!' | sudo -S -u www-data bash -c 'cd /var/www/PT3_Mie_Madyang/frontend && npm install'
+            echo 'MieenakPol@!' | sudo -S -u www-data bash -c 'cd /var/www/PT3_Mie_Madyang/frontend && npm run build'
+            echo 'MieenakPol@!' | sudo -S -u www-data pm2 restart frontend
+            
+            echo "Anjay, Deploy Frontend & Backend Berhasil, Lur!"
