@@ -4,7 +4,7 @@
  * Fallback ke browser print dialog jika server tidak tersedia
  */
 
-const PRINT_SERVER_URL = "http://localhost:8585";
+const PRINT_SERVER_URL = "http://127.0.0.1:8585";
 
 export interface PrintItem {
   nama: string;
@@ -86,10 +86,10 @@ export function printViaBrowser(order: PrintOrder): void {
       <style>
         @page { size: 80mm auto; margin: 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Courier New', monospace; font-size: 12px; width: 80mm; padding: 4mm; }
+        body { font-family: 'Courier New', monospace; font-size: 14px; width: 80mm; padding: 4mm; color: black; }
         .center { text-align: center; }
         .bold { font-weight: bold; }
-        .big { font-size: 16px; font-weight: bold; }
+        .big { font-size: 20px; font-weight: bold; }
         .divider { border-top: 1px dashed #000; margin: 4px 0; }
         table { width: 100%; border-collapse: collapse; }
         td { vertical-align: top; }
