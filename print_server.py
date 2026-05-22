@@ -8,12 +8,12 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 import json, sys, os, subprocess
 from pathlib import Path
 
-# Auto-install pywin32 jika belum ada
+# Instal pyserial jika belum ada
 try:
-    import win32print
+    import serial
 except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "pywin32", "-q"])
-    import win32print
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "pyserial", "-q"])
+    import serial
 
 # ======= LOAD CONFIG NOTA =======
 BASE_DIR = Path(__file__).parent
@@ -35,7 +35,7 @@ def load_config():
 
 # ======= KONFIGURASI =======
 PORT = 8585
-PRINTER_KEYWORD = ['rongta', 'rpp']
+PRINTER_PORT = 'COM12'  # Pakai port langsung sesuai hardware
 
 # ======= ESC/POS Helpers =======
 ESC = b'\x1b'
@@ -52,26 +52,18 @@ def esc_feed(n=4):   return ESC + b'\x64' + bytes([n])
 def esc_cut():       return GS  + b'\x56\x41\x00'
 def enc(text):       return text.encode('latin-1', errors='replace')
 
-def find_printer():
-    printers = win32print.EnumPrinters(
-        win32print.PRINTER_ENUM_LOCAL | win32print.PRINTER_ENUM_CONNECTIONS
-    )
-    for p in printers:
-        name = p[2].lower()
-        if any(k in name for k in PRINTER_KEYWORD):
-            return p[2]
-    return None
-
-def raw_print(printer_name, data: bytes):
-    hPrinter = win32print.OpenPrinter(printer_name)
+def check_printer():
     try:
-        hJob = win32print.StartDocPrinter(hPrinter, 1, ("Struk POS", None, "RAW"))
-        win32print.StartPagePrinter(hPrinter)
-        win32print.WritePrinter(hPrinter, data)
-        win32print.EndPagePrinter(hPrinter)
-        win32print.EndDocPrinter(hPrinter)
-    finally:
-        win32print.ClosePrinter(hPrinter)
+        # Test buka port sebentar
+        with serial.Serial(PRINTER_PORT, 9600, timeout=1) as ser:
+            return True
+    except:
+        return False
+
+def raw_print(data: bytes):
+    # Bypass Windows Spooler total, langsung kirim lewat hardware port
+    with serial.Serial(PRINTER_PORT, 9600, timeout=3) as ser:
+        ser.write(data)
 
 def build_struk(order: dict) -> bytes:
     from datetime import datetime
@@ -146,12 +138,12 @@ class PrintHandler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path == '/status':
-            printer = find_printer()
+            is_ready = check_printer()
             cfg = load_config()
             self._respond(200, {
                 "status": "ok",
-                "printer": printer or "not found",
-                "ready": printer is not None,
+                "printer": PRINTER_PORT if is_ready else "not found",
+                "ready": is_ready,
                 "config": cfg
             })
         else:
@@ -163,13 +155,12 @@ class PrintHandler(BaseHTTPRequestHandler):
             try:
                 length = int(self.headers.get('Content-Length', 0))
                 order = json.loads(self.rfile.read(length))
-                printer = find_printer()
-                if not printer:
-                    self._respond(503, {"success": False, "error": "Printer tidak ditemukan"})
+                if not check_printer():
+                    self._respond(503, {"success": False, "error": f"Gagal buka port {PRINTER_PORT}"})
                     return
-                raw_print(printer, build_struk(order))
-                self._respond(200, {"success": True, "printer": printer})
-                print(f"[PRINT OK] No:{order.get('no','?')} Nama:{order.get('nama','?')} -> {printer}")
+                raw_print(build_struk(order))
+                self._respond(200, {"success": True, "printer": PRINTER_PORT})
+                print(f"[PRINT OK] No:{order.get('no','?')} Nama:{order.get('nama','?')} -> {PRINTER_PORT}")
             except Exception as e:
                 print(f"[ERROR] {e}")
                 self._respond(500, {"success": False, "error": str(e)})
@@ -181,6 +172,7 @@ class PrintHandler(BaseHTTPRequestHandler):
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header('Access-Control-Allow-Private-Network', 'true')
 
     def _respond(self, code, data):
         body = json.dumps(data).encode()
@@ -194,13 +186,13 @@ class PrintHandler(BaseHTTPRequestHandler):
 # ======= MAIN =======
 if __name__ == '__main__':
     cfg = load_config()
-    printer = find_printer()
+    is_ready = check_printer()
     print("=" * 44)
     print(f"  {cfg['nama_toko']} - PRINT SERVER")
     print("=" * 44)
     print(f"  Port   : http://localhost:{PORT}")
-    print(f"  Printer: {printer or 'TIDAK DITEMUKAN!'}")
-    print(f"  Status : {'SIAP' if printer else 'ERROR - Cek printer'}")
+    print(f"  Printer: {PRINTER_PORT}")
+    print(f"  Status : {'SIAP' if is_ready else 'ERROR - Cek kabel/driver'}")
     print(f"  Config : {CONFIG_PATH}")
     print("=" * 44)
     print("  Tekan Ctrl+C untuk stop\n")
