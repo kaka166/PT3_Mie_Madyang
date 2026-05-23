@@ -188,9 +188,9 @@ export default function LaporanPemasukan() {
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-gray-50/50">
                 <tr>
-                  <th className="px-5 py-3">Rentang Waktu</th>
-                  <th className="px-5 py-3">Total Penghasilan</th>
-                  <th className="px-5 py-3">Jumlah Transaksi</th>
+                  <th className="px-5 py-3 ">Rentang Waktu</th>
+                  <th className="px-5 py-3 ">Total Penghasilan</th>
+                  <th className="px-5 py-3 ">Jumlah Transaksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -199,7 +199,7 @@ export default function LaporanPemasukan() {
                 ) : groupedRekap.length === 0 ? (
                   <tr><td colSpan={3} className="py-8 text-center text-gray-400">Belum ada data</td></tr>
                 ) : groupedRekap.map((row: any, idx) => (
-                  <tr key={idx} className={idx % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                  <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
                     <td className="px-5 py-3.5 text-neutral-600">{row.rentang}</td>
                     <td className="px-5 py-3.5 font-semibold text-neutral-800">{formatRupiah(row.total)}</td>
                     <td className="px-5 py-3.5 text-neutral-600">{row.transaksi}</td>
@@ -239,12 +239,12 @@ export default function LaporanPemasukan() {
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-gray-50/50">
                 <tr>
-                  <th className="px-5 py-3">No. Transaksi</th>
-                  <th className="px-5 py-3">Customer</th>
-                  <th className="px-5 py-3">Waktu</th>
-                  <th className="px-5 py-3">Kasir</th>
-                  <th className="px-5 py-3">Metode</th>
-                  <th className="px-5 py-3">Jumlah</th>
+                  <th className="px-5 py-3 ">No. Transaksi</th>
+                  <th className="px-5 py-3 ">Customer</th>
+                  <th className="px-5 py-3 ">Waktu</th>
+                  <th className="px-5 py-3 ">Kasir</th>
+                  <th className="px-5 py-3 ">Metode</th>
+                  <th className="px-5 py-3 ">Jumlah</th>
                 </tr>
               </thead>
               <tbody>
@@ -259,7 +259,7 @@ export default function LaporanPemasukan() {
                     <td className="px-5 py-3.5 font-bold text-neutral-800">{row.nama}</td>
                     <td className="px-5 py-3.5 text-neutral-500 text-xs">{formatTanggal(row.waktu)}</td>
                     <td className="px-5 py-3.5 text-neutral-600">{row.kasir}</td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-3.5 ">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${row.metode === "QRIS" ? "bg-purple-50 text-purple-600" : "bg-green-50 text-green-600"}`}>
                         {row.metode}
                       </span>

@@ -180,26 +180,24 @@ export default function StockBahanPage() {
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="py-3 px-4 text-left">ID</th>
-                <th className="py-3 px-4 text-left">Nama Barang</th>
-                <th className="py-3 px-4">Jumlah Stock</th>
-                <th className="py-3 px-4">Stock Limit</th>
-                <th className="py-3 px-4">Status</th>
+                <th className="px-5 py-3 text-left">ID</th>
+                <th className="px-5 py-3 text-left">Nama Barang</th>
+                <th className="px-5 py-3 ">Jumlah Stock</th>
+                <th className="px-5 py-3 ">Stock Limit</th>
+                <th className="px-5 py-3 ">Status</th>
               </tr>
             </thead>
 
             <tbody>
               {(paginatedStock || []).map((item, i) => (
-                <tr
-                  key={`${item.nama}-${i}`}
-                  className={i % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-                  <td className="py-3 px-4 text-left">{item.id}</td>
-                  <td className="py-3 px-4 text-left">{item.nama}</td>
-                  <td className="py-3 px-4">{item.jumlah}</td>
-                  <td className="py-3 px-4 text-gray-500">
+                <tr key={`${item.nama} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                  <td className="px-5 py-3.5 text-left">{item.id}</td>
+                  <td className="px-5 py-3.5 text-left">{item.nama}</td>
+                  <td className="px-5 py-3.5 ">{item.jumlah}</td>
+                  <td className="px-5 py-3.5 text-gray-500">
                     {item.stock_limit}
                   </td>
-                  <td className="py-3 px-4 flex justify-center">
+                  <td className="px-5 py-3.5 flex justify-center">
                     <span
                       className={`px-3 py-1 rounded-full text-xs ${
                         item.status === "Aman"
@@ -298,30 +296,28 @@ export default function StockBahanPage() {
         <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
-              <tr className="text-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
-                <th className="px-6 py-3">ID</th>
-                <th className="px-6 py-3">Item ID</th>
-                <th className="px-6 py-3">Nama Barang</th>
-                <th className="px-6 py-3">Tipe</th>
-                <th className="px-6 py-3">Alasan</th>
-                <th className="px-6 py-3">Kuantiti</th>
-                <th className="px-6 py-3">Perubahan</th>
-                <th className="px-6 py-3">Dibuat Oleh</th>
+              <tr>
+                <th className="px-5 py-3 ">ID</th>
+                <th className="px-5 py-3 ">Item ID</th>
+                <th className="px-5 py-3 ">Nama Barang</th>
+                <th className="px-5 py-3 ">Tipe</th>
+                <th className="px-5 py-3 ">Alasan</th>
+                <th className="px-5 py-3 ">Kuantiti</th>
+                <th className="px-5 py-3 ">Perubahan</th>
+                <th className="px-5 py-3 ">Dibuat Oleh</th>
               </tr>
             </thead>
 
             <tbody>
               {(paginatedRiwayat || []).map((item, i) => (
-                <tr
-                  key={`${item.nama}-${i}`}
-                  className={i % 2 === 0 ? "bg-white" : "bg-gray-100"}>
-                  <td className="px-6 py-4 text-neutral-700">{item.id}</td>
+                <tr key={`${item.nama} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                  <td className="px-5 py-3.5 text-neutral-700">{item.id}</td>
 
-                  <td className="px-6 py-4 text-neutral-600">{item.itemId}</td>
+                  <td className="px-5 py-3.5 text-neutral-600">{item.itemId}</td>
 
-                  <td className="px-6 py-4 text-neutral-700">{item.nama}</td>
+                  <td className="px-5 py-3.5 text-neutral-700">{item.nama}</td>
 
-                  <td className="px-6 py-4">
+                  <td className="px-5 py-3.5 ">
                     <span
                       className={`px-2 py-1 rounded-full text-xs font-bold ${
                         item.tipe.toLowerCase() === "restock"
@@ -332,17 +328,17 @@ export default function StockBahanPage() {
                     </span>
                   </td>
 
-                  <td className="px-6 py-4 text-neutral-600">{item.alasan}</td>
+                  <td className="px-5 py-3.5 text-neutral-600">{item.alasan}</td>
 
-                  <td className="px-6 py-4 text-neutral-700">
+                  <td className="px-5 py-3.5 text-neutral-700">
                     {item.kuantiti}
                   </td>
 
-                  <td className="px-6 py-4 text-neutral-700">
+                  <td className="px-5 py-3.5 text-neutral-700">
                     {formatTanggal(item.waktu)}
                   </td>
 
-                  <td className="px-6 py-4 text-neutral-600">{item.pembuat}</td>
+                  <td className="px-5 py-3.5 text-neutral-600">{item.pembuat}</td>
                 </tr>
               ))}
             </tbody>

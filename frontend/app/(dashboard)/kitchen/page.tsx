@@ -309,44 +309,42 @@ export default function KitchenDashboardPage() {
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="py-4 px-4 font-medium">Order ID</th>
-                <th className="py-4 px-4 font-medium">Waktu</th>
-                <th className="py-4 px-4 font-medium">Customer</th>
-                <th className="py-4 px-4 font-medium">Total Item</th>
-                <th className="py-4 px-4 font-medium">Total Harga</th>
-                <th className="py-4 px-4 font-medium">Kondisi</th>
-                <th className="py-4 px-4 font-medium">Status</th>
-                <th className="py-4 px-4 font-medium">Aksi</th>
+                <th className="px-5 py-3 font-medium">Order ID</th>
+                <th className="px-5 py-3 font-medium">Waktu</th>
+                <th className="px-5 py-3 font-medium">Customer</th>
+                <th className="px-5 py-3 font-medium">Total Item</th>
+                <th className="px-5 py-3 font-medium">Total Harga</th>
+                <th className="px-5 py-3 font-medium">Kondisi</th>
+                <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {currentData.map((item, index) => (
-                <tr
-                  key={index}
-                  className="border border-neutral-100 even:bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <td className="py-4 px-4 font-bold text-gray-800">
+                <tr key={index} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                  <td className="px-5 py-3.5 font-bold text-gray-800">
                     {item.id}
                   </td>
-                  <td className="py-4 px-4 text-gray-700">
+                  <td className="px-5 py-3.5 text-gray-700">
                     {formatTanggal(item.waktu)}
                   </td>
-                  <td className="py-4 px-4 font-bold text-gray-800">
+                  <td className="px-5 py-3.5 font-bold text-gray-800">
                     {item.customer}
                   </td>
-                  <td className="py-4 px-4 font-medium">{item.items}</td>
-                  <td className="py-4 px-4 font-bold text-gray-800">
+                  <td className="px-5 py-3.5 font-medium">{item.items}</td>
+                  <td className="px-5 py-3.5 font-bold text-gray-800">
                     {formatRupiah(item.harga)}
                   </td>
-                  <td className="py-4 px-4 font-bold text-gray-800">
+                  <td className="px-5 py-3.5 font-bold text-gray-800">
                     {item.kondisi}
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="px-5 py-3.5 ">
                     <span
                       className={`px-4 py-1.5 rounded-full text-xs font-bold inline-block w-24 text-center ${getStatusBadge(item.status)}`}>
                       {item.status}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-gray-500">
+                  <td className="px-5 py-3.5 text-gray-500">
                     <div className="flex items-center justify-center gap-2">
                       {item.status === "Antri" && (
                         <button

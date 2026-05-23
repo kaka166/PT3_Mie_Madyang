@@ -259,18 +259,18 @@ export default function LaporanPengeluaran() {
           <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-gray-50/50">
-                <tr className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
-                  <th className="px-6 py-3">Rentang Waktu</th>
-                  <th className="px-6 py-3">Total Pengeluaran</th>
-                  <th className="px-6 py-3">Jumlah Transaksi</th>
+                <tr>
+                  <th className="px-5 py-3 ">Rentang Waktu</th>
+                  <th className="px-5 py-3 ">Total Pengeluaran</th>
+                  <th className="px-5 py-3 ">Jumlah Transaksi</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedRekap.map((row: { rentang: string; total: number; transaksi: number }, idx: number) => (
-                  <tr key={idx} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-red-50 transition-colors`}>
-                    <td className="px-6 py-3 text-neutral-600">{row.rentang}</td>
-                    <td className="px-6 py-3 font-semibold text-neutral-800">{formatRupiah(row.total)}</td>
-                    <td className="px-6 py-3 text-neutral-600">{row.transaksi}</td>
+                  <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                    <td className="px-5 py-3.5 text-neutral-600">{row.rentang}</td>
+                    <td className="px-5 py-3.5 font-semibold text-neutral-800">{formatRupiah(row.total)}</td>
+                    <td className="px-5 py-3.5 text-neutral-600">{row.transaksi}</td>
                   </tr>
                 ))}
               </tbody>
@@ -360,30 +360,30 @@ export default function LaporanPengeluaran() {
           <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-gray-50/50">
-                <tr className="text-neutral-400 text-xs font-semibold uppercase tracking-wider border-b border-neutral-100">
-                  <th className="px-6 py-3">ID Transaksi</th>
-                  <th className="px-6 py-3">Nama Pengeluaran</th>
-                  <th className="px-6 py-3">Kategori</th>
-                  <th className="px-6 py-3">Waktu</th>
-                  <th className="px-6 py-3">Dibuat Oleh</th>
-                  <th className="px-6 py-3">Total</th>
+                <tr>
+                  <th className="px-5 py-3 ">ID Transaksi</th>
+                  <th className="px-5 py-3 ">Nama Pengeluaran</th>
+                  <th className="px-5 py-3 ">Kategori</th>
+                  <th className="px-5 py-3 ">Waktu</th>
+                  <th className="px-5 py-3 ">Dibuat Oleh</th>
+                  <th className="px-5 py-3 ">Total</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedData.length > 0 ? (
                   (paginatedData || []).map((row, idx) => (
-                    <tr key={idx} className={`${idx % 2 === 0 ? "bg-white" : "bg-gray-100"} hover:bg-red-50 transition-colors`}>
-                      <td className="px-6 py-4 font-semibold text-neutral-700">{row.id}</td>
-                      <td className="px-6 py-4 font-bold text-neutral-800">{row.nama}</td>
-                      <td className="px-6 py-4">
+                    <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                      <td className="px-5 py-3.5 font-semibold text-neutral-700">{row.id}</td>
+                      <td className="px-5 py-3.5 font-bold text-neutral-800">{row.nama}</td>
+                      <td className="px-5 py-3.5 ">
                         <span className="px-2 py-0.5 rounded-full text-xs font-bold" style={{
                           backgroundColor: row.kategori === "Operasional" ? "#e0f2fe" : row.kategori === "Gaji" ? "#dcfce7" : row.kategori === "Sewa" ? "#fef3c7" : row.kategori === "Bahan Baku" ? "#fae8ff" : "#f3e8ff",
                           color: row.kategori === "Operasional" ? "#0369a1" : row.kategori === "Gaji" ? "#166534" : row.kategori === "Sewa" ? "#92400e" : row.kategori === "Bahan Baku" ? "#86198f" : "#5b21b6",
                         }}>{row.kategori}</span>
                       </td>
-                      <td className="px-6 py-4 text-neutral-500">{formatTanggal(row.waktu)}</td>
-                      <td className="px-6 py-4 text-neutral-600">{row.user_id}</td>
-                      <td className="px-6 py-4 font-semibold text-neutral-800">{formatRupiah(row.jumlah)}</td>
+                      <td className="px-5 py-3.5 text-neutral-500">{formatTanggal(row.waktu)}</td>
+                      <td className="px-5 py-3.5 text-neutral-600">{row.user_id}</td>
+                      <td className="px-5 py-3.5 font-semibold text-neutral-800">{formatRupiah(row.jumlah)}</td>
                     </tr>
                   ))
                 ) : (

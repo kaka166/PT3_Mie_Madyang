@@ -82,12 +82,12 @@ export default function StockBahanPage() {
           <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-gray-50/50">
-                <tr className="text-gray-500 text-xs font-bold uppercase tracking-wider border-b border-neutral-100">
-                  <th className="py-3 px-4 text-left">ID</th>
-                  <th className="py-3 px-4 text-left">Nama Barang</th>
-                  <th className="py-3 px-4">Jumlah Stock</th>
-                  <th className="py-3 px-4">Stock Limit</th>
-                  <th className="py-3 px-4">Status</th>
+                <tr>
+                  <th className="px-5 py-3 text-left">ID</th>
+                  <th className="px-5 py-3 text-left">Nama Barang</th>
+                  <th className="px-5 py-3 ">Jumlah Stock</th>
+                  <th className="px-5 py-3 ">Stock Limit</th>
+                  <th className="px-5 py-3 ">Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -99,18 +99,14 @@ export default function StockBahanPage() {
                   const isKritis = item.status === "Kritis";
 
                   return (
-                    <tr
-                      key={item.id}
-                      className={`border border-neutral-200 transition-colors hover:bg-red-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                        }`}
-                    >
-                      <td className="py-3 px-4 text-left font-semibold text-neutral-700">{item.id}</td>
-                      <td className="py-3 px-4 text-left font-bold text-neutral-800">{item.nama}</td>
-                      <td className="py-3 px-4 text-center font-semibold">{item.jumlah}</td>
-                      <td className="py-3 px-4 text-center">
+                    <tr key={item.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                      <td className="px-5 py-3.5 text-left font-semibold text-neutral-700">{item.id}</td>
+                      <td className="px-5 py-3.5 text-left font-bold text-neutral-800">{item.nama}</td>
+                      <td className="px-5 py-3.5 text-center font-semibold">{item.jumlah}</td>
+                      <td className="px-5 py-3.5 text-center">
                         <span className="text-xs text-neutral-500">{item.stock_limit}</span>
                       </td>
-                      <td className="py-3 px-4">
+                      <td className="px-5 py-3.5 ">
                         <div className="flex flex-col items-center gap-1">
                           <div className="w-full max-w-[100px] h-2 bg-neutral-200 rounded-full overflow-hidden">
                             <div

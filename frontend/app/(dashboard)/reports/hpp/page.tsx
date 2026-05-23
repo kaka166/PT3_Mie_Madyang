@@ -230,10 +230,10 @@ export default function HPPPage() {
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="py-4 px-6 font-semibold">ID</th>
-                <th className="py-4 px-6 font-semibold">Nama Menu</th>
-                <th className="py-4 px-6 font-semibold">Total HPP</th>
-                <th className="py-4 px-6 font-semibold text-center">Aksi</th>
+                <th className="px-5 py-3 font-semibold">ID</th>
+                <th className="px-5 py-3 font-semibold">Nama Menu</th>
+                <th className="px-5 py-3 font-semibold">Total HPP</th>
+                <th className="px-5 py-3 font-semibold text-center">Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -242,20 +242,17 @@ export default function HPPPage() {
                   i.nama_menu.toLowerCase().includes(search.toLowerCase()),
                 )
                 .map((item, index) => (
-                  <tr
-                    key={item.id}
-                    className={`border-b border-gray-100 transition-colors hover:bg-red-50 ${index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                      }`}>
-                    <td className="py-4 px-6 font-semibold text-gray-700">
+                  <tr key={item.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                    <td className="px-5 py-3.5 font-semibold text-gray-700">
                       #{item.id}
                     </td>
-                    <td className="py-4 px-6 font-bold text-gray-800">
+                    <td className="px-5 py-3.5 font-bold text-gray-800">
                       {item.nama_menu}
                     </td>
-                    <td className="py-4 px-6 font-medium text-gray-700">
+                    <td className="px-5 py-3.5 font-medium text-gray-700">
                       {formatRupiah(item.total_hpp)}
                     </td>
-                    <td className="py-4 px-6 text-center">
+                    <td className="px-5 py-3.5 text-center">
                       <button
                         onClick={() => handleOpenModal(item)}
                         className="text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-200 p-2 rounded-lg transition-colors">

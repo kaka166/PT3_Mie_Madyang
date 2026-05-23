@@ -177,8 +177,8 @@ export default function LabaRugiPage() {
                       row.type === "separator" ? (
                         <tr key={i}><td colSpan={2}><hr className="my-3" /></td></tr>
                       ) : (
-                        <tr key={i} className="border-b border-neutral-100">
-                          <td className="py-3 font-semibold text-neutral-700">{row.label}</td>
+                        <tr key={i} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                          <td className="px-5 py-3.5 font-semibold text-neutral-700">{row.label}</td>
                           <td className={`py-3 text-right font-bold ${
                             row.type === "result"
                               ? (ringkasan!.laba_bersih >= 0 ? "text-green-600" : "text-red-600")
