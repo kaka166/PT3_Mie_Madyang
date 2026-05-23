@@ -13,10 +13,10 @@ import {
 import { attendanceService, AttendanceData } from "@/services/attendanceService";
 import { authService } from "@/services/authService";
 
-// Format tanggal saja (tanpa jam) dari string tanggal DB
 const formatDateOnly = (dateStr: string) => {
   if (!dateStr) return "-";
-  const date = new Date(dateStr + "T00:00:00+07:00");
+  const dateOnly = dateStr.substring(0, 10);
+  const date = new Date(dateOnly + "T00:00:00+07:00");
   return date.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
@@ -25,7 +25,7 @@ const formatDateOnly = (dateStr: string) => {
   });
 };
 
-// Konversi waktu HH:MM:SS yang tersimpan sebagai UTC ke WIB (GMT+7)
+
 const formatTimeWIB = (timeStr: string | null) => {
   if (!timeStr) return "-";
   // Backend menyimpan jam dalam format HH:MM:SS

@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
     .filter(s => !s.selesai && s.mulai && new Date(s.mulai).toDateString() === today.toDateString())
     .reduce((sum, s) => sum + Number(s.total_pemasukan || 0), 0);
   const staffHadirHariIni = attendance.filter(a => {
-    const tgl = a.tanggal || "";
+    const tgl = (a.tanggal || "").substring(0, 10);
     return tgl === todayISO && a.status === "hadir";
   }).length;
 
@@ -145,7 +145,7 @@ export default function AdminDashboardPage() {
 
   const filteredAttendance = attendance.filter(a => {
     if (!attendanceDateRange.start) return true;
-    const tgl = a.tanggal || "";
+    const tgl = (a.tanggal || "").substring(0, 10);
     return tgl >= attendanceDateRange.start && tgl <= (attendanceDateRange.end || attendanceDateRange.start);
   });
 
