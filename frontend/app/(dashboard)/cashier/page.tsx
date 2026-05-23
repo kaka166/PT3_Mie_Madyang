@@ -38,6 +38,7 @@ export default function POSPage() {
   const [paymentMethod, setPaymentMethod] = useState<"QRIS" | "Tunai">("QRIS");
   const [customerName, setCustomerName] = useState("");
   const [tableNumber, setTableNumber] = useState("");
+  const [uangTunai, setUangTunai] = useState<number | "">("");
 
   const [isTaxEnabled, setIsTaxEnabled] = useState(true);
   const [taxPercent, setTaxPercent] = useState(0);
@@ -569,9 +570,6 @@ export default function POSPage() {
                 <h2 className="text-2xl font-black text-gray-800 tracking-tight">
                   Pembayaran
                 </h2>
-                <span className="font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full text-xs">
-                  #99282
-                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -690,19 +688,37 @@ export default function POSPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-center">
+                  <div className="text-center w-full">
                     <p className="text-xs font-bold text-gray-400 uppercase mb-1">
                       Terima Tunai
                     </p>
-                    <p className="text-2xl font-black text-gray-800">
+                    <p className="text-2xl font-black text-gray-800 mb-4">
                       {formatRupiah(total)}
                     </p>
+                    <input
+                      type="number"
+                      placeholder="Masukkan Uang Diterima"
+                      value={uangTunai}
+                      onChange={(e) => setUangTunai(e.target.value ? Number(e.target.value) : "")}
+                      className="w-full bg-gray-50 border-2 border-transparent focus:border-red-100 rounded-xl px-4 py-3 outline-none text-center font-bold text-lg"
+                    />
+                    {typeof uangTunai === "number" && uangTunai >= total && (
+                      <p className="mt-2 text-sm font-bold text-green-600">
+                        Kembalian: {formatRupiah(uangTunai - total)}
+                      </p>
+                    )}
+                    {typeof uangTunai === "number" && uangTunai > 0 && uangTunai < total && (
+                      <p className="mt-2 text-sm font-bold text-red-500">
+                        Uang kurang {formatRupiah(total - uangTunai)}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
 
               <div className="space-y-3">
                 <button
+                  disabled={paymentMethod === "Tunai" && (typeof uangTunai !== "number" || uangTunai < total)}
                   onClick={async () => {
                     const result = await createOrder({
                       customer_name: customerName,
@@ -742,14 +758,20 @@ export default function POSPage() {
 
                       await fetchMenu();
 
+                      const dt = new Date(result.data.tanggal);
+                      const dateStr = dt.getFullYear() + String(dt.getMonth()+1).padStart(2,'0') + String(dt.getDate()).padStart(2,'0');
+                      const formattedNo = "#" + dateStr + String(result.data.id).padStart(3,'0');
+
                       const newOrder: Pemasukan = {
-                        no: '#' + result.data.id,
+                        no: formattedNo,
                         nama: customerName || "Guest",
                         waktu: result.data.tanggal,
                         kasir: user?.name || "Unknown",
                         metode: paymentMethod,
                         jumlah: result.data.total,
                         kondisi: orderType === 'Dine In' ? 'Makan di Tempat' : 'Bungkus',
+                        tunai: paymentMethod === 'Tunai' && typeof uangTunai === 'number' ? uangTunai : undefined,
+                        kembalian: paymentMethod === 'Tunai' && typeof uangTunai === 'number' ? uangTunai - total : undefined,
                         details: result.data.detail.map((d: any) => ({
                           nama: d.menu.nama_menu,
                           qty: d.qty,
@@ -764,9 +786,10 @@ export default function POSPage() {
                       setCart([]);
                       setCustomerName("");
                       setTableNumber("");
+                      setUangTunai("");
                     }
                   }}
-                  className="w-full bg-[#b93b3b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200/50 active:scale-95 transition-all">
+                  className="w-full bg-[#b93b3b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200/50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   Selesaikan Pesanan
                 </button>
                 <button
