@@ -23,10 +23,107 @@ export interface PrintOrder {
   kembalian?: number;
 }
 
+let cachedDevice: any = null;
+let cachedCharacteristic: any = null;
+
+async function getBluetoothCharacteristic() {
+  if (cachedCharacteristic) return cachedCharacteristic;
+  const nav = navigator as any;
+  if (!nav.bluetooth) throw new Error("Web Bluetooth API tidak didukung di browser ini.");
+
+  const device = await nav.bluetooth.requestDevice({
+    acceptAllDevices: true,
+    optionalServices: [
+      '000018f0-0000-1000-8000-00805f9b34fb', 
+      'e7810a71-73ae-499d-8c15-faa9aef0c3f2', 
+      '49535343-fe7d-4ae5-8fa9-9fafd205e455', 
+      '0000ff00-0000-1000-8000-00805f9b34fb'
+    ]
+  });
+
+  const server = await device.gatt.connect();
+  const services = await server.getPrimaryServices();
+  for (const service of services) {
+    const characteristics = await service.getCharacteristics();
+    for (const char of characteristics) {
+      if (char.properties.write || char.properties.writeWithoutResponse) {
+        cachedDevice = device;
+        cachedCharacteristic = char;
+        device.addEventListener('gattserverdisconnected', () => {
+          cachedDevice = null;
+          cachedCharacteristic = null;
+        });
+        return char;
+      }
+    }
+  }
+  throw new Error("Karakteristik Bluetooth untuk mencetak tidak ditemukan.");
+}
+
+async function printViaBluetooth(order: PrintOrder) {
+  const char = await getBluetoothCharacteristic();
+  const buffer: number[] = [];
+  const config = (order as any).receipt_config || {};
+
+  buffer.push(27, 64); // ESC @
+  buffer.push(27, 97, 1); // Center
+
+  const textToBuffer = (str: string) => {
+    for (let i = 0; i < str.length; i++) buffer.push(str.charCodeAt(i));
+    buffer.push(10); // LF
+  };
+
+  const formatRp = (angka: number) => new Intl.NumberFormat("id-ID").format(angka);
+
+  textToBuffer(config.store_name || "MIE MA-DYANG");
+  if (config.store_motto) textToBuffer(config.store_motto);
+  textToBuffer(config.store_address || "Jl. Raya Madyang No. 16, Malang");
+  if (config.store_phone) textToBuffer(config.store_phone);
+  textToBuffer("-".repeat(32));
+
+  buffer.push(27, 97, 0); // Left
+  textToBuffer(`No   : ${order.no}`);
+  textToBuffer(`Kasir: ${order.kasir}`);
+  textToBuffer(`Plgn : ${order.nama}`);
+  textToBuffer("-".repeat(32));
+
+  order.items.forEach((item) => {
+    textToBuffer(item.nama);
+    const line = `  ${item.qty} x ${formatRp(item.harga)}`;
+    const subtotal = formatRp(item.subtotal);
+    const spaces = Math.max(1, 32 - line.length - subtotal.length);
+    textToBuffer(line + " ".repeat(spaces) + subtotal);
+  });
+  textToBuffer("-".repeat(32));
+
+  buffer.push(27, 97, 2); // Right
+  textToBuffer(`TOTAL   : ${formatRp(order.total)}`);
+  if (order.tunai) textToBuffer(`Bayar   : ${formatRp(order.tunai)}`);
+  if (order.kembalian !== undefined) textToBuffer(`Kembali : ${formatRp(order.kembalian)}`);
+
+  buffer.push(27, 97, 1); // Center
+  textToBuffer("-".repeat(32));
+  textToBuffer(config.footer_msg1 || "Terima kasih!");
+  if (config.footer_msg2) textToBuffer(config.footer_msg2);
+  buffer.push(10, 10, 10, 10); // Spacing
+
+  const finalBuffer = new Uint8Array(buffer);
+  const chunkSize = 100;
+  for (let i = 0; i < finalBuffer.length; i += chunkSize) {
+    await char.writeValue(finalBuffer.slice(i, i + chunkSize));
+  }
+}
+
 export async function smartPrint(order: PrintOrder) {
   try {
-    // Coba kirim ke Local Print Server (Python)
-    const response = await fetch("http://localhost:5000/print", {
+    const printServerUrl = (order as any).receipt_config?.print_server_url || "http://localhost:5000/print";
+    
+    if (printServerUrl.trim().toLowerCase() === "bluetooth") {
+      await printViaBluetooth(order);
+      return "server"; // sukses via bluetooth
+    }
+
+    const response = await fetch(printServerUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,7 +135,7 @@ export async function smartPrint(order: PrintOrder) {
       return "server";
     }
   } catch (error) {
-    console.log("Local Print Server tidak merespons, fallback ke browser print.", error);
+    console.log("Cetak gagal / tidak merespons, fallback ke browser print.", error);
   }
 
   // Fallback ke browser print

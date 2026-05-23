@@ -14,6 +14,7 @@ export default function ReceiptSettings() {
     store_phone: "",
     footer_msg1: "",
     footer_msg2: "",
+    print_server_url: "",
   });
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function ReceiptSettings() {
           store_phone: result.data.store_phone || "",
           footer_msg1: result.data.footer_msg1 || "",
           footer_msg2: result.data.footer_msg2 || "",
+          print_server_url: result.data.print_server_url || "",
         });
       }
     } catch (error) {
@@ -125,6 +127,23 @@ export default function ReceiptSettings() {
                   placeholder={data.store_phone || "0812-3456-7890"}
                   className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 outline-none font-medium text-center"
                 />
+              </div>
+
+              <h2 className="text-xl font-bold mb-4 mt-8 text-gray-800">Koneksi Print Server (Printer Lokal)</h2>
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">URL Print Server</label>
+                <input
+                  type="text"
+                  value={data.print_server_url}
+                  onChange={(e) => setData({ ...data, print_server_url: e.target.value })}
+                  placeholder="http://192.168.1.10:5000/print"
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 outline-none font-medium text-center text-blue-600 bg-blue-50"
+                />
+                <p className="text-xs text-gray-500 mt-2 leading-relaxed">
+                  Isi dengan IP komputer yang menjalankan <b>print_server.py</b> (contoh: <code>http://192.168.1.10:5000/print</code>) agar kasir bisa mencetak langsung dari HP. Biarkan default <code>http://localhost:5000/print</code> jika kasir menggunakan PC yang sama.
+                  <br/><br/>
+                  <b>KHUSUS ANDROID:</b> Isi dengan <code>bluetooth</code> jika Anda ingin mencetak langsung menggunakan Bluetooth HP (Web Bluetooth API) tanpa print server.
+                </p>
               </div>
 
               <h2 className="text-xl font-bold mb-4 mt-8 text-gray-800">Footer Nota</h2>

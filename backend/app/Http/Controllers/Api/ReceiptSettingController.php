@@ -20,6 +20,7 @@ class ReceiptSettingController extends Controller
             'store_phone' => '0812-3456-7890',
             'footer_msg1' => 'Terima kasih!',
             'footer_msg2' => 'Selamat menikmati :)',
+            'print_server_url' => 'http://localhost:5000/print',
         ];
 
         foreach ($defaults as $key => $default) {
