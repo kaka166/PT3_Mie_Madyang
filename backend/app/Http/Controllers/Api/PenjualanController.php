@@ -27,7 +27,7 @@ class PenjualanController extends Controller
                 $q->where('status', '!=', 'done')
                   ->orWhere(function ($q2) {
                       $q2->where('status', 'done')
-                         ->whereDate('tanggal', now()->toDateString());
+                         ->where('tanggal', '>=', now()->subHours(24));
                   });
             })
             ->latest()
