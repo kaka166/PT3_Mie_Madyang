@@ -298,7 +298,7 @@ export default function Sidebar({
         {/* FOOTER */}
         <div className="px-3 pb-4 pt-3 border-t border-white/5 space-y-0.5 flex-shrink-0">
           <div className="px-3 pb-1">
-            <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">App v1.1.0</span>
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">Versi 3.0.5.12</span>
           </div>
 
           <LinkNext
