@@ -303,7 +303,7 @@ export default function Sidebar({
           </div>
 
           <LinkNext
-            href="#"
+            href="/help"
             className="flex items-center gap-3 px-3 py-2.5 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all"
           >
             <HelpCircle size={18} />
