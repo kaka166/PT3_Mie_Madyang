@@ -96,11 +96,19 @@ class PrintHandler(BaseHTTPRequestHandler):
             raise Exception("Tipe printer tidak dikenali.")
             
         try:
+            receipt_config = order.get('receipt_config', {})
+            store_name = receipt_config.get('store_name') or 'MIE MA-DYANG'
+            store_motto = receipt_config.get('store_motto') or 'The Culinary Curator'
+            store_address = receipt_config.get('store_address') or 'Jl. Raya Madyang No. 16, Malang'
+            store_phone = receipt_config.get('store_phone') or '0812-3456-7890'
+            footer_msg1 = receipt_config.get('footer_msg1') or 'Terima kasih!'
+            footer_msg2 = receipt_config.get('footer_msg2') or 'Selamat menikmati :)'
+
             printer.set(align='center', font='a', width=1, height=1)
-            printer.text("MIE MA-DYANG\n")
-            printer.text("The Culinary Curator\n")
-            printer.text("Jl. Raya Madyang No. 16, Malang\n")
-            printer.text("0812-3456-7890\n")
+            printer.text(f"{store_name}\n")
+            if store_motto: printer.text(f"{store_motto}\n")
+            printer.text(f"{store_address}\n")
+            if store_phone: printer.text(f"{store_phone}\n")
             printer.text("-" * 32 + "\n")
             
             printer.set(align='left')
@@ -128,8 +136,8 @@ class PrintHandler(BaseHTTPRequestHandler):
             
             printer.set(align='center')
             printer.text("-" * 32 + "\n")
-            printer.text("Terima kasih!\n")
-            printer.text("Selamat menikmati :)\n")
+            if footer_msg1: printer.text(f"{footer_msg1}\n")
+            if footer_msg2: printer.text(f"{footer_msg2}\n")
             printer.text("\n\n\n\n")
         finally:
             # Pastikan koneksi printer ditutup agar tidak terjadi PermissionError(13) di pencetakan berikutnya

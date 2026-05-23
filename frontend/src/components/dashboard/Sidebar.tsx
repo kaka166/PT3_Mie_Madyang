@@ -100,6 +100,7 @@ export default function Sidebar({
       subItems: [
         { label: "QRIS", href: "/settings/qris" },
         { label: "Landing Page", href: "/settings/landing-page" },
+        { label: "Pengaturan Nota", href: "/settings/receipt" },
       ],
     },
   ];

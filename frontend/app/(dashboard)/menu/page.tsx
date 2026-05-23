@@ -316,7 +316,7 @@ export default function InventoryPage() {
                             src={`${STORAGE_BASE_URL}/menu/${item.gambar}`}
                             alt={item.nama_menu}
                             className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/eeeeee/999999?text=Menu'; }}
                           />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg flex-shrink-0">🍜</div>

@@ -79,6 +79,17 @@ export default function POSPage() {
 
   // Cetak struk via print server lokal (auto) atau browser dialog (fallback)
   const printReceipt = async (order: Pemasukan) => {
+    let receiptConfig = {};
+    try {
+      const res = await fetch(`${API_BASE_URL}/receipt-settings`);
+      const result = await res.json();
+      if (result.success && result.data) {
+        receiptConfig = result.data;
+      }
+    } catch (e) {
+      console.error("Gagal get receipt settings:", e);
+    }
+
     const result = await smartPrint({
       no: order.no || "-",
       nama: order.nama || "Guest",
@@ -87,6 +98,9 @@ export default function POSPage() {
       waktu: order.waktu || "",
       kondisi: order.kondisi || "-",
       total: order.jumlah || 0,
+      tunai: order.tunai,
+      kembalian: order.kembalian,
+      receipt_config: receiptConfig,
       items: (order.details || []).map((d) => ({
         nama: d.nama,
         qty: d.qty,

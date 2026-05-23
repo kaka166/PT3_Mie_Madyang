@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Save, Image as ImageIcon } from "lucide-react";
 import Swal from "sweetalert2";
 import { API_BASE_URL } from "@/config";
+import { getMenus, MenuItem } from "@/services/cashierService";
 
 export default function LandingPageSettings() {
   const [loading, setLoading] = useState(false);
@@ -17,8 +18,13 @@ export default function LandingPageSettings() {
     footer_address: "",
     contact_phone: "",
     contact_email: "",
+    featured_mie: "",
+    featured_topping: "",
+    featured_minuman: "",
   });
   
+  const [activeData, setActiveData] = useState<any>({});
+  const [menus, setMenus] = useState<MenuItem[]>([]);
   const [heroImage, setHeroImage] = useState<File | null>(null);
   const [mascotImage, setMascotImage] = useState<File | null>(null);
 
@@ -28,7 +34,12 @@ export default function LandingPageSettings() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/landing-page`);
+      const [res, menusData] = await Promise.all([
+        fetch(`${API_BASE_URL}/landing-page`),
+        getMenus()
+      ]);
+      setMenus(menusData);
+      
       const result = await res.json();
       if (result.success && result.data) {
         setData({
@@ -41,7 +52,11 @@ export default function LandingPageSettings() {
           footer_address: result.data.footer_address || "",
           contact_phone: result.data.contact_phone || "",
           contact_email: result.data.contact_email || "",
+          featured_mie: result.data.featured_mie || "",
+          featured_topping: result.data.featured_topping || "",
+          featured_minuman: result.data.featured_minuman || "",
         });
+        setActiveData(result.data);
       }
     } catch (error) {
       console.error("Gagal load setting", error);
@@ -111,7 +126,7 @@ export default function LandingPageSettings() {
                   type="text"
                   value={data.hero_title}
                   onChange={(e) => setData({ ...data, hero_title: e.target.value })}
-                  placeholder="Contoh: Cita Rasa Legendaris"
+                  placeholder={activeData.hero_title || "Contoh: Cita Rasa Legendaris"}
                   className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#c93535] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
                 />
               </div>
@@ -125,7 +140,7 @@ export default function LandingPageSettings() {
                   onChange={(e) => setData({ ...data, hero_subtitle: e.target.value })}
                   rows={3}
                   className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#c93535] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
-                  placeholder="Deskripsi..."
+                  placeholder={activeData.hero_subtitle || "Deskripsi..."}
                 />
               </div>
               
@@ -137,7 +152,7 @@ export default function LandingPageSettings() {
                   type="text"
                   value={data.hero_cta}
                   onChange={(e) => setData({ ...data, hero_cta: e.target.value })}
-                  placeholder="Contoh: Pesan Sekarang"
+                  placeholder={activeData.hero_cta || "Contoh: Pesan Sekarang"}
                   className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#c93535] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
                 />
               </div>
@@ -149,7 +164,7 @@ export default function LandingPageSettings() {
                   type="text"
                   value={data.stats_customers}
                   onChange={(e) => setData({ ...data, stats_customers: e.target.value })}
-                  placeholder="Contoh: 12,000+"
+                  placeholder={activeData.stats_customers || "Contoh: 12,000+"}
                   className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
                 />
               </div>
@@ -168,7 +183,7 @@ export default function LandingPageSettings() {
                   type="text"
                   value={data.favorite_menu_title}
                   onChange={(e) => setData({ ...data, favorite_menu_title: e.target.value })}
-                  placeholder="Contoh: Menu Favorit Kami"
+                  placeholder={activeData.favorite_menu_title || "Contoh: Menu Favorit Kami"}
                   className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
                 />
               </div>
@@ -182,8 +197,62 @@ export default function LandingPageSettings() {
                   onChange={(e) => setData({ ...data, about_text: e.target.value })}
                   rows={4}
                   className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
-                  placeholder="Cerita singkat atau moto warung Anda..."
+                  placeholder={activeData.about_text || "Cerita singkat atau moto warung Anda..."}
                 />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+            <h2 className="text-xl font-bold mb-6 text-gray-800">Menu Andalan (Katalog)</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">
+                  Menu Utama (Mie)
+                </label>
+                <select
+                  value={data.featured_mie}
+                  onChange={(e) => setData({ ...data, featured_mie: e.target.value })}
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium bg-white"
+                >
+                  <option value="">Pilih Menu Mie</option>
+                  {menus.map((m) => (
+                    <option key={m.id} value={m.id.toString()}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">
+                  Topping / Side Dish
+                </label>
+                <select
+                  value={data.featured_topping}
+                  onChange={(e) => setData({ ...data, featured_topping: e.target.value })}
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium bg-white"
+                >
+                  <option value="">Pilih Topping</option>
+                  {menus.map((m) => (
+                    <option key={m.id} value={m.id.toString()}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">
+                  Minuman
+                </label>
+                <select
+                  value={data.featured_minuman}
+                  onChange={(e) => setData({ ...data, featured_minuman: e.target.value })}
+                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium bg-white"
+                >
+                  <option value="">Pilih Minuman</option>
+                  {menus.map((m) => (
+                    <option key={m.id} value={m.id.toString()}>{m.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>
@@ -201,7 +270,7 @@ export default function LandingPageSettings() {
                   onChange={(e) => setData({ ...data, footer_address: e.target.value })}
                   rows={2}
                   className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
-                  placeholder="Jl. Contoh No. 123..."
+                  placeholder={activeData.footer_address || "Jl. Contoh No. 123..."}
                 />
               </div>
 
@@ -214,7 +283,7 @@ export default function LandingPageSettings() {
                     type="text"
                     value={data.contact_phone}
                     onChange={(e) => setData({ ...data, contact_phone: e.target.value })}
-                    placeholder="Contoh: +62 812-3456-7890"
+                    placeholder={activeData.contact_phone || "Contoh: +62 812-3456-7890"}
                     className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
                   />
                 </div>
@@ -226,7 +295,7 @@ export default function LandingPageSettings() {
                     type="text"
                     value={data.contact_email}
                     onChange={(e) => setData({ ...data, contact_email: e.target.value })}
-                    placeholder="halo@miemadyang.com"
+                    placeholder={activeData.contact_email || "halo@miemadyang.com"}
                     className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium"
                   />
                 </div>
