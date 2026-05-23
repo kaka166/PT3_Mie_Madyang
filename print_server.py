@@ -1,6 +1,8 @@
 import sys
 import json
 import time
+import logging
+from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
 try:
     from escpos.printer import Serial, Usb, Network
@@ -11,6 +13,20 @@ except ImportError:
     print("==================================================")
     input("Tekan Enter untuk keluar...")
     sys.exit(1)
+
+# Setup Logging
+log_filename = f"print_server_{datetime.now().strftime('%Y%m%d')}.log"
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
+    handlers=[
+        logging.FileHandler(log_filename),
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+logger = logging.getLogger(__name__)
 
 # Variabel global untuk menyimpan konfigurasi printer
 PRINTER_CONFIG = {
@@ -23,7 +39,7 @@ PRINTER_CONFIG = {
 
 class PrintHandler(BaseHTTPRequestHandler):
     def log_message(self, format, *args):
-        pass
+        pass # Matikan log bawaan http.server
 
     def do_OPTIONS(self):
         self.send_response(200, "ok")
@@ -41,7 +57,12 @@ class PrintHandler(BaseHTTPRequestHandler):
             
             try:
                 order = json.loads(post_data.decode('utf-8'))
-                print(f"\n[INFO] Menerima request cetak struk untuk No: {order.get('no', 'Unknown')}")
+                origin = self.headers.get('Origin', 'Web Lokal / Unknown')
+                
+                if 'mie-madyang.farelzy.my.id' in origin:
+                    logger.info(f"WEB ONLINE REQUEST: Order No: {order.get('no', 'Unknown')} | Dari: {origin}")
+                else:
+                    logger.info(f"WEB REQUEST: Order No: {order.get('no', 'Unknown')} | Dari: {origin}")
                 
                 self.print_receipt(order, PRINTER_CONFIG)
                 
@@ -50,10 +71,10 @@ class PrintHandler(BaseHTTPRequestHandler):
                 self.send_header('Content-type', 'application/json')
                 self.end_headers()
                 self.wfile.write(json.dumps({"status": "success", "message": "Struk berhasil dicetak"}).encode('utf-8'))
-                print("[SUCCESS] Struk berhasil dicetak!")
+                logger.info(f"PRINTER SUCCESS: Struk {order.get('no', 'Unknown')} berhasil dicetak!")
                 
             except Exception as e:
-                print(f"[ERROR] Gagal mencetak: {e}")
+                logger.error(f"PRINTER ERROR: Gagal mencetak: {e}")
                 self.send_response(500)
                 self.send_header('Access-Control-Allow-Origin', '*')
                 self.send_header('Content-type', 'application/json')
@@ -65,7 +86,6 @@ class PrintHandler(BaseHTTPRequestHandler):
             self.end_headers()
 
     def print_receipt(self, order, config):
-        # Membuka koneksi ke printer berdasarkan tipe
         if config['type'] == 'serial':
             printer = Serial(config['port'], 9600, timeout=1)
         elif config['type'] == 'usb':
@@ -76,7 +96,6 @@ class PrintHandler(BaseHTTPRequestHandler):
             raise Exception("Tipe printer tidak dikenali.")
             
         printer.set(align='center', font='a', width=1, height=1)
-        
         printer.text("MIE MA-DYANG\n")
         printer.text("The Culinary Curator\n")
         printer.text("Jl. Raya Madyang No. 16, Malang\n")
@@ -95,7 +114,6 @@ class PrintHandler(BaseHTTPRequestHandler):
             printer.text(f"{item['nama']}\n")
             qty_harga = f"  {item['qty']} x {self.format_rp(item['harga'])}"
             subtotal = f"{self.format_rp(item['subtotal'])}"
-            
             spaces = 32 - len(qty_harga) - len(subtotal)
             if spaces < 1: spaces = 1
             printer.text(qty_harga + (" " * spaces) + subtotal + "\n")
@@ -111,7 +129,6 @@ class PrintHandler(BaseHTTPRequestHandler):
         printer.text("-" * 32 + "\n")
         printer.text("Terima kasih!\n")
         printer.text("Selamat menikmati :)\n")
-        
         printer.text("\n\n\n\n")
 
     def format_rp(self, number):
@@ -138,7 +155,6 @@ def run_server(port=5000):
         if pilihan == '1':
             PRINTER_CONFIG['type'] = 'serial'
             print("\n>> TIPE: SERIAL / BLUETOOTH")
-            print("Cara cek COM Port: Buka Windows Device Manager -> Ports (COM & LPT)")
             while True:
                 com_input = input("Masukkan Port Printer (contoh: COM11): ").strip()
                 if com_input.upper().startswith("COM"):
@@ -151,8 +167,6 @@ def run_server(port=5000):
         elif pilihan == '2':
             PRINTER_CONFIG['type'] = 'usb'
             print("\n>> TIPE: USB KABEL")
-            print("Cara cek Vendor & Product ID: Buka Windows Device Manager -> Universal Serial Bus controllers -> klik kanan Printer -> Details -> Hardware Ids")
-            print("Format contoh: 0x04b8 atau 04b8")
             PRINTER_CONFIG['vendor'] = input("Masukkan idVendor (contoh: 0x04b8): ").strip()
             if not PRINTER_CONFIG['vendor'].startswith('0x'): PRINTER_CONFIG['vendor'] = '0x' + PRINTER_CONFIG['vendor']
             PRINTER_CONFIG['product'] = input("Masukkan idProduct (contoh: 0x0202): ").strip()
@@ -168,17 +182,24 @@ def run_server(port=5000):
         else:
             print("Pilihan tidak valid! Silakan masukkan 1, 2, atau 3.")
             
-    print("\n[INFO] Menyimpan konfigurasi... (Anda akan langsung menggunakannya untuk print)")
+    logger.info("Menyimpan konfigurasi printer...")
     
     print("\n=======================================================")
-    print(f" Print Server BERJALAN di Port {port}")
+    logger.info(f"Print Server BERJALAN di Port {port}")
+    
     if PRINTER_CONFIG['type'] == 'serial':
-        print(f" Target Printer: Serial / Bluetooth di {PRINTER_CONFIG['port']}")
+        print(f" >>> ANDA TERHUBUNG DENGAN PRINTER {PRINTER_CONFIG['port']} <<<")
+        logger.info(f"Terkoneksi ke {PRINTER_CONFIG['port']}")
     elif PRINTER_CONFIG['type'] == 'usb':
-        print(f" Target Printer: USB (Vendor: {PRINTER_CONFIG['vendor']}, Product: {PRINTER_CONFIG['product']})")
+        print(" >>> ANDA TERHUBUNG DENGAN PRINTER USB <<<")
+        logger.info("Terkoneksi ke USB")
     elif PRINTER_CONFIG['type'] == 'network':
-        print(f" Target Printer: Network (IP: {PRINTER_CONFIG['ip']})")
-    print(" JANGAN TUTUP jendela ini selama aplikasi kasir digunakan.")
+        print(f" >>> ANDA TERHUBUNG DENGAN PRINTER IP {PRINTER_CONFIG['ip']} <<<")
+        logger.info(f"Terkoneksi ke IP {PRINTER_CONFIG['ip']}")
+        
+    print("\nJANGAN TUTUP jendela ini selama aplikasi kasir digunakan.")
+    print("Menerima request dari web lokal maupun online (mie-madyang.farelzy.my.id).")
+    print(f"Log disimpan di: {log_filename}")
     print("=======================================================\n")
     
     server_address = ('', port)
@@ -186,7 +207,7 @@ def run_server(port=5000):
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:
-        print("\n[INFO] Mematikan Print Server...")
+        logger.info("Mematikan Print Server...")
         sys.exit(0)
 
 if __name__ == '__main__':

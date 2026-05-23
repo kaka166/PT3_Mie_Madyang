@@ -10,8 +10,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  CheckCircle2,
-  Flame,
 } from "lucide-react";
 import { formatTanggal } from "@/utils/formatTanggal";
 import { formatRupiah } from "@/utils/formatRupiah";
@@ -97,7 +95,7 @@ export default function KitchenDashboardPage() {
       const date = new Date(item.waktu);
 
       const matchSearch = searchId
-        ? item.id.replace("#", "").includes(searchId)
+        ? String(item.id).replace("#", "").includes(searchId)
         : true;
 
       const matchTab =
@@ -153,7 +151,7 @@ export default function KitchenDashboardPage() {
     }
 
     addNotification(
-      `Status #${selectedOrder.id.replace("#", "")} diperbarui`,
+      `Status #${String(selectedOrder.id).replace("#", "")} diperbarui`,
       `${selectedOrder.customer} → ${modalStatus}`,
       modalStatus === "Ready" ? "success" : "warning",
       true,
@@ -280,7 +278,7 @@ export default function KitchenDashboardPage() {
                           onClick={async () => {
                             const ok = await updateOrderStatus(Number(item.original_id), "cooking");
                             if (ok) {
-                              addNotification(`#${item.id.replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
+                              addNotification(`#${String(item.id).replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
                               fetchOrders();
                             }
                           }}
@@ -293,7 +291,7 @@ export default function KitchenDashboardPage() {
                           onClick={async () => {
                             const ok = await updateOrderStatus(Number(item.original_id), "done");
                             if (ok) {
-                              addNotification(`#${item.id.replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
+                              addNotification(`#${String(item.id).replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
                               fetchOrders();
                             }
                           }}
@@ -338,7 +336,7 @@ export default function KitchenDashboardPage() {
                     onClick={async () => {
                       const ok = await updateOrderStatus(Number(item.original_id), "cooking");
                       if (ok) {
-                        addNotification(`#${item.id.replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
+                        addNotification(`#${String(item.id).replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
                         fetchOrders();
                       }
                     }}
@@ -351,7 +349,7 @@ export default function KitchenDashboardPage() {
                     onClick={async () => {
                       const ok = await updateOrderStatus(Number(item.original_id), "done");
                       if (ok) {
-                        addNotification(`#${item.id.replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
+                        addNotification(`#${String(item.id).replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
                         fetchOrders();
                       }
                     }}
