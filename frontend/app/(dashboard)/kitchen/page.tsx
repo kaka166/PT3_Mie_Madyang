@@ -39,6 +39,7 @@ export default function KitchenDashboardPage() {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [modalStatus, setModalStatus] = useState<string>("");
   const [statusError, setStatusError] = useState("");
+  const [confirmSelesai, setConfirmSelesai] = useState<any | null>(null);
   const previousOrderIds = useRef<Set<string>>(new Set());
 
   const fetchOrders = async () => {
@@ -362,14 +363,7 @@ export default function KitchenDashboardPage() {
                       )}
                       {item.status === "Dimasak" && (
                         <button
-                          onClick={async () => {
-                            if (!window.confirm(`Yakin pesanan ${item.id} sudah selesai?`)) return;
-                            const ok = await updateOrderStatus(Number(item.original_id), "done");
-                            if (ok) {
-                              addNotification(`#${String(item.id).replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
-                              fetchOrders();
-                            }
-                          }}
+                          onClick={() => setConfirmSelesai(item)}
                           className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
                           Selesai
                         </button>
@@ -421,14 +415,7 @@ export default function KitchenDashboardPage() {
                 )}
                 {item.status === 'Dimasak' && (
                   <button
-                    onClick={async () => {
-                      if (!window.confirm(`Yakin pesanan ${item.id} sudah selesai?`)) return;
-                      const ok = await updateOrderStatus(Number(item.original_id), "done");
-                      if (ok) {
-                        addNotification(`#${String(item.id).replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
-                        fetchOrders();
-                      }
-                    }}
+                    onClick={() => setConfirmSelesai(item)}
                     className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
                     Selesai
                   </button>
@@ -606,6 +593,39 @@ export default function KitchenDashboardPage() {
                   Simpan
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- KOMPONEN POP UP KONFIRMASI SELESAI --- */}
+      {confirmSelesai && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Konfirmasi Selesai</h3>
+            <p className="text-gray-600 mb-6">
+              Yakin pesanan <span className="font-bold text-black">{confirmSelesai.id}</span> dari <span className="font-bold text-black">{confirmSelesai.customer}</span> sudah selesai?
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setConfirmSelesai(null)}
+                className="px-5 py-2.5 rounded-xl font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={async () => {
+                  const item = confirmSelesai;
+                  setConfirmSelesai(null);
+                  const ok = await updateOrderStatus(Number(item.original_id), "done");
+                  if (ok) {
+                    addNotification(`#${String(item.id).replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
+                    fetchOrders();
+                  }
+                }}
+                className="px-5 py-2.5 rounded-xl font-bold bg-green-500 hover:bg-green-600 text-white shadow-sm transition-colors"
+              >
+                Ya, Selesai
+              </button>
             </div>
           </div>
         </div>

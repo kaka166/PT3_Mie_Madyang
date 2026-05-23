@@ -95,41 +95,49 @@ class PrintHandler(BaseHTTPRequestHandler):
         else:
             raise Exception("Tipe printer tidak dikenali.")
             
-        printer.set(align='center', font='a', width=1, height=1)
-        printer.text("MIE MA-DYANG\n")
-        printer.text("The Culinary Curator\n")
-        printer.text("Jl. Raya Madyang No. 16, Malang\n")
-        printer.text("0812-3456-7890\n")
-        printer.text("-" * 32 + "\n")
-        
-        printer.set(align='left')
-        printer.text(f"No   : {order.get('no', '')}\n")
-        printer.text(f"Tgl  : {order.get('waktu', '')}\n")
-        printer.text(f"Kasir: {order.get('kasir', '')}\n")
-        printer.text(f"Plgn : {order.get('nama', '')}\n")
-        printer.text(f"Tipe : {order.get('kondisi', '')}\n")
-        printer.text("-" * 32 + "\n")
-        
-        for item in order.get('items', []):
-            printer.text(f"{item['nama']}\n")
-            qty_harga = f"  {item['qty']} x {self.format_rp(item['harga'])}"
-            subtotal = f"{self.format_rp(item['subtotal'])}"
-            spaces = 32 - len(qty_harga) - len(subtotal)
-            if spaces < 1: spaces = 1
-            printer.text(qty_harga + (" " * spaces) + subtotal + "\n")
+        try:
+            printer.set(align='center', font='a', width=1, height=1)
+            printer.text("MIE MA-DYANG\n")
+            printer.text("The Culinary Curator\n")
+            printer.text("Jl. Raya Madyang No. 16, Malang\n")
+            printer.text("0812-3456-7890\n")
+            printer.text("-" * 32 + "\n")
             
-        printer.text("-" * 32 + "\n")
-        
-        printer.set(align='right')
-        printer.text(f"TOTAL   : {self.format_rp(order.get('total', 0))}\n")
-        printer.text(f"Bayar   : {self.format_rp(order.get('tunai', 0)) if order.get('tunai') else '-'}\n")
-        printer.text(f"Kembali : {self.format_rp(order.get('kembalian', 0)) if order.get('kembalian') is not None else '-'}\n")
-        
-        printer.set(align='center')
-        printer.text("-" * 32 + "\n")
-        printer.text("Terima kasih!\n")
-        printer.text("Selamat menikmati :)\n")
-        printer.text("\n\n\n\n")
+            printer.set(align='left')
+            printer.text(f"No   : {order.get('no', '')}\n")
+            printer.text(f"Tgl  : {order.get('waktu', '')}\n")
+            printer.text(f"Kasir: {order.get('kasir', '')}\n")
+            printer.text(f"Plgn : {order.get('nama', '')}\n")
+            printer.text(f"Tipe : {order.get('kondisi', '')}\n")
+            printer.text("-" * 32 + "\n")
+            
+            for item in order.get('items', []):
+                printer.text(f"{item['nama']}\n")
+                qty_harga = f"  {item['qty']} x {self.format_rp(item['harga'])}"
+                subtotal = f"{self.format_rp(item['subtotal'])}"
+                spaces = 32 - len(qty_harga) - len(subtotal)
+                if spaces < 1: spaces = 1
+                printer.text(qty_harga + (" " * spaces) + subtotal + "\n")
+                
+            printer.text("-" * 32 + "\n")
+            
+            printer.set(align='right')
+            printer.text(f"TOTAL   : {self.format_rp(order.get('total', 0))}\n")
+            printer.text(f"Bayar   : {self.format_rp(order.get('tunai', 0)) if order.get('tunai') else '-'}\n")
+            printer.text(f"Kembali : {self.format_rp(order.get('kembalian', 0)) if order.get('kembalian') is not None else '-'}\n")
+            
+            printer.set(align='center')
+            printer.text("-" * 32 + "\n")
+            printer.text("Terima kasih!\n")
+            printer.text("Selamat menikmati :)\n")
+            printer.text("\n\n\n\n")
+        finally:
+            # Pastikan koneksi printer ditutup agar tidak terjadi PermissionError(13) di pencetakan berikutnya
+            if hasattr(printer, 'close'):
+                try:
+                    printer.close()
+                except:
+                    pass
 
     def format_rp(self, number):
         try:
