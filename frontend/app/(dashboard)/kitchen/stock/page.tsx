@@ -190,7 +190,7 @@ export default function StockBahanPage() {
 
             <tbody>
               {(paginatedStock || []).map((item, i) => (
-                <tr key={`${item.nama} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                <tr key={`${item.nama}-${i}`} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
                   <td className="px-5 py-3.5 text-left">{item.id}</td>
                   <td className="px-5 py-3.5 text-left">{item.nama}</td>
                   <td className="px-5 py-3.5 ">{item.jumlah}</td>
@@ -310,7 +310,7 @@ export default function StockBahanPage() {
 
             <tbody>
               {(paginatedRiwayat || []).map((item, i) => (
-                <tr key={`${item.nama} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                <tr key={`${item.nama}-${i}`} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
                   <td className="px-5 py-3.5 text-neutral-700">{item.id}</td>
 
                   <td className="px-5 py-3.5 text-neutral-600">{item.itemId}</td>
