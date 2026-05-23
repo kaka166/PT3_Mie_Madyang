@@ -201,13 +201,13 @@ export default function KitchenDashboardPage() {
                   setActiveTab("riwayat");
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center sm:flex-row sm:gap-1 ${
                   activeTab === "riwayat"
                     ? "bg-white text-[#F53E1B] shadow-sm"
                     : "text-gray-500 hover:text-gray-800"
                 }`}
               >
-                Riwayat Selesai
+                Riwayat Selesai <span className="text-[10px] font-normal opacity-75">(24 Jam Terakhir)</span>
               </button>
             </div>
           </div>
@@ -228,6 +228,80 @@ export default function KitchenDashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Kanban Board / Quick Summary */}
+        {activeTab === "aktif" && (
+          <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-b bg-white">
+            {/* Kolom Antri */}
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 h-[400px] overflow-y-auto custom-scrollbar">
+              <h3 className="font-bold text-gray-700 mb-3 sticky top-0 bg-gray-50 py-1">Pesanan Selanjutnya</h3>
+              <div className="space-y-3">
+                {orders.filter(o => o.status === "Antri").map((order, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-bold text-gray-800">{order.id}</p>
+                      <p className="text-xs font-semibold text-gray-500">{order.customer}</p>
+                    </div>
+                    <ul className="text-sm space-y-1.5">
+                      {(order.details || []).map((d: any, i: number) => (
+                        <li key={i} className="flex justify-between text-gray-700">
+                          <span><span className="font-bold text-[#F53E1B]">{d.qty}x</span> {d.nama}</span>
+                          {d.note && <span className="text-xs text-gray-400 italic bg-gray-50 px-1.5 rounded">{d.note}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Kolom Dimasak */}
+            <div className="bg-orange-50 rounded-xl p-4 border border-orange-100 h-[400px] overflow-y-auto custom-scrollbar">
+              <h3 className="font-bold text-orange-800 mb-3 sticky top-0 bg-orange-50 py-1">Pesanan Dimasak</h3>
+              <div className="space-y-3">
+                {orders.filter(o => o.status === "Dimasak").map((order, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-orange-100">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-bold text-gray-800">{order.id}</p>
+                      <p className="text-xs font-semibold text-gray-500">{order.customer}</p>
+                    </div>
+                    <ul className="text-sm space-y-1.5">
+                      {(order.details || []).map((d: any, i: number) => (
+                        <li key={i} className="flex justify-between text-gray-700">
+                          <span><span className="font-bold text-[#F53E1B]">{d.qty}x</span> {d.nama}</span>
+                          {d.note && <span className="text-xs text-orange-400 italic bg-orange-50 px-1.5 rounded">{d.note}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Kolom Selesai */}
+            <div className="bg-green-50 rounded-xl p-4 border border-green-100 h-[400px] overflow-y-auto custom-scrollbar">
+              <h3 className="font-bold text-green-800 mb-3 sticky top-0 bg-green-50 py-1">Pesanan Selesai</h3>
+              <div className="space-y-3">
+                {orders.filter(o => o.status === "Ready").map((order, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-green-100 opacity-75">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-bold text-gray-800">{order.id}</p>
+                      <p className="text-xs font-semibold text-gray-500">{order.customer}</p>
+                    </div>
+                    <ul className="text-sm space-y-1.5">
+                      {(order.details || []).map((d: any, i: number) => (
+                        <li key={i} className="flex justify-between text-gray-700">
+                          <span><span className="font-bold text-[#F53E1B]">{d.qty}x</span> {d.nama}</span>
+                          {d.note && <span className="text-xs text-green-500 italic bg-green-100 px-1.5 rounded">{d.note}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tabel - Desktop */}
         <div className="hidden md:block overflow-x-auto">
@@ -283,12 +357,13 @@ export default function KitchenDashboardPage() {
                             }
                           }}
                           className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
-                          🍳 Proses
+                          Proses
                         </button>
                       )}
                       {item.status === "Dimasak" && (
                         <button
                           onClick={async () => {
+                            if (!window.confirm(`Yakin pesanan ${item.id} sudah selesai?`)) return;
                             const ok = await updateOrderStatus(Number(item.original_id), "done");
                             if (ok) {
                               addNotification(`#${String(item.id).replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
@@ -296,7 +371,7 @@ export default function KitchenDashboardPage() {
                             }
                           }}
                           className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
-                          ✅ Selesai
+                          Selesai
                         </button>
                       )}
                       <button
@@ -341,12 +416,13 @@ export default function KitchenDashboardPage() {
                       }
                     }}
                     className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
-                    🍳 Proses
+                    Proses
                   </button>
                 )}
                 {item.status === 'Dimasak' && (
                   <button
                     onClick={async () => {
+                      if (!window.confirm(`Yakin pesanan ${item.id} sudah selesai?`)) return;
                       const ok = await updateOrderStatus(Number(item.original_id), "done");
                       if (ok) {
                         addNotification(`#${String(item.id).replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
@@ -354,7 +430,7 @@ export default function KitchenDashboardPage() {
                       }
                     }}
                     className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
-                    ✅ Selesai
+                    Selesai
                   </button>
                 )}
                 <button
