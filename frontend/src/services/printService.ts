@@ -23,7 +23,25 @@ export interface PrintOrder {
   kembalian?: number;
 }
 
-export function smartPrint(order: PrintOrder) {
+export async function smartPrint(order: PrintOrder) {
+  try {
+    // Coba kirim ke Local Print Server (Python)
+    const response = await fetch("http://localhost:5000/print", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(order),
+    });
+
+    if (response.ok) {
+      return "server";
+    }
+  } catch (error) {
+    console.log("Local Print Server tidak merespons, fallback ke browser print.", error);
+  }
+
+  // Fallback ke browser print
   const printWindow = window.open("", "_blank", "width=340,height=600");
   if (!printWindow) {
     alert("Popup diblokir oleh browser! Mohon izinkan popup untuk mencetak struk.");
