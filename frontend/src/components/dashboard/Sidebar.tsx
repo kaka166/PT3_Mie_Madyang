@@ -297,6 +297,10 @@ export default function Sidebar({
 
         {/* FOOTER */}
         <div className="px-3 pb-4 pt-3 border-t border-white/5 space-y-0.5 flex-shrink-0">
+          <div className="px-3 pb-1">
+            <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">App v1.1.0</span>
+          </div>
+
           <LinkNext
             href="#"
             className="flex items-center gap-3 px-3 py-2.5 text-white/40 hover:text-white/70 hover:bg-white/5 rounded-xl transition-all"
