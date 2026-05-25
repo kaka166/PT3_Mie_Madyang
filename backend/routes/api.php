@@ -143,6 +143,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/session/active', [SessionController::class, 'active']);
         Route::get('/session/last-recap', [SessionController::class, 'lastRecap']);
 
+        // Profile
+        Route::put('/profile', [UserController::class, 'updateProfile']);
+
         // Attendance
         Route::get('/attendance/status', [AttendanceController::class, 'status']);
         Route::post('/attendance/check-in', [AttendanceController::class, 'checkIn']);

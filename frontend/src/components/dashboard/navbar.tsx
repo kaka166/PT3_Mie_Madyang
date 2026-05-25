@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   Settings,
@@ -9,7 +9,9 @@ import {
   Mail,
   Shield,
   Save,
+  Loader2,
 } from "lucide-react";
+import { authService } from "@/services/authService";
 import NotificationCenter from "./NotificationCenter";
 
 // Definisi Interface agar tidak menggunakan 'any'
@@ -29,6 +31,23 @@ export default function Navbar({
   onMenuClick: () => void;
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const nameRef = useRef<HTMLInputElement>(null);
+
+  const handleSaveProfile = async () => {
+    const name = nameRef.current?.value?.trim();
+    if (!name) return;
+    setSaving(true);
+    try {
+      const res = await authService.updateProfile({ name });
+      if (res.data) setUser(res.data);
+      setIsModalOpen(false);
+    } catch (err: any) {
+      alert(err.message || "Gagal menyimpan profil");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Helper untuk mendapatkan Nama Role
   const getRoleName = (roleId: number | string | undefined): string => {
@@ -42,7 +61,7 @@ export default function Navbar({
   };
 
   // State User dengan Type UserData
-  const [user] = useState<UserData | null>(() => {
+  const [user, setUser] = useState<UserData | null>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("user");
       try {
@@ -158,6 +177,7 @@ export default function Navbar({
                   <div className="relative">
                     <UserIcon size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 group-focus-within:text-neutral-800 transition-colors" />
                     <input
+                      ref={nameRef}
                       type="text"
                       defaultValue={user?.name}
                       className="w-full pl-12 pr-4 py-3.5 rounded-2xl border border-neutral-100 bg-neutral-50 focus:bg-white focus:ring-4 focus:ring-neutral-100 focus:border-neutral-300 outline-none text-sm font-bold transition-all"
@@ -206,8 +226,10 @@ export default function Navbar({
                 Tutup
               </button>
 
-              <button className="flex-[2] bg-neutral-900 text-white px-4 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all shadow-lg shadow-neutral-200 text-sm uppercase tracking-widest">
-                <Save size={18} /> Simpan Perubahan
+              <button onClick={handleSaveProfile} disabled={saving}
+                className="flex-[2] bg-neutral-900 text-white px-4 py-4 rounded-2xl font-black flex items-center justify-center gap-2 hover:bg-black active:scale-95 transition-all shadow-lg shadow-neutral-200 text-sm uppercase tracking-widest disabled:opacity-50">
+                {saving ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />}
+                {saving ? "Menyimpan..." : "Simpan Perubahan"}
               </button>
             </div>
           </div>

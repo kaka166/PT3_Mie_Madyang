@@ -152,6 +152,24 @@ export const authService = {
     return roles[roleId] || "Guest";
   },
 
+  async updateProfile(payload: { name?: string; password?: string }): Promise<{ success: boolean; message: string; data?: User }> {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_URL}/profile`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.message || "Gagal memperbarui profil");
+    if (json.data) {
+      localStorage.setItem("user", JSON.stringify(json.data));
+    }
+    return json;
+  },
+
   logout(): void {
     if (typeof window !== "undefined") {
       localStorage.removeItem("token");

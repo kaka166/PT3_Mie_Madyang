@@ -143,7 +143,7 @@ export default function KitchenDashboardPage() {
     }
 
     const ok = await updateOrderStatus(
-      Number(selectedOrder.id.replace("#", "")),
+      selectedOrder.penjualan_id,
       statusBackend,
     );
 
@@ -278,7 +278,7 @@ export default function KitchenDashboardPage() {
                       {item.status === "Antri" && (
                         <button
                           onClick={async () => {
-                            const ok = await updateOrderStatus(Number(item.id.replace("#", "")), "cooking");
+                            const ok = await updateOrderStatus(item.penjualan_id, "cooking");
                             if (ok) {
                               addNotification(`#${item.id.replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
                               fetchOrders();
@@ -291,7 +291,7 @@ export default function KitchenDashboardPage() {
                       {item.status === "Dimasak" && (
                         <button
                           onClick={async () => {
-                            const ok = await updateOrderStatus(Number(item.id.replace("#", "")), "done");
+                            const ok = await updateOrderStatus(item.penjualan_id, "done");
                             if (ok) {
                               addNotification(`#${item.id.replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
                               fetchOrders();
@@ -336,7 +336,7 @@ export default function KitchenDashboardPage() {
                 {item.status === 'Antri' && (
                   <button
                     onClick={async () => {
-                      const ok = await updateOrderStatus(Number(item.id.replace("#", "")), "cooking");
+                      const ok = await updateOrderStatus(item.penjualan_id, "cooking");
                       if (ok) {
                         addNotification(`#${item.id.replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
                         fetchOrders();
@@ -349,7 +349,7 @@ export default function KitchenDashboardPage() {
                 {item.status === 'Dimasak' && (
                   <button
                     onClick={async () => {
-                      const ok = await updateOrderStatus(Number(item.id.replace("#", "")), "done");
+                      const ok = await updateOrderStatus(item.penjualan_id, "done");
                       if (ok) {
                         addNotification(`#${item.id.replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
                         fetchOrders();

@@ -60,9 +60,9 @@ class MenuKategoriController extends Controller
                 'updated_at' => now()
             ]);
 
-            // 2. Cascading: Jika kategori mati, semua menu di dalamnya IKUT MATI
+            // 2. Cascading: Jika kategori dinonaktifkan, semua menu di dalamnya ikut nonaktif
             if ($statusBaru == 0) {
-                DB::table('menu_kategori')->where('kategori_id', $id)->update([
+                DB::table('menu')->where('kategori_id', $id)->update([
                     'is_active' => 0,
                     'updated_at' => now()
                 ]);

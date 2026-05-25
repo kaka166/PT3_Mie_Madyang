@@ -221,7 +221,7 @@ export default function Sidebar({
         </div>
 
         {/* NAVIGATION */}
-        <nav className="flex-1 px-3 py-2 overflow-y-auto no-scrollbar space-y-0.5">
+        <nav className="flex-1 px-3 py-2 overflow-y-auto sidebar-scrollbar space-y-0.5">
           <p className="text-white/20 text-[9px] font-black uppercase tracking-[0.2em] px-3 py-2 mt-1">
             Menu Utama
           </p>

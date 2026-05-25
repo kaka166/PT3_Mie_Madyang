@@ -37,6 +37,7 @@ class PenjualanController extends Controller
                 $noTrx = $dt->format('Ymd') . str_pad($p->id, 3, '0', STR_PAD_LEFT);
                 return [
                     'id'       => $noTrx,
+                    'penjualan_id' => $p->id,
                     'waktu'    => $p->tanggal,
                     'customer' => $p->customer_name ?? 'Guest',
                     'items'    => $p->detail->sum('qty'),

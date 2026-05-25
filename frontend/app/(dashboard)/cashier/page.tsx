@@ -346,17 +346,18 @@ export default function POSPage() {
     }
 
     const init = async () => {
-      await fetchTax();
-      await loadInitialData();
-      try {
-        const qrisRes = await getQrisSettings();
-        if (qrisRes.success) setQrisSettings(qrisRes.data.filter((q) => q.is_active));
-      } catch (err) { console.error("Gagal fetch QRIS:", err); }
-
-      const session = await getActiveSession();
       const userData = localStorage.getItem("user");
       const parsedUser = userData ? JSON.parse(userData) : null;
       setUser(parsedUser);
+
+      const [session] = await Promise.all([
+        getActiveSession(),
+        fetchTax(),
+        loadInitialData().catch(() => {}),
+        getQrisSettings().then((qrisRes) => {
+          if (qrisRes.success) setQrisSettings(qrisRes.data.filter((q) => q.is_active));
+        }).catch((err) => console.error("Gagal fetch QRIS:", err)),
+      ]);
 
       if (session?.data?.id) {
         setSessionActive(true);

@@ -25,17 +25,10 @@ const formatDateOnly = (dateStr: string) => {
   });
 };
 
-// Konversi waktu HH:MM:SS yang tersimpan sebagai UTC ke WIB (GMT+7)
+// Format waktu HH:MM:SS ke HH:MM (waktu sudah dalam WIB dari backend)
 const formatTimeWIB = (timeStr: string | null) => {
   if (!timeStr) return "-";
-  // Backend menyimpan jam dalam format HH:MM:SS
-  // Kita tambah 7 jam untuk konversi UTC -> WIB
-  const [h, m, s] = timeStr.split(":").map(Number);
-  const totalSeconds = h * 3600 + m * 60 + (s || 0) + 7 * 3600;
-  const wibH = Math.floor((totalSeconds % 86400) / 3600).toString().padStart(2, "0");
-  const wibM = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, "0");
-  const wibS = (totalSeconds % 60).toString().padStart(2, "0");
-  return `${wibH}:${wibM}:${wibS}`;
+  return timeStr.substring(0, 5);
 };
 
 export default function AbsensiPage() {

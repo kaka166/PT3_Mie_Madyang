@@ -30,6 +30,7 @@ export type CreateOrderPayload = {
 };
 export type Order = {
   id: string;
+  penjualan_id: number;
   waktu: string;
   customer: string;
   items: number;
