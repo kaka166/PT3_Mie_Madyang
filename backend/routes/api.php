@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\QrisSettingController;
 use App\Http\Controllers\Api\EvidenceController;
 use App\Http\Controllers\Api\LandingPageSettingController;
+use App\Http\Controllers\Api\ReceiptSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,6 +87,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         // Landing Page Settings (Admin)
         Route::post('/landing-page', [LandingPageSettingController::class, 'update']);
+
+        // Receipt Settings (Admin)
+        Route::post('/receipt-settings', [ReceiptSettingController::class, 'update']);
     });
 
     /*
@@ -103,9 +107,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/kategori', [MenuKategoriController::class, 'index']);
         Route::get('/kategori/{id}', [MenuKategoriController::class, 'show']);
 
-        // Pajak
+        // Pajak & Nota
         Route::get('/tax', [TaxSettingController::class, 'get']);
         Route::post('/tax', [TaxSettingController::class, 'update']);
+        Route::get('/receipt-settings', [ReceiptSettingController::class, 'index']);
 
         // Orders
         Route::get('/orders', [PenjualanController::class, 'index']);

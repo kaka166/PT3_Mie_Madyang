@@ -295,28 +295,26 @@ export default function InventoryPage() {
         <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
-              <tr className="text-gray-400 text-xs font-black uppercase tracking-widest border-b border-gray-100">
-                <th className="py-3 px-4 text-left">Nama Makanan</th>
-                <th className="py-3 px-4 text-left">Kategori</th>
-                <th className="py-3 px-4 text-left">Harga Jual</th>
-                <th className="py-3 px-4 text-center">Stok</th>
-                <th className="px-6 py-4 text-center">Visibilitas POS</th>
-                <th className="py-3 px-4 text-right">Aksi</th>
+              <tr>
+                <th className="px-5 py-3 text-left">Nama Makanan</th>
+                <th className="px-5 py-3 text-left">Kategori</th>
+                <th className="px-5 py-3 text-left">Harga Jual</th>
+                <th className="px-5 py-3 text-center">Stok</th>
+                <th className="px-5 py-3 text-center">Visibilitas POS</th>
+                <th className="px-5 py-3 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-50">
               {filteredMenus.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-red-50/20 border-b border-gray-50 transition-colors group">
-                    <td className="px-6 py-4 text-neutral-700">
+                  <tr key={item.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                    <td className="px-5 py-3.5 text-neutral-700">
                       <div className="flex items-center gap-3">
                         {item.gambar ? (
                           <img
                             src={`${STORAGE_BASE_URL}/menu/${item.gambar}`}
                             alt={item.nama_menu}
                             className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/eeeeee/999999?text=Menu'; }}
                           />
                         ) : (
                           <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg flex-shrink-0">🍜</div>
@@ -324,15 +322,15 @@ export default function InventoryPage() {
                         {item.nama_menu}
                       </div>
                     </td>
-                  <td className="px-6 py-4">
+                  <td className="px-5 py-3.5 ">
                     <span className="bg-zinc-100 text-zinc-500 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight">
                       {item.kategori?.nama_kategori}
                     </span>
                   </td>
-                  <td className="px-6 py-4 text-neutral-800">
+                  <td className="px-5 py-3.5 text-neutral-800">
                     {formatRupiah(item.harga_jual)}
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-5 py-3.5 text-center">
                     <input
                       type="number"
                       defaultValue={item.stock ?? 0}
@@ -359,7 +357,7 @@ export default function InventoryPage() {
                       }}
                     />
                   </td>
-                  <td className="px-6 py-4 text-center">
+                  <td className="px-5 py-3.5 text-center">
                     <button
                       onClick={() => toggleMenu(item)}
                       className={`w-11 h-6 flex items-center rounded-full transition-all mx-auto ${item.is_active ? "bg-green-500" : "bg-zinc-300"}`}>
@@ -368,7 +366,7 @@ export default function InventoryPage() {
                       />
                     </button>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-5 py-3.5 ">
                     <div className="flex justify-end gap-2 text-zinc-400">
                       <button
                         onClick={() => {

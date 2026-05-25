@@ -10,8 +10,6 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  CheckCircle2,
-  Flame,
 } from "lucide-react";
 import { formatTanggal } from "@/utils/formatTanggal";
 import { formatRupiah } from "@/utils/formatRupiah";
@@ -41,6 +39,7 @@ export default function KitchenDashboardPage() {
   const [selectedOrder, setSelectedOrder] = useState<any | null>(null);
   const [modalStatus, setModalStatus] = useState<string>("");
   const [statusError, setStatusError] = useState("");
+  const [confirmSelesai, setConfirmSelesai] = useState<any | null>(null);
   const previousOrderIds = useRef<Set<string>>(new Set());
 
   const fetchOrders = async () => {
@@ -97,7 +96,7 @@ export default function KitchenDashboardPage() {
       const date = new Date(item.waktu);
 
       const matchSearch = searchId
-        ? item.id.replace("#", "").includes(searchId)
+        ? String(item.id).replace("#", "").includes(searchId)
         : true;
 
       const matchTab =
@@ -143,7 +142,7 @@ export default function KitchenDashboardPage() {
     }
 
     const ok = await updateOrderStatus(
-      selectedOrder.penjualan_id,
+      Number(selectedOrder.original_id),
       statusBackend,
     );
 
@@ -153,7 +152,7 @@ export default function KitchenDashboardPage() {
     }
 
     addNotification(
-      `Status #${selectedOrder.id.replace("#", "")} diperbarui`,
+      `Status #${String(selectedOrder.id).replace("#", "")} diperbarui`,
       `${selectedOrder.customer} → ${modalStatus}`,
       modalStatus === "Ready" ? "success" : "warning",
       true,
@@ -203,13 +202,13 @@ export default function KitchenDashboardPage() {
                   setActiveTab("riwayat");
                   setCurrentPage(1);
                 }}
-                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex flex-col items-center sm:flex-row sm:gap-1 ${
                   activeTab === "riwayat"
                     ? "bg-white text-[#F53E1B] shadow-sm"
                     : "text-gray-500 hover:text-gray-800"
                 }`}
               >
-                Riwayat Selesai
+                Riwayat Selesai <span className="text-[10px] font-normal opacity-75">(24 Jam Terakhir)</span>
               </button>
             </div>
           </div>
@@ -231,74 +230,140 @@ export default function KitchenDashboardPage() {
           </div>
         </div>
 
+        {/* Kanban Board / Quick Summary */}
+        {activeTab === "aktif" && (
+          <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-b bg-white">
+            {/* Kolom Antri */}
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 h-[400px] overflow-y-auto custom-scrollbar">
+              <h3 className="font-bold text-gray-700 mb-3 sticky top-0 bg-gray-50 py-1">Pesanan Selanjutnya</h3>
+              <div className="space-y-3">
+                {orders.filter(o => o.status === "Antri").map((order, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-bold text-gray-800">{order.id}</p>
+                      <p className="text-xs font-semibold text-gray-500">{order.customer}</p>
+                    </div>
+                    <ul className="text-sm space-y-1.5">
+                      {(order.details || []).map((d: any, i: number) => (
+                        <li key={i} className="flex justify-between text-gray-700">
+                          <span><span className="font-bold text-[#F53E1B]">{d.qty}x</span> {d.nama}</span>
+                          {d.note && <span className="text-xs text-gray-400 italic bg-gray-50 px-1.5 rounded">{d.note}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Kolom Dimasak */}
+            <div className="bg-orange-50 rounded-xl p-4 border border-orange-100 h-[400px] overflow-y-auto custom-scrollbar">
+              <h3 className="font-bold text-orange-800 mb-3 sticky top-0 bg-orange-50 py-1">Pesanan Dimasak</h3>
+              <div className="space-y-3">
+                {orders.filter(o => o.status === "Dimasak").map((order, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-orange-100">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-bold text-gray-800">{order.id}</p>
+                      <p className="text-xs font-semibold text-gray-500">{order.customer}</p>
+                    </div>
+                    <ul className="text-sm space-y-1.5">
+                      {(order.details || []).map((d: any, i: number) => (
+                        <li key={i} className="flex justify-between text-gray-700">
+                          <span><span className="font-bold text-[#F53E1B]">{d.qty}x</span> {d.nama}</span>
+                          {d.note && <span className="text-xs text-orange-400 italic bg-orange-50 px-1.5 rounded">{d.note}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Kolom Selesai */}
+            <div className="bg-green-50 rounded-xl p-4 border border-green-100 h-[400px] overflow-y-auto custom-scrollbar">
+              <h3 className="font-bold text-green-800 mb-3 sticky top-0 bg-green-50 py-1">Pesanan Selesai</h3>
+              <div className="space-y-3">
+                {orders.filter(o => o.status === "Ready").map((order, idx) => (
+                  <div key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-green-100 opacity-75">
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="font-bold text-gray-800">{order.id}</p>
+                      <p className="text-xs font-semibold text-gray-500">{order.customer}</p>
+                    </div>
+                    <ul className="text-sm space-y-1.5">
+                      {(order.details || []).map((d: any, i: number) => (
+                        <li key={i} className="flex justify-between text-gray-700">
+                          <span><span className="font-bold text-[#F53E1B]">{d.qty}x</span> {d.nama}</span>
+                          {d.note && <span className="text-xs text-green-500 italic bg-green-100 px-1.5 rounded">{d.note}</span>}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tabel - Desktop */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="py-4 px-4 font-medium">Order ID</th>
-                <th className="py-4 px-4 font-medium">Waktu</th>
-                <th className="py-4 px-4 font-medium">Customer</th>
-                <th className="py-4 px-4 font-medium">Total Item</th>
-                <th className="py-4 px-4 font-medium">Total Harga</th>
-                <th className="py-4 px-4 font-medium">Kondisi</th>
-                <th className="py-4 px-4 font-medium">Status</th>
-                <th className="py-4 px-4 font-medium">Aksi</th>
+                <th className="px-5 py-3 font-medium">Order ID</th>
+                <th className="px-5 py-3 font-medium">Waktu</th>
+                <th className="px-5 py-3 font-medium">Customer</th>
+                <th className="px-5 py-3 font-medium">Total Item</th>
+                <th className="px-5 py-3 font-medium">Total Harga</th>
+                <th className="px-5 py-3 font-medium">Kondisi</th>
+                <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {currentData.map((item, index) => (
-                <tr
-                  key={index}
-                  className="border border-neutral-100 even:bg-gray-50 hover:bg-gray-100 transition-colors">
-                  <td className="py-4 px-4 font-bold text-gray-800">
+                <tr key={index} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                  <td className="px-5 py-3.5 font-bold text-gray-800">
                     {item.id}
                   </td>
-                  <td className="py-4 px-4 text-gray-700">
+                  <td className="px-5 py-3.5 text-gray-700">
                     {formatTanggal(item.waktu)}
                   </td>
-                  <td className="py-4 px-4 font-bold text-gray-800">
+                  <td className="px-5 py-3.5 font-bold text-gray-800">
                     {item.customer}
                   </td>
-                  <td className="py-4 px-4 font-medium">{item.items}</td>
-                  <td className="py-4 px-4 font-bold text-gray-800">
+                  <td className="px-5 py-3.5 font-medium">{item.items}</td>
+                  <td className="px-5 py-3.5 font-bold text-gray-800">
                     {formatRupiah(item.harga)}
                   </td>
-                  <td className="py-4 px-4 font-bold text-gray-800">
+                  <td className="px-5 py-3.5 font-bold text-gray-800">
                     {item.kondisi}
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="px-5 py-3.5 ">
                     <span
                       className={`px-4 py-1.5 rounded-full text-xs font-bold inline-block w-24 text-center ${getStatusBadge(item.status)}`}>
                       {item.status}
                     </span>
                   </td>
-                  <td className="py-4 px-4 text-gray-500">
+                  <td className="px-5 py-3.5 text-gray-500">
                     <div className="flex items-center justify-center gap-2">
                       {item.status === "Antri" && (
                         <button
                           onClick={async () => {
-                            const ok = await updateOrderStatus(item.penjualan_id, "cooking");
+                            const ok = await updateOrderStatus(Number(item.original_id), "cooking");
                             if (ok) {
-                              addNotification(`#${item.id.replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
+                              addNotification(`#${String(item.id).replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
                               fetchOrders();
                             }
                           }}
                           className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
-                          🍳 Proses
+                          Proses
                         </button>
                       )}
                       {item.status === "Dimasak" && (
                         <button
-                          onClick={async () => {
-                            const ok = await updateOrderStatus(item.penjualan_id, "done");
-                            if (ok) {
-                              addNotification(`#${item.id.replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
-                              fetchOrders();
-                            }
-                          }}
+                          onClick={() => setConfirmSelesai(item)}
                           className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
-                          ✅ Selesai
+                          Selesai
                         </button>
                       )}
                       <button
@@ -336,27 +401,21 @@ export default function KitchenDashboardPage() {
                 {item.status === 'Antri' && (
                   <button
                     onClick={async () => {
-                      const ok = await updateOrderStatus(item.penjualan_id, "cooking");
+                      const ok = await updateOrderStatus(Number(item.original_id), "cooking");
                       if (ok) {
-                        addNotification(`#${item.id.replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
+                        addNotification(`#${String(item.id).replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
                         fetchOrders();
                       }
                     }}
                     className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
-                    🍳 Proses
+                    Proses
                   </button>
                 )}
                 {item.status === 'Dimasak' && (
                   <button
-                    onClick={async () => {
-                      const ok = await updateOrderStatus(item.penjualan_id, "done");
-                      if (ok) {
-                        addNotification(`#${item.id.replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
-                        fetchOrders();
-                      }
-                    }}
+                    onClick={() => setConfirmSelesai(item)}
                     className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
-                    ✅ Selesai
+                    Selesai
                   </button>
                 )}
                 <button
@@ -532,6 +591,39 @@ export default function KitchenDashboardPage() {
                   Simpan
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* --- KOMPONEN POP UP KONFIRMASI SELESAI --- */}
+      {confirmSelesai && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Konfirmasi Selesai</h3>
+            <p className="text-gray-600 mb-6">
+              Yakin pesanan <span className="font-bold text-black">{confirmSelesai.id}</span> dari <span className="font-bold text-black">{confirmSelesai.customer}</span> sudah selesai?
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setConfirmSelesai(null)}
+                className="px-5 py-2.5 rounded-xl font-bold bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                onClick={async () => {
+                  const item = confirmSelesai;
+                  setConfirmSelesai(null);
+                  const ok = await updateOrderStatus(Number(item.original_id), "done");
+                  if (ok) {
+                    addNotification(`#${String(item.id).replace("#","")} selesai`, `${item.customer} → Ready`, "success", true, "kitchen");
+                    fetchOrders();
+                  }
+                }}
+                className="px-5 py-2.5 rounded-xl font-bold bg-green-500 hover:bg-green-600 text-white shadow-sm transition-colors"
+              >
+                Ya, Selesai
+              </button>
             </div>
           </div>
         </div>

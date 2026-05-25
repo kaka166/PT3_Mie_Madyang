@@ -13,6 +13,7 @@ import { getQrisSettings, QrisSetting } from "@/services/qrisService";
 import { X, QrCode } from "lucide-react";
 import { addNotification } from "@/services/notificationService";
 import { STORAGE_BASE_URL } from "@/config";
+import { smartPrint } from "@/services/printService";
 
 /* ================= TYPES ================= */
 type CartItem = {
@@ -37,6 +38,7 @@ export default function POSPage() {
   const [paymentMethod, setPaymentMethod] = useState<"QRIS" | "Tunai">("QRIS");
   const [customerName, setCustomerName] = useState("");
   const [tableNumber, setTableNumber] = useState("");
+  const [uangTunai, setUangTunai] = useState<number | "">("");
 
   const [isTaxEnabled, setIsTaxEnabled] = useState(true);
   const [taxPercent, setTaxPercent] = useState(0);
@@ -75,168 +77,43 @@ export default function POSPage() {
     }
   }, [showHistoryModal]);
 
-  const printReceipt = (order: Pemasukan) => {
-    const printWindow = window.open("", "_blank", "width=320,height=600");
-    if (!printWindow) {
-      alert("Popup diblokir oleh browser! Harap izinkan popup untuk mencetak.");
-      return;
+  // Cetak struk via print server lokal (auto) atau browser dialog (fallback)
+  const printReceipt = async (order: Pemasukan) => {
+    let receiptConfig = {};
+    try {
+      const res = await fetch(`${API_BASE_URL}/receipt-settings`);
+      const result = await res.json();
+      if (result.success && result.data) {
+        receiptConfig = result.data;
+      }
+    } catch (e) {
+      console.error("Gagal get receipt settings:", e);
     }
 
-    const itemSubtotal = order.details.reduce((sum, item) => sum + (item.subtotal || (item.qty * item.harga)), 0);
-    const taxVal = order.jumlah - itemSubtotal;
-
-    const receiptHtml = `
-      <html>
-      <head>
-        <title>Cetak Struk - ${order.no}</title>
-        <style>
-          @page {
-            size: 80mm auto;
-            margin: 0;
-          }
-          body {
-            font-family: 'Courier New', Courier, monospace;
-            width: 72mm;
-            margin: 0 auto;
-            padding: 4mm 0;
-            font-size: 11px;
-            color: #000;
-            line-height: 1.3;
-          }
-          .text-center { text-align: center; }
-          .text-right { text-align: right; }
-          .bold { font-weight: bold; }
-          .separator {
-            border-top: 1px dashed #000;
-            margin: 3px 0;
-          }
-          .double-separator {
-            border-top: 1px double #000;
-            margin: 4px 0;
-          }
-          .title {
-            font-size: 16px;
-            font-weight: bold;
-            margin-bottom: 2px;
-            text-transform: uppercase;
-          }
-          .subtitle {
-            font-size: 10px;
-            margin-bottom: 6px;
-          }
-          .flex {
-            display: flex;
-            justify-content: space-between;
-          }
-          .items-container {
-            margin: 5px 0;
-          }
-          .item-row {
-            margin-bottom: 3px;
-          }
-          .item-note {
-            font-size: 9px;
-            font-style: italic;
-            padding-left: 3px;
-            margin-top: -2px;
-            margin-bottom: 2px;
-          }
-          .footer {
-            margin-top: 8px;
-            font-size: 10px;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="text-center">
-          <div class="title">MIE MADYANG</div>
-          <div class="subtitle">Jl. Raya Madyang No. 16, Malang<br>Telp: 0812-3456-7890</div>
-        </div>
-        
-        <div class="separator"></div>
-        
-        <div class="flex">
-          <span>No. Nota:</span>
-          <span class="bold">${order.no}</span>
-        </div>
-        <div class="flex">
-          <span>Waktu   :</span>
-          <span>${order.waktu}</span>
-        </div>
-        <div class="flex">
-          <span>Kasir   :</span>
-          <span>${order.kasir}</span>
-        </div>
-        <div class="flex">
-          <span>Tipe    :</span>
-          <span>${order.kondisi}</span>
-        </div>
-        <div class="flex">
-          <span>Pelanggan:</span>
-          <span>${order.nama}</span>
-        </div>
-        
-        <div class="separator"></div>
-        
-        <div class="bold">ITEMS</div>
-        <div class="items-container">
-          ${order.details.map(item => `
-            <div class="item-row">
-              <div>${item.nama}</div>
-              <div class="flex">
-                <span>  ${item.qty} x ${new Intl.NumberFormat("id-ID").format(item.harga)}</span>
-                <span>${new Intl.NumberFormat("id-ID").format(item.subtotal || (item.qty * item.harga))}</span>
-              </div>
-              ${item.note ? `<div class="item-note">* Note: ${item.note}</div>` : ''}
-            </div>
-          `).join('')}
-        </div>
-        
-        <div class="separator"></div>
-        
-        <div class="flex">
-          <span>Subtotal:</span>
-          <span>${new Intl.NumberFormat("id-ID").format(itemSubtotal)}</span>
-        </div>
-        ${taxVal > 0 ? `
-        <div class="flex">
-          <span>Pajak:</span>
-          <span>${new Intl.NumberFormat("id-ID").format(taxVal)}</span>
-        </div>
-        ` : ''}
-        
-        <div class="double-separator"></div>
-        
-        <div class="flex bold" style="font-size: 12px;">
-          <span>TOTAL:</span>
-          <span>Rp ${new Intl.NumberFormat("id-ID").format(order.jumlah)}</span>
-        </div>
-        
-        <div class="flex">
-          <span>Metode Pembayaran:</span>
-          <span class="bold">${order.metode}</span>
-        </div>
-        
-        <div class="double-separator"></div>
-        
-        <div class="text-center footer">
-          <strong>TERIMA KASIH</strong><br>
-          Sudah Madyang di Mie Madyang!<br>
-          Silakan datang kembali.
-        </div>
-        
-        <script>
-          window.onload = function() {
-            window.print();
-            setTimeout(function() { window.close(); }, 500);
-          }
-        </script>
-      </body>
-      </html>
-    `;
-
-    printWindow.document.write(receiptHtml);
-    printWindow.document.close();
+    const result = await smartPrint({
+      no: order.no || "-",
+      nama: order.nama || "Guest",
+      kasir: order.kasir || "-",
+      metode: order.metode || "-",
+      waktu: order.waktu || "",
+      kondisi: order.kondisi || "-",
+      total: order.jumlah || 0,
+      tunai: order.tunai,
+      kembalian: order.kembalian,
+      receipt_config: receiptConfig,
+      items: (order.details || []).map((d) => ({
+        nama: d.nama,
+        qty: d.qty,
+        harga: d.harga,
+        subtotal: d.subtotal || d.qty * d.harga,
+      })),
+    });
+    if (result === "server") {
+      addNotification("Struk Dicetak", "Struk berhasil dicetak via printer", "success", false, "cashier");
+    } else if (result === "failed") {
+      addNotification("Gagal Cetak", "Tidak bisa mencetak struk", "error", false, "cashier");
+    }
+    // result === "browser" → sudah terbuka dialog print, tidak perlu notif
   };
 
   type SessionResult = {
@@ -708,9 +585,6 @@ export default function POSPage() {
                 <h2 className="text-2xl font-black text-gray-800 tracking-tight">
                   Pembayaran
                 </h2>
-                <span className="font-bold text-gray-400 bg-gray-100 px-3 py-1 rounded-full text-xs">
-                  #99282
-                </span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
@@ -829,19 +703,37 @@ export default function POSPage() {
                     )}
                   </div>
                 ) : (
-                  <div className="text-center">
+                  <div className="text-center w-full">
                     <p className="text-xs font-bold text-gray-400 uppercase mb-1">
                       Terima Tunai
                     </p>
-                    <p className="text-2xl font-black text-gray-800">
+                    <p className="text-2xl font-black text-gray-800 mb-4">
                       {formatRupiah(total)}
                     </p>
+                    <input
+                      type="number"
+                      placeholder="Masukkan Uang Diterima"
+                      value={uangTunai}
+                      onChange={(e) => setUangTunai(e.target.value ? Number(e.target.value) : "")}
+                      className="w-full bg-gray-50 border-2 border-transparent focus:border-red-100 rounded-xl px-4 py-3 outline-none text-center font-bold text-lg"
+                    />
+                    {typeof uangTunai === "number" && uangTunai >= total && (
+                      <p className="mt-2 text-sm font-bold text-green-600">
+                        Kembalian: {formatRupiah(uangTunai - total)}
+                      </p>
+                    )}
+                    {typeof uangTunai === "number" && uangTunai > 0 && uangTunai < total && (
+                      <p className="mt-2 text-sm font-bold text-red-500">
+                        Uang kurang {formatRupiah(total - uangTunai)}
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
 
               <div className="space-y-3">
                 <button
+                  disabled={paymentMethod === "Tunai" && (typeof uangTunai !== "number" || uangTunai < total)}
                   onClick={async () => {
                     const result = await createOrder({
                       customer_name: customerName,
@@ -881,14 +773,20 @@ export default function POSPage() {
 
                       await fetchMenu();
 
+                      const dt = new Date(result.data.tanggal);
+                      const dateStr = dt.getFullYear() + String(dt.getMonth()+1).padStart(2,'0') + String(dt.getDate()).padStart(2,'0');
+                      const formattedNo = "#" + dateStr + String(result.data.id).padStart(3,'0');
+
                       const newOrder: Pemasukan = {
-                        no: '#' + result.data.id,
+                        no: formattedNo,
                         nama: customerName || "Guest",
                         waktu: result.data.tanggal,
                         kasir: user?.name || "Unknown",
                         metode: paymentMethod,
                         jumlah: result.data.total,
                         kondisi: orderType === 'Dine In' ? 'Makan di Tempat' : 'Bungkus',
+                        tunai: paymentMethod === 'Tunai' && typeof uangTunai === 'number' ? uangTunai : undefined,
+                        kembalian: paymentMethod === 'Tunai' && typeof uangTunai === 'number' ? uangTunai - total : undefined,
                         details: result.data.detail.map((d: any) => ({
                           nama: d.menu.nama_menu,
                           qty: d.qty,
@@ -903,9 +801,10 @@ export default function POSPage() {
                       setCart([]);
                       setCustomerName("");
                       setTableNumber("");
+                      setUangTunai("");
                     }
                   }}
-                  className="w-full bg-[#b93b3b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200/50 active:scale-95 transition-all">
+                  className="w-full bg-[#b93b3b] text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl shadow-red-200/50 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
                   Selesaikan Pesanan
                 </button>
                 <button

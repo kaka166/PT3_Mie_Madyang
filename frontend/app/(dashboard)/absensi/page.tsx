@@ -13,10 +13,10 @@ import {
 import { attendanceService, AttendanceData } from "@/services/attendanceService";
 import { authService } from "@/services/authService";
 
-// Format tanggal saja (tanpa jam) dari string tanggal DB
 const formatDateOnly = (dateStr: string) => {
   if (!dateStr) return "-";
-  const date = new Date(dateStr + "T00:00:00+07:00");
+  const dateOnly = dateStr.substring(0, 10);
+  const date = new Date(dateOnly + "T00:00:00+07:00");
   return date.toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
@@ -25,10 +25,10 @@ const formatDateOnly = (dateStr: string) => {
   });
 };
 
-// Format waktu HH:MM:SS ke HH:MM (waktu sudah dalam WIB dari backend)
+
 const formatTimeWIB = (timeStr: string | null) => {
   if (!timeStr) return "-";
-  return timeStr.substring(0, 5);
+  return timeStr;
 };
 
 export default function AbsensiPage() {
@@ -353,17 +353,17 @@ export default function AbsensiPage() {
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="py-4 px-4 font-semibold">Tanggal</th>
+                <th className="px-5 py-3 font-semibold">Tanggal</th>
                 {roleId === 1 && (
-                  <th className="py-4 px-4 font-semibold">Nama Staf</th>
+                  <th className="px-5 py-3 font-semibold">Nama Staf</th>
                 )}
                 {roleId === 1 && (
-                  <th className="py-4 px-4 font-semibold">Role</th>
+                  <th className="px-5 py-3 font-semibold">Role</th>
                 )}
-                <th className="py-4 px-4 font-semibold">Jam Masuk</th>
-                <th className="py-4 px-4 font-semibold">Jam Keluar</th>
-                <th className="py-4 px-4 font-semibold">Status</th>
-                <th className="py-4 px-4 font-semibold">Keterangan</th>
+                <th className="px-5 py-3 font-semibold">Jam Masuk</th>
+                <th className="px-5 py-3 font-semibold">Jam Keluar</th>
+                <th className="px-5 py-3 font-semibold">Status</th>
+                <th className="px-5 py-3 font-semibold">Keterangan</th>
               </tr>
             </thead>
             <tbody>
@@ -377,29 +377,27 @@ export default function AbsensiPage() {
                 </tr>
               ) : (
                 history.map((row, idx) => (
-                  <tr
-                    key={idx}
-                    className="border-b border-neutral-50 even:bg-neutral-50/50 hover:bg-neutral-50 transition-colors">
-                    <td className="py-4 px-4 font-semibold text-gray-700">
+                  <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                    <td className="px-5 py-3.5 font-semibold text-gray-700">
                       {formatDateOnly(row.tanggal)}
                     </td>
                     {roleId === 1 && (
-                      <td className="py-4 px-4 font-bold text-gray-900">
+                      <td className="px-5 py-3.5 font-bold text-gray-900">
                         {row.user?.name || "-"}
                       </td>
                     )}
                     {roleId === 1 && (
-                      <td className="py-4 px-4 font-semibold text-gray-600">
+                      <td className="px-5 py-3.5 font-semibold text-gray-600">
                         {authService.getRoleName(row.user?.role ?? 2)}
                       </td>
                     )}
-                    <td className="py-4 px-4 text-gray-800 font-bold">
+                    <td className="px-5 py-3.5 text-gray-800 font-bold">
                       {formatTimeWIB(row.jam_masuk)}
                     </td>
-                    <td className="py-4 px-4 text-gray-800 font-bold">
+                    <td className="px-5 py-3.5 text-gray-800 font-bold">
                       {formatTimeWIB(row.jam_keluar)}
                     </td>
-                    <td className="py-4 px-4">
+                    <td className="px-5 py-3.5 ">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-bold inline-block w-20 text-center ${
                           row.status === "hadir"
@@ -415,7 +413,7 @@ export default function AbsensiPage() {
                             : "Izin"}
                       </span>
                     </td>
-                    <td className="py-4 px-4 text-gray-600 font-medium italic">
+                    <td className="px-5 py-3.5 text-gray-600 font-medium italic">
                       {row.keterangan || "-"}
                     </td>
                   </tr>

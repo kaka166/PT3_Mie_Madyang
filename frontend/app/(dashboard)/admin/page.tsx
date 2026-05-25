@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
     .filter(s => !s.selesai && s.mulai && new Date(s.mulai).toDateString() === today.toDateString())
     .reduce((sum, s) => sum + Number(s.total_pemasukan || 0), 0);
   const staffHadirHariIni = attendance.filter(a => {
-    const tgl = a.tanggal || "";
+    const tgl = (a.tanggal || "").substring(0, 10);
     return tgl === todayISO && a.status === "hadir";
   }).length;
 
@@ -145,7 +145,7 @@ export default function AdminDashboardPage() {
 
   const filteredAttendance = attendance.filter(a => {
     if (!attendanceDateRange.start) return true;
-    const tgl = a.tanggal || "";
+    const tgl = (a.tanggal || "").substring(0, 10);
     return tgl >= attendanceDateRange.start && tgl <= (attendanceDateRange.end || attendanceDateRange.start);
   });
 
@@ -291,13 +291,13 @@ export default function AdminDashboardPage() {
               <table className="w-full text-sm text-left whitespace-nowrap">
                 <thead className="bg-gray-50/50">
                   <tr>
-                    <th className="py-3 px-4 font-semibold text-left">Nama</th>
-                    <th className="py-3 px-4 font-semibold text-left">Username</th>
-                    <th className="py-3 px-4 font-semibold text-left">Role</th>
-                    <th className="py-3 px-4 font-semibold text-left">Email</th>
-                    <th className="py-3 px-4 font-semibold text-left">No HP</th>
-                    <th className="py-3 px-4 font-semibold text-center">Sesi Aktif</th>
-                    <th className="py-3 px-4 font-semibold text-center">Aksi</th>
+                    <th className="px-5 py-3 font-semibold text-left">Nama</th>
+                    <th className="px-5 py-3 font-semibold text-left">Username</th>
+                    <th className="px-5 py-3 font-semibold text-left">Role</th>
+                    <th className="px-5 py-3 font-semibold text-left">Email</th>
+                    <th className="px-5 py-3 font-semibold text-left">No HP</th>
+                    <th className="px-5 py-3 font-semibold text-center">Sesi Aktif</th>
+                    <th className="px-5 py-3 font-semibold text-center">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -305,17 +305,17 @@ export default function AdminDashboardPage() {
                     const hasSession = activeSessions.some(s => s.user_id === user.id);
                     const sessionData = activeSessions.find(s => s.user_id === user.id);
                     return (
-                      <tr key={user.id} className={`border-b border-neutral-50 transition-colors hover:bg-red-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                        <td className="py-3.5 px-4 font-bold text-gray-800">{user.name}</td>
-                        <td className="py-3.5 px-4 text-gray-500">@{user.username}</td>
-                        <td className="py-3.5 px-4">
+                      <tr key={user.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                        <td className="px-5 py-3.5 font-bold text-gray-800">{user.name}</td>
+                        <td className="px-5 py-3.5 text-gray-500">@{user.username}</td>
+                        <td className="px-5 py-3.5 ">
                           <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[user.role] || "bg-gray-100 text-gray-600"}`}>
                             {ROLE_LABELS[user.role] || "Staff"}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-gray-500 text-xs">{user.email}</td>
-                        <td className="py-3.5 px-4 text-gray-500 text-xs">{user.phone || "-"}</td>
-                        <td className="py-3.5 px-4 text-center">
+                        <td className="px-5 py-3.5 text-gray-500 text-xs">{user.email}</td>
+                        <td className="px-5 py-3.5 text-gray-500 text-xs">{user.phone || "-"}</td>
+                        <td className="px-5 py-3.5 text-center">
                           {hasSession ? (
                             <div>
                               <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
@@ -330,7 +330,7 @@ export default function AdminDashboardPage() {
                             <span className="text-xs text-gray-300">–</span>
                           )}
                         </td>
-                        <td className="py-3.5 px-4">
+                        <td className="px-5 py-3.5 ">
                           <div className="flex items-center justify-center gap-2">
                             <button onClick={() => { setEditingUser(user); setEditForm({ username: user.username||"" , name: user.name||"" , email: user.email||"" , phone: user.phone||"" , role: user.role, password: "" }); setShowEditModal(true); }}
                               className="text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 p-2 rounded-lg transition-colors">
@@ -382,33 +382,33 @@ export default function AdminDashboardPage() {
               <table className="w-full text-sm text-left whitespace-nowrap">
                 <thead className="bg-gray-50/50">
                   <tr>
-                    <th className="py-3 px-4 font-semibold text-left">ID</th>
-                    <th className="py-3 px-4 font-semibold text-left">Kasir</th>
-                    <th className="py-3 px-4 font-semibold text-left">Role</th>
-                    <th className="py-3 px-4 font-semibold text-left">Mulai</th>
-                    <th className="py-3 px-4 font-semibold text-left">Selesai</th>
-                    <th className="py-3 px-4 font-semibold text-left">Durasi</th>
-                    <th className="py-3 px-4 font-semibold text-left">Uang Awal</th>
-                    <th className="py-3 px-4 font-semibold text-left">Total Masuk</th>
-                    <th className="py-3 px-4 font-semibold text-left">Status</th>
+                    <th className="px-5 py-3 font-semibold text-left">ID</th>
+                    <th className="px-5 py-3 font-semibold text-left">Kasir</th>
+                    <th className="px-5 py-3 font-semibold text-left">Role</th>
+                    <th className="px-5 py-3 font-semibold text-left">Mulai</th>
+                    <th className="px-5 py-3 font-semibold text-left">Selesai</th>
+                    <th className="px-5 py-3 font-semibold text-left">Durasi</th>
+                    <th className="px-5 py-3 font-semibold text-left">Uang Awal</th>
+                    <th className="px-5 py-3 font-semibold text-left">Total Masuk</th>
+                    <th className="px-5 py-3 font-semibold text-left">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredShifts.map((shift: any, idx: number) => (
-                    <tr key={shift.id} className={`border-b border-neutral-50 hover:bg-red-50 transition-colors ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                      <td className="py-3.5 px-4 font-bold text-gray-500 text-xs">{shift.id}</td>
-                      <td className="py-3.5 px-4 font-bold text-gray-800">{shift.nama}</td>
-                      <td className="py-3.5 px-4">
+                    <tr key={shift.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                      <td className="px-5 py-3.5 font-bold text-gray-500 text-xs">{shift.id}</td>
+                      <td className="px-5 py-3.5 font-bold text-gray-800">{shift.nama}</td>
+                      <td className="px-5 py-3.5 ">
                         <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[shift.role] || "bg-gray-100 text-gray-600"}`}>
                           {ROLE_LABELS[shift.role] || "Staff"}
                         </span>
                       </td>
-                      <td className="py-3.5 px-4 text-xs text-gray-600">{shift.mulai ? new Date(shift.mulai).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}</td>
-                      <td className="py-3.5 px-4 text-xs text-gray-600">{shift.selesai ? new Date(shift.selesai).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "–"}</td>
-                      <td className="py-3.5 px-4 text-gray-600">{shift.durasi || "–"}</td>
-                      <td className="py-3.5 px-4 text-gray-600">{formatRupiah(shift.opening_cash || 0)}</td>
-                      <td className="py-3.5 px-4 font-bold text-green-700">{formatRupiah(shift.total_pemasukan || 0)}</td>
-                      <td className="py-3.5 px-4">
+                      <td className="px-5 py-3.5 text-xs text-gray-600">{shift.mulai ? new Date(shift.mulai).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}</td>
+                      <td className="px-5 py-3.5 text-xs text-gray-600">{shift.selesai ? new Date(shift.selesai).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "–"}</td>
+                      <td className="px-5 py-3.5 text-gray-600">{shift.durasi || "–"}</td>
+                      <td className="px-5 py-3.5 text-gray-600">{formatRupiah(shift.opening_cash || 0)}</td>
+                      <td className="px-5 py-3.5 font-bold text-green-700">{formatRupiah(shift.total_pemasukan || 0)}</td>
+                      <td className="px-5 py-3.5 ">
                         {!shift.selesai ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
                             <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> Aktif
@@ -443,14 +443,14 @@ export default function AdminDashboardPage() {
               <table className="w-full text-sm text-left whitespace-nowrap">
                 <thead className="bg-gray-50/50">
                   <tr>
-                    <th className="py-3 px-4 font-semibold text-left">Tanggal</th>
-                    <th className="py-3 px-4 font-semibold text-left">Nama Staf</th>
-                    <th className="py-3 px-4 font-semibold text-left">Role</th>
-                    <th className="py-3 px-4 font-semibold text-left">Jam Masuk</th>
-                    <th className="py-3 px-4 font-semibold text-left">Jam Keluar</th>
-                    <th className="py-3 px-4 font-semibold text-left">Durasi</th>
-                    <th className="py-3 px-4 font-semibold text-left">Status</th>
-                    <th className="py-3 px-4 font-semibold text-left">Keterangan</th>
+                    <th className="px-5 py-3 font-semibold text-left">Tanggal</th>
+                    <th className="px-5 py-3 font-semibold text-left">Nama Staf</th>
+                    <th className="px-5 py-3 font-semibold text-left">Role</th>
+                    <th className="px-5 py-3 font-semibold text-left">Jam Masuk</th>
+                    <th className="px-5 py-3 font-semibold text-left">Jam Keluar</th>
+                    <th className="px-5 py-3 font-semibold text-left">Durasi</th>
+                    <th className="px-5 py-3 font-semibold text-left">Status</th>
+                    <th className="px-5 py-3 font-semibold text-left">Keterangan</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -464,24 +464,24 @@ export default function AdminDashboardPage() {
                       if (diff > 0) durasi = `${Math.floor(diff/60)}j ${diff%60}m`;
                     }
                     return (
-                      <tr key={idx} className={`border-b border-neutral-50 hover:bg-red-50 transition-colors ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                        <td className="py-3.5 px-4 text-gray-600 text-xs">{formatTanggal(row.tanggal)}</td>
-                        <td className="py-3.5 px-4 font-bold text-gray-800">{row.user?.name || "-"}</td>
-                        <td className="py-3.5 px-4">
+                      <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                        <td className="px-5 py-3.5 text-gray-600 text-xs">{formatTanggal(row.tanggal)}</td>
+                        <td className="px-5 py-3.5 font-bold text-gray-800">{row.user?.name || "-"}</td>
+                        <td className="px-5 py-3.5 ">
                           <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[row.user?.role] || "bg-gray-100 text-gray-600"}`}>
                             {ROLE_LABELS[row.user?.role] || "Staff"}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 font-semibold text-gray-800">{row.jam_masuk || "–"}</td>
-                        <td className="py-3.5 px-4 font-semibold text-gray-800">{row.jam_keluar || "–"}</td>
-                        <td className="py-3.5 px-4 text-gray-500">{durasi}</td>
-                        <td className="py-3.5 px-4">
+                        <td className="px-5 py-3.5 font-semibold text-gray-800">{row.jam_masuk || "–"}</td>
+                        <td className="px-5 py-3.5 font-semibold text-gray-800">{row.jam_keluar || "–"}</td>
+                        <td className="px-5 py-3.5 text-gray-500">{durasi}</td>
+                        <td className="px-5 py-3.5 ">
                           <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
                             row.status === "hadir" ? "bg-green-100 text-green-700" :
                             row.status === "sakit" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
                           }`}>{row.status}</span>
                         </td>
-                        <td className="py-3.5 px-4 text-gray-400 italic text-xs">{row.keterangan || "–"}</td>
+                        <td className="px-5 py-3.5 text-gray-400 italic text-xs">{row.keterangan || "–"}</td>
                       </tr>
                     );
                   })}
@@ -524,12 +524,12 @@ export default function AdminDashboardPage() {
               <table className="w-full text-sm text-left whitespace-nowrap">
                 <thead className="bg-gray-50/50">
                   <tr>
-                    <th className="py-3 px-4 font-semibold text-left">ID</th>
-                    <th className="py-3 px-4 font-semibold text-left">Nama</th>
-                    <th className="py-3 px-4 font-semibold text-left">Kategori</th>
-                    <th className="py-3 px-4 font-semibold text-left">Tanggal</th>
-                    <th className="py-3 px-4 font-semibold text-left">Oleh</th>
-                    <th className="py-3 px-4 font-semibold text-right">Jumlah</th>
+                    <th className="px-5 py-3 font-semibold text-left">ID</th>
+                    <th className="px-5 py-3 font-semibold text-left">Nama</th>
+                    <th className="px-5 py-3 font-semibold text-left">Kategori</th>
+                    <th className="px-5 py-3 font-semibold text-left">Tanggal</th>
+                    <th className="px-5 py-3 font-semibold text-left">Oleh</th>
+                    <th className="px-5 py-3 font-semibold text-right">Jumlah</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -537,15 +537,15 @@ export default function AdminDashboardPage() {
                     <tr><td colSpan={6} className="py-12 text-center text-gray-400">Belum ada data pengeluaran</td></tr>
                   ) : (
                     filteredExpenses.map((expense, idx) => (
-                      <tr key={idx} className={`border-b border-neutral-50 hover:bg-red-50 transition-colors ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"}`}>
-                        <td className="py-3.5 px-4 text-gray-400 text-xs">{expense.id}</td>
-                        <td className="py-3.5 px-4 font-semibold text-gray-800">{expense.nama}</td>
-                        <td className="py-3.5 px-4">
+                      <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                        <td className="px-5 py-3.5 text-gray-400 text-xs">{expense.id}</td>
+                        <td className="px-5 py-3.5 font-semibold text-gray-800">{expense.nama}</td>
+                        <td className="px-5 py-3.5 ">
                           <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">{expense.kategori}</span>
                         </td>
-                        <td className="py-3.5 px-4 text-gray-500 text-xs">{expense.waktu ? formatTanggal(expense.waktu) : expense.tanggal || "–"}</td>
-                        <td className="py-3.5 px-4 text-gray-500 text-xs">{expense.user_id || "–"}</td>
-                        <td className="py-3.5 px-4 font-bold text-red-600 text-right">{formatRupiah(expense.jumlah)}</td>
+                        <td className="px-5 py-3.5 text-gray-500 text-xs">{expense.waktu ? formatTanggal(expense.waktu) : expense.tanggal || "–"}</td>
+                        <td className="px-5 py-3.5 text-gray-500 text-xs">{expense.user_id || "–"}</td>
+                        <td className="px-5 py-3.5 font-bold text-red-600 text-right">{formatRupiah(expense.jumlah)}</td>
                       </tr>
                     ))
                   )}

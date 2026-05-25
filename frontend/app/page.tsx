@@ -5,6 +5,8 @@ import Navbar from "../src/components/navbar";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "@/config";
+import { getMenus, MenuItem } from "@/services/cashierService";
+import { formatRupiah } from "@/utils/formatRupiah";
 
 export default function LandingPage() {
   const [settings, setSettings] = useState({
@@ -38,11 +40,26 @@ export default function LandingPage() {
             footer_address: res.data.footer_address || prev.footer_address,
             contact_phone: res.data.contact_phone || prev.contact_phone,
             contact_email: res.data.contact_email || prev.contact_email,
+            featured_mie: res.data.featured_mie || "",
+            featured_topping: res.data.featured_topping || "",
+            featured_minuman: res.data.featured_minuman || "",
           }));
         }
       })
       .catch(err => console.error("Error fetching landing page settings:", err));
+
+    getMenus().then(res => setMenus(res)).catch(err => console.error("Error fetching menus:", err));
   }, []);
+
+  const [menus, setMenus] = useState<MenuItem[]>([]);
+  const featuredMie = menus.find(m => m.id.toString() === settings.featured_mie) || menus[0];
+  const featuredTopping = menus.find(m => m.id.toString() === settings.featured_topping) || menus[1];
+  const featuredMinuman = menus.find(m => m.id.toString() === settings.featured_minuman) || menus[2];
+
+  // Helper untuk fallback image
+  const getImageUrl = (url?: string) => {
+    return url ? `${API_BASE_URL}/storage/${url}` : "https://placehold.co/400x400/eeeeee/999999?text=Ma-Dyang";
+  };
   return (
     <div className="bg-background text-on-background min-h-screen">
       {/* Memanggil Navbar Komponen */}
@@ -149,34 +166,36 @@ export default function LandingPage() {
             </div>
             {/* Bento Grid */}
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+              {featuredMie && (
               <div className="md:col-span-8 group relative overflow-hidden rounded-3xl bg-white shadow-sm hover:shadow-xl transition-all duration-500">
                 <div className="aspect-[16/9] overflow-hidden">
                   <img
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAPLw6XYJvhjxex_ojIfHm-VLbwmL7wS-BFMzOGLB-htUThugPevO0pQ6mVbpokqfzITidlKItFFlcQVz-FiPvVDre0a-KILh9BA9XNHPmSADAkdTYQMI4vpLEAS7hTJu6JwI5kY9GX4s8wgV-OY1O-JehRdG03Og3Kv6bN2xv0HSnBsB0Fl7CdpXs9xTiqZBYWwh_BJFWhj49ZXGDcznwn0At5Iq2fOtHx_4Z8leCP6N2kU3PoeEsH3JVlddmYnfh1-X_tqEE7WhY"
-                    alt="Mie Ayam Spesial"
+                    src={getImageUrl(featuredMie.gambar)}
+                    alt={featuredMie.name}
+                    onError={(e) => { e.currentTarget.src = "https://placehold.co/800x450/eeeeee/999999?text=Ma-Dyang" }}
                   />
                 </div>
                 <div className="p-8 flex justify-between items-center">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       <span className="px-2 py-1 bg-tertiary/10 text-tertiary text-[10px] font-bold rounded uppercase">
-                        Best Seller
+                        Menu Utama
                       </span>
                       <span className="text-tertiary font-bold text-xs">
-                        5.0 (2.1k Reviews)
+                        5.0 Rating
                       </span>
                     </div>
                     <h3 className="text-2xl font-bold text-[#1a1c1c]">
-                      Mie Ayam Spesial Ma-Dyang
+                      {featuredMie.name}
                     </h3>
                     <p className="text-[#564241] text-sm mt-1">
-                      Lengkap dengan bakso, pangsit, dan ceker.
+                      Pilihan menu favorit khas Ma-Dyang.
                     </p>
                   </div>
                   <div className="text-right">
                     <div className="text-3xl font-black text-primary mb-2">
-                      Rp 25k
+                      {formatRupiah(featuredMie.price)}
                     </div>
                     <button className="p-4 bg-[#eeeeee] rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
                       <span className="material-symbols-outlined">
@@ -186,46 +205,33 @@ export default function LandingPage() {
                   </div>
                 </div>
               </div>
+              )}
               <div className="md:col-span-4 flex flex-col gap-6">
-                {[
-                  {
-                    title: "Pangsit Goreng Kriuk",
-                    price: "Rp 12k",
-                    img: "2",
-                    desc: "Pelengkap sempurna yang renyah dengan bumbu rempah pilihan.",
-                  },
-                  {
-                    title: "Es Jeruk Segar Madu",
-                    price: "Rp 15k",
-                    img: "3",
-                    desc: "Perasan jeruk asli dengan sentuhan madu hutan yang menyegarkan.",
-                  },
-                ].map((item, idx) => (
+                {[featuredTopping, featuredMinuman].filter(Boolean).map((item, idx) => (
                   <div
-                    key={idx}
+                    key={item.id}
                     className="flex-1 bg-white rounded-3xl p-6 shadow-sm group hover:shadow-xl transition-all overflow-hidden relative"
                   >
                     <div className="flex gap-4 mb-4">
                       <div className="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0">
-                        <Image
-                                      src="https://placehold.co/100x100.png"
-                                            alt={"Mie Ayam Ma-Dyang Logo"}
-                                            width={100}
-                                            height={100}
-                                            className="object-cover"
-                                    />
+                        <img
+                          src={getImageUrl(item.gambar)}
+                          alt={item.name}
+                          onError={(e) => { e.currentTarget.src = "https://placehold.co/100x100/eeeeee/999999?text=Ma-Dyang" }}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                       <div>
                         <h4 className="font-bold text-lg text-[#1a1c1c] leading-tight">
-                          {item.title}
+                          {item.name}
                         </h4>
                         <div className="text-primary font-bold text-xl mt-1">
-                          {item.price}
+                          {formatRupiah(item.price)}
                         </div>
                       </div>
                     </div>
                     <p className="text-xs text-[#564241] leading-relaxed mb-4">
-                      {item.desc}
+                      Sajian pelengkap nikmat untuk menyempurnakan santapan Anda.
                     </p>
                     <button className="w-full py-3 bg-[#e9e0e0] text-[#696363] rounded-xl text-sm font-bold flex items-center justify-center gap-2">
                       Tambahkan{" "}

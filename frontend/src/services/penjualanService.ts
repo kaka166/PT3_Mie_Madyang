@@ -56,6 +56,8 @@ export type Pemasukan = {
   jumlah: number;
   kondisi: string;
   details: DetailItem[];
+  tunai?: number;
+  kembalian?: number;
 };
 
 // ================= API FUNCTIONS =================
