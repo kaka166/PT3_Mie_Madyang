@@ -106,6 +106,14 @@ class MenuKategoriController extends Controller
     // Hapus Kategori
     public function destroy($id)
     {
+        $menuCount = DB::table('menu')->where('kategori_id', $id)->count();
+        if ($menuCount > 0) {
+            return response()->json([
+                'success' => false,
+                'message' => "Kategori tidak dapat dihapus. $menuCount menu masih menggunakan kategori ini. Nonaktifkan saja kategorinya."
+            ], 400);
+        }
+
         DB::table('menu_kategori')->where('id', $id)->delete();
         return response()->json(['success' => true]);
     }

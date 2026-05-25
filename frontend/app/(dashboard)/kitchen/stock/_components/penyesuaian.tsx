@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import {
   getBahan,
-  getStockHistory,
   createStockMovement,
 } from "@/services/stockService";
+import { addNotification } from "@/services/notificationService";
 
 const alasanOptions = [
   "Rusak",
@@ -32,15 +32,19 @@ export default function Penyesuaian({
   onClose,
   onSuccess,
 }: PenyesuaianProps) {
-  const [bahanList, setBahanList] = useState<any[]>([]);
+  const [bahanMaster, setBahanMaster] = useState<any[]>([]);
   const [selectedBahan, setSelectedBahan] = useState<any>(null);
 
   const [jumlah, setJumlah] = useState("");
   const [satuan, setSatuan] = useState("Kg");
   const [alasan, setAlasan] = useState("");
-  const [tipe, setTipe] = useState<"plus" | "minus">("minus");
 
-  const [riwayat, setRiwayat] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const filteredBahan = bahanMaster.filter((b) =>
+    b.nama.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  const [keranjang, setKeranjang] = useState<any[]>([]);
   const [error, setError] = useState("");
 
   // ================= FETCH BAHAN =================
@@ -48,104 +52,165 @@ export default function Penyesuaian({
     if (!isOpen) return;
 
     const load = async () => {
-      const data = await getBahan();
-      setBahanList(data);
+      try {
+        const data = await getBahan();
+        setBahanMaster(data);
+      } catch (err) {
+        console.error("ERROR GET BAHAN:", err);
+      }
     };
 
     load();
   }, [isOpen]);
 
-  // ================= FETCH RIWAYAT =================
-  const fetchRiwayat = async (id: number) => {
-    const data = await getStockHistory(id);
-    setRiwayat(data);
+  // ================= TAMBAH KE KERANJANG =================
+  const handleTambah = () => {
+    if (!selectedBahan || !selectedBahan.nama) {
+      return alert("Pilih bahan dulu");
+    }
+    if (!jumlah || Number(jumlah) <= 0) {
+      return alert("Jumlah harus lebih dari 0");
+    }
+    if (!alasan) {
+      return alert("Pilih alasan perubahan");
+    }
+    if (Number(jumlah) > (selectedBahan?.qty ?? 0)) {
+      return alert(`Stok ${selectedBahan.nama} tidak mencukupi. Sisa stok: ${selectedBahan.qty} ${satuan}`);
+    }
+
+    const existingIndex = keranjang.findIndex(
+      (k) => k.nama === selectedBahan.nama,
+    );
+
+    if (existingIndex !== -1) {
+      const updated = [...keranjang];
+      updated[existingIndex].jumlah = String(
+        Number(updated[existingIndex].jumlah) + Number(jumlah),
+      );
+      setKeranjang(updated);
+    } else {
+      setKeranjang([
+        ...keranjang,
+        {
+          id: selectedBahan.id,
+          nama: selectedBahan.nama,
+          jumlah,
+          satuan,
+          alasan,
+        },
+      ]);
+    }
+
+    setJumlah("");
+    setAlasan("");
+    setSearch("");
+    setSelectedBahan(null);
   };
 
-  // ================= SUBMIT =================
+  const handleRemoveItem = (index: number) => {
+    const updated = keranjang.filter((_, i) => i !== index);
+    setKeranjang(updated);
+  };
+
+  // ================= SIMPAN PENYESUAIAN =================
   const handleSubmit = async () => {
     setError("");
 
-    if (!selectedBahan) return alert("Pilih barang dulu");
-    if (!jumlah || Number(jumlah) <= 0) {
-      setError("Jumlah harus lebih dari 0");
-      return;
-    }
-    if (tipe === "minus" && Number(jumlah) > (selectedBahan?.qty ?? 0)) {
-      setError(`Stok ${selectedBahan.nama} tidak mencukupi. Sisa stok: ${selectedBahan.qty} ${satuan}`);
+    if (keranjang.length === 0) {
+      setError("Keranjang kosong");
       return;
     }
 
     try {
-      await createStockMovement({
-        bahan_id: selectedBahan.id,
-        jumlah: Number(jumlah),
-        satuan,
-        tipe,
-        kategori: "penyesuaian",
-        alasan,
-      });
+      await Promise.all(
+        keranjang.map((item) =>
+          createStockMovement({
+            bahan_id: item.id,
+            jumlah: Number(item.jumlah),
+            satuan: item.satuan,
+            tipe: "minus",
+            kategori: "penyesuaian",
+            alasan: item.alasan,
+          }),
+        ),
+      );
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || "Gagal menyimpan penyesuaian";
       setError(msg);
       return;
     }
 
-    await fetchRiwayat(selectedBahan.id);
-
     onSuccess?.();
-    onClose();
-  };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleString("id-ID", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    addNotification("Penyesuaian Dicatat", `${keranjang.length} bahan disesuaikan`, "success", true, "kitchen");
+
+    setKeranjang([]);
+    setJumlah("");
+    setAlasan("");
+    setSearch("");
+    setSelectedBahan(null);
+
+    onClose();
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-      <div className="flex w-full max-w-4xl flex-col md:flex-row overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh]">
+      <div className="flex w-full max-w-4xl flex-col md:flex-row overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh] relative">
+        {/* CLOSE BUTTON — always visible */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 bg-red-200 hover:bg-red-300 p-2 rounded-md">
+          <X size={20} />
+        </button>
+
         {/* ================= LEFT ================= */}
-        <div className="flex-1 p-6 overflow-y-auto flex flex-col">
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col max-h-[50vh] md:max-h-none">
           <h2 className="mb-6 text-2xl font-bold text-gray-900">
             Penyesuaian Stock
           </h2>
 
-          {/* NAMA BARANG */}
+          {/* SEARCH + DROPDOWN */}
           <div className="mb-4">
             <label className="block text-sm font-semibold mb-2">
               Nama Barang
             </label>
-            <select
-              className="w-full bg-gray-100 border-none rounded-lg p-3 text-sm"
-              onChange={(e) => {
-                setError("");
-                const id = Number(e.target.value);
-                const bahan = bahanList.find((b) => b.id === id);
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Cari bahan..."
+                value={selectedBahan ? selectedBahan.nama : search}
+                onChange={(e) => {
+                  setSelectedBahan(null);
+                  setSearch(e.target.value);
+                }}
+                className="w-full bg-gray-100 rounded-lg p-3 text-sm"
+              />
 
-                setSelectedBahan(bahan);
-                setSatuan(bahan?.satuan || "Kg");
-                fetchRiwayat(id);
-              }}>
-              <option value="">Pilih barang</option>
-              {bahanList.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.nama}
-                </option>
-              ))}
-            </select>
+              {search && !selectedBahan && (
+                <div className="absolute z-10 w-full bg-white border rounded-lg mt-1 max-h-40 overflow-y-auto shadow">
+                  {filteredBahan.map((b) => (
+                    <div
+                      key={b.id}
+                      onClick={() => {
+                        setSelectedBahan(b);
+                        setSatuan(b.satuan || "Kg");
+                        setSearch("");
+                      }}
+                      className="p-2 hover:bg-gray-100 cursor-pointer text-sm">
+                      {b.nama}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* JUMLAH */}
-          <div className="flex gap-4 mb-6">
+          <div className="flex-col sm:flex-row gap-4 mb-4">
             <div className="flex-1">
-              <label className="block text-sm font-semibold mb-2">
+              <label className="text-sm font-semibold mb-2">
                 Jumlah Sekarang
               </label>
               <div className="text-lg font-bold">
@@ -154,22 +219,24 @@ export default function Penyesuaian({
             </div>
 
             <div className="flex-1">
-              <label className="block text-sm font-semibold mb-2">
+              <label className="text-sm font-semibold mb-2">
                 Jumlah Dikurangi
               </label>
-              <div className="flex border rounded-lg overflow-hidden bg-gray-100">
+              <div className="flex border rounded-lg bg-gray-100">
                 <input
                   type="number"
                   value={jumlah}
                   onChange={(e) => { setError(""); setJumlah(e.target.value); }}
-                  className="w-full bg-transparent p-2 text-sm outline-none"
+                  className="w-full p-2"
                 />
                 <select
                   value={satuan}
                   onChange={(e) => setSatuan(e.target.value)}
-                  className="bg-gray-200 border-l px-2 text-sm font-medium">
+                  className="bg-gray-200 px-2">
                   {unitOptions.map((u) => (
-                    <option key={u}>{u}</option>
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -195,6 +262,40 @@ export default function Penyesuaian({
             </div>
           </div>
 
+          <button
+            onClick={handleTambah}
+            className="mt-auto w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
+            + Tambahkan ke Keranjang
+          </button>
+        </div>
+
+        {/* ================= RIGHT ================= */}
+        <div className="flex-1 bg-gray-100 p-4 sm:p-6 relative flex flex-col border-t md:border-t-0 md:border-l max-h-[40vh] md:max-h-none">
+          <h3 className="font-bold text-xl mb-4 mt-1 md:mt-2">Keranjang</h3>
+          <div className="flex-1 overflow-y-auto space-y-3">
+            {keranjang.map((item, i) => (
+              <div
+                key={`${item.nama}-${i}`}
+                className="bg-white p-4 rounded-xl relative">
+                <button
+                  onClick={() => handleRemoveItem(i)}
+                  className="absolute top-0 right-0 p-2.5 text-gray-400 hover:text-red-500">
+                  <X size={16} />
+                </button>
+
+                <div className="flex justify-between">
+                  <span className="font-bold">{item.nama}</span>
+                  <span className="font-bold text-red-600">
+                    - {item.jumlah} {item.satuan}
+                  </span>
+                </div>
+
+                <div className="text-xs text-gray-400 mt-1">
+                  {item.alasan}
+                </div>
+              </div>
+            ))}
+          </div>
           {error && (
             <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
               {error}
@@ -205,82 +306,6 @@ export default function Penyesuaian({
             className="mt-auto w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition-all active:scale-95">
             Simpan Penyesuaian
           </button>
-        </div>
-
-        {/* ================= RIGHT ================= */}
-        <div className="flex-1 bg-gray-100 p-6 relative flex flex-col">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 bg-red-200 text-gray-700 hover:bg-red-300 p-1 rounded-md">
-            <X size={20} />
-          </button>
-
-          {/* INFO */}
-          <div className="bg-white p-4 rounded-xl shadow-sm mb-6 mt-6 md:mt-0">
-            <div className="flex items-center gap-2 mb-4">
-              <h3 className="font-bold text-gray-800">
-                {selectedBahan?.nama || "-"}
-              </h3>
-              <span className="text-xs text-gray-400">
-                #{selectedBahan?.id || "-"}
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-y-4 text-sm mb-4">
-              <div>
-                <div className="text-gray-400 text-xs mb-1">
-                  Alasan perubahan
-                </div>
-                <div className="font-medium text-gray-700">{alasan || "-"}</div>
-              </div>
-
-              <div>
-                <div className="text-gray-400 text-xs mb-1">
-                  Perubahan Stok Terakhir
-                </div>
-                <div className="font-medium text-gray-700">
-                  {riwayat[0] ? formatDate(riwayat[0].created_at) : "-"}
-                </div>
-              </div>
-
-              <div>
-                <div className="text-gray-400 text-xs mb-1">
-                  Jumlah Sekarang
-                </div>
-                <div className="font-medium text-gray-700">
-                  {selectedBahan?.qty ?? 0} {selectedBahan?.satuan ?? ""}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* RIWAYAT */}
-          <h3 className="font-bold text-lg mb-4">Riwayat Perubahan Stock</h3>
-
-          <div className="flex-1 overflow-y-auto pr-2 space-y-3 pb-4">
-            {riwayat.map((item, index) => (
-              <div key={index} className="bg-white p-3 rounded-xl shadow-sm">
-                <div className="flex justify-between">
-                  <span className="font-bold">{selectedBahan?.nama}</span>
-                  <span
-                    className={
-                      item.tipe === "plus" ? "text-green-500" : "text-red-500"
-                    }>
-                    {item.tipe === "plus" ? "+" : "-"} {item.jumlah}{" "}
-                    {item.satuan}
-                  </span>
-                </div>
-
-                <div className="flex justify-between text-xs mt-1">
-                  <span className="text-gray-400">User</span>
-                  <span className="text-red-500">{item.alasan}</span>
-                  <span className="text-gray-500">
-                    {formatDate(item.created_at)}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

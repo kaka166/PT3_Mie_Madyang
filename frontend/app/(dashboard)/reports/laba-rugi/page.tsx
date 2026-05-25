@@ -82,7 +82,7 @@ export default function LabaRugiPage() {
 
   return (
     <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24">
-      <div className="max-w-1xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-start gap-4">
           <div>
             <h1 className="text-3xl font-bold text-[#F53E1B]">Laba Rugi</h1>
@@ -164,7 +164,7 @@ export default function LabaRugiPage() {
               <div className="p-6 border-b">
                 <h2 className="text-xl font-bold text-neutral-900">Ringkasan Laba Rugi</h2>
               </div>
-              <div className="p-6">
+              <div className="p-6 overflow-x-auto">
                 <table className="w-full text-sm text-left whitespace-nowrap">
                   <tbody>
                     {[

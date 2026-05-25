@@ -34,7 +34,8 @@ class PenjualanController extends Controller
             ->get()
             ->map(function ($p) {
                 $dt = \Carbon\Carbon::parse($p->tanggal ?? now())->setTimezone('Asia/Jakarta');
-                $noTrx = $dt->format('Ymd') . str_pad($p->id, 3, '0', STR_PAD_LEFT);
+                $seq = $p->daily_seq ?? $p->id;
+                $noTrx = str_pad($seq, 3, '0', STR_PAD_LEFT);
                 return [
                     'id'       => $noTrx,
                     'original_id' => $p->id,
@@ -54,7 +55,7 @@ class PenjualanController extends Controller
 
                     'details' => $p->detail->map(function ($d) {
                         return [
-                            'nama' => $d->menu->nama_menu ?? '-',
+                            'nama' => $d->menu?->nama_menu ?? '-',
                             'qty' => $d->qty,
                             'note' => $d->note ?? ''
                         ];
@@ -112,6 +113,9 @@ class PenjualanController extends Controller
                 'status' => 'pending',
                 'metode_pembayaran' => $request->metode_pembayaran
             ]);
+
+            $penjualan->daily_seq = Penjualan::whereDate('tanggal', today())->count();
+            $penjualan->save();
 
             $grand_total = 0;
 
@@ -243,8 +247,13 @@ class PenjualanController extends Controller
             $q->withTrashed();
         }]);
 
-        // Role kasir (role 2): filter hanya transaksi sesi aktif hari ini
-        if ($user && $user->role === 2) {
+        // Jika session_id dikirim via query param, filter berdasarkan itu
+        if ($request->has('session_id')) {
+            $query->whereHas('penjualan', function ($q) use ($request) {
+                $q->where('session_id', $request->session_id);
+            });
+        } elseif ($user && $user->role === 2) {
+            // Role kasir (role 2): filter hanya transaksi sesi aktif hari ini
             $activeSession = \App\Models\PosSession::where('user_id', $user->id)
                 ->whereNull('ended_at')
                 ->latest()
@@ -259,38 +268,35 @@ class PenjualanController extends Controller
                 return response()->json([]);
             }
         }
-        // Role admin (role 1): tampilkan semua transaksi
+        // Role admin (role 1): tampilkan semua (kecuali session_id ditentukan)
 
         $data = $query->latest()->get()->map(function ($p) {
             $penjualan = $p->penjualan;
 
             $kasirName = $p->kasir;
             if ($kasirName === 'Unknown' || $kasirName === null) {
-                $kasirName = $penjualan && $penjualan->user ? $penjualan->user->name : 'Unknown';
+                $kasirName = $penjualan?->user?->name ?? 'Unknown';
             }
 
+            $seq = $penjualan ? ($penjualan->daily_seq ?? $penjualan->id) : $p->penjualan_id;
+
             return [
-                'no'      => (function() use ($p) {
-                    // Format: YYYYMMDDNNN  e.g. 2026052006
-                    $waktu = $p->waktu ?? now();
-                    $dt = \Carbon\Carbon::parse($waktu)->setTimezone('Asia/Jakarta');
-                    return $dt->format('Ymd') . str_pad($p->penjualan_id, 3, '0', STR_PAD_LEFT);
-                })(),
+                'no'      => str_pad($seq, 3, '0', STR_PAD_LEFT),
                 'nama'    => $penjualan->customer_name ?? 'Guest',
                 'waktu'   => $p->waktu,
                 'kasir'   => $kasirName,
                 'metode'  => $p->metode,
                 'jumlah'  => $p->total,
-                'kondisi' => $penjualan->order_type === 'Dine In' ? 'Makan di Tempat' : 'Bungkus',
-                'details' => $penjualan->detail->map(function ($d) {
+                'kondisi' => $penjualan?->order_type === 'Dine In' ? 'Makan di Tempat' : 'Bungkus',
+                'details' => $penjualan?->detail?->map(function ($d) {
                     return [
-                        'nama'     => $d->menu->nama_menu ?? '-',
+                        'nama'     => $d->menu?->nama_menu ?? '-',
                         'qty'      => $d->qty,
                         'note'     => $d->note ?? '',
                         'harga'    => $d->harga,
                         'subtotal' => $d->subtotal,
                     ];
-                }),
+                }) ?? [],
             ];
         });
 

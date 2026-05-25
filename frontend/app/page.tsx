@@ -21,6 +21,9 @@ export default function LandingPage() {
     footer_address: "Jl. Madyang Raya No. 1, Yogyakarta",
     contact_phone: "+62 812-3456-7890",
     contact_email: "halo@miemadyang.com",
+    featured_mie: "",
+    featured_topping: "",
+    featured_minuman: "",
   });
 
   useEffect(() => {

@@ -32,7 +32,7 @@ class QrisSettingController extends Controller
 
         if ($request->hasFile('gambar')) {
             $file = $request->file('gambar');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time() . '_' . $file->hashName();
             $file->storeAs('qris', $filename, 'public');
             $data['gambar_qris'] = $filename;
         }
@@ -65,7 +65,7 @@ class QrisSettingController extends Controller
                 Storage::disk('public')->delete('qris/' . $setting->gambar_qris);
             }
             $file = $request->file('gambar');
-            $filename = time() . '_' . $file->getClientOriginalName();
+            $filename = time() . '_' . $file->hashName();
             $file->storeAs('qris', $filename, 'public');
             $data['gambar_qris'] = $filename;
         }

@@ -27,7 +27,7 @@ use App\Http\Controllers\Api\ReceiptSettingController;
 */
 
 Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 Route::get('/login-error', [AuthController::class, 'unauthenticated'])->name('login');
 Route::get('/landing-page', [LandingPageSettingController::class, 'index']);
 

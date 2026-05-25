@@ -166,7 +166,7 @@ export default function ReportsAnalyticsPage() {
 
   return (
     <div className="min-h-screen bg-neutral-100 p-8 font-sans">
-      <div className="max-w-1xl mx-auto space-y-4">
+      <div className="max-w-7xl mx-auto space-y-4">
         {/* --- Header Title --- */}
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-[#F53E1B]">

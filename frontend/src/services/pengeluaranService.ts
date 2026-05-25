@@ -16,7 +16,8 @@ export interface Pengeluaran {
 // AUTH HEADER HELPER
 // ==========================
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   if (!token) {
     throw new Error("Token tidak ditemukan, silakan login ulang");

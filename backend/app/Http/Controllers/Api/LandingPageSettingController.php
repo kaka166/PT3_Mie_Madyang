@@ -20,28 +20,33 @@ class LandingPageSettingController extends Controller
 
     public function update(Request $request)
     {
+        $allowedKeys = ['hero_title', 'hero_subtitle', 'hero_image', 'mascot_image', 'about_title', 'about_description', 'features', 'social_links'];
+
         $data = $request->all();
 
         // Handle file uploads
         if ($request->hasFile('hero_image')) {
             $file = $request->file('hero_image');
-            $path = $file->storeAs('landing-page', 'hero_image.' . $file->extension(), 'public');
+            $filename = 'hero_image.' . $file->hashName() . '.' . $file->extension();
+            $path = $file->storeAs('landing-page', $filename, 'public');
             $data['hero_image'] = '/storage/' . $path;
         }
 
         if ($request->hasFile('mascot_image')) {
             $file = $request->file('mascot_image');
-            $path = $file->storeAs('landing-page', 'mascot_image.' . $file->extension(), 'public');
+            $filename = 'mascot_image.' . $file->hashName() . '.' . $file->extension();
+            $path = $file->storeAs('landing-page', $filename, 'public');
             $data['mascot_image'] = '/storage/' . $path;
         }
 
         foreach ($data as $key => $value) {
-            if ($key !== '_method' && (is_string($value) || is_numeric($value))) {
-                LandingPageSetting::updateOrCreate(
-                    ['key' => $key],
-                    ['value' => $value]
-                );
+            if (!in_array($key, $allowedKeys) || $key === '_method') {
+                continue;
             }
+            LandingPageSetting::updateOrCreate(
+                ['key' => $key],
+                ['value' => is_array($value) ? json_encode($value) : $value]
+            );
         }
 
         return response()->json([

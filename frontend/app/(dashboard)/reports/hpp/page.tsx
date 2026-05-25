@@ -269,9 +269,9 @@ export default function HPPPage() {
       {/* --- MODAL PRODUKSI --- */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl flex w-full max-w-5xl h-[650px] overflow-hidden relative">
+          <div className="bg-white rounded-2xl shadow-2xl flex-col md:flex-row w-full max-w-5xl max-h-[90vh] h-auto overflow-hidden relative">
             {/* PANEL KIRI */}
-            <div className="w-[40%] bg-white p-8 flex flex-col border-r border-gray-200 overflow-y-auto custom-scrollbar">
+            <div className="w-full md:w-[40%] bg-white p-8 flex flex-col border-r border-gray-200 overflow-y-auto custom-scrollbar">
               <h2 className="text-3xl font-bold mb-8 text-black">Hitung HPP</h2>
               <div className="space-y-4 mb-6">
                 <div>
@@ -375,7 +375,7 @@ export default function HPPPage() {
             </div>
 
             {/* PANEL KANAN */}
-            <div className="w-[60%] bg-[#f4f4f5] p-8 flex flex-col relative overflow-y-auto custom-scrollbar">
+            <div className="w-full md:w-[60%] bg-[#f4f4f5] p-8 flex flex-col relative overflow-y-auto custom-scrollbar">
               <button
                 onClick={handleCloseModal}
                 className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 transition-colors z-10">

@@ -21,6 +21,7 @@ export interface PrintOrder {
   items: PrintItem[];
   tunai?: number;
   kembalian?: number;
+  receipt_config?: Record<string, any>;
 }
 
 let cachedDevice: any = null;
@@ -63,7 +64,7 @@ async function getBluetoothCharacteristic() {
 async function printViaBluetooth(order: PrintOrder) {
   const char = await getBluetoothCharacteristic();
   const buffer: number[] = [];
-  const config = (order as any).receipt_config || {};
+  const config = order.receipt_config || {};
 
   buffer.push(27, 64); // ESC @
   buffer.push(27, 97, 1); // Center
@@ -116,7 +117,7 @@ async function printViaBluetooth(order: PrintOrder) {
 
 export async function smartPrint(order: PrintOrder) {
   try {
-    const printServerUrl = (order as any).receipt_config?.print_server_url || "http://localhost:5000/print";
+    const printServerUrl = order.receipt_config?.print_server_url || "http://localhost:5000/print";
     
     if (printServerUrl.trim().toLowerCase() === "bluetooth") {
       await printViaBluetooth(order);

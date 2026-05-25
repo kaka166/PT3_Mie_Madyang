@@ -20,6 +20,7 @@ const getHeaders = () => {
 export type OrderItemPayload = {
   menu_id: number;
   qty: number;
+  note?: string;
 };
 
 export type CreateOrderPayload = {
@@ -30,7 +31,7 @@ export type CreateOrderPayload = {
 };
 export type Order = {
   id: string;
-  penjualan_id: number;
+  original_id: number;
   waktu: string;
   customer: string;
   items: number;
@@ -69,10 +70,14 @@ export const getOrders = async (): Promise<Order[]> => {
       headers: getHeaders(),
     });
 
-    if (!res.ok) throw new Error("Gagal ambil orders");
+    const text = await res.text();
+    if (!res.ok) {
+      let msg = "Gagal ambil orders";
+      try { const j = JSON.parse(text); msg = j.message || j.error || msg; } catch {}
+      throw new Error(msg);
+    }
 
-    const data = await res.json();
-    return data || [];
+    return JSON.parse(text) || [];
   } catch (error) {
     console.error("Error getOrders:", error);
     return [];
@@ -117,7 +122,12 @@ export const updateOrderStatus = async (
       body: JSON.stringify({ status }),
     });
 
-    if (!res.ok) throw new Error("Gagal update status");
+    const text = await res.text();
+    if (!res.ok) {
+      let msg = "Gagal update status";
+      try { const j = JSON.parse(text); msg = j.message || j.error || msg; } catch {}
+      throw new Error(msg);
+    }
 
     return true;
   } catch (error) {
@@ -126,15 +136,24 @@ export const updateOrderStatus = async (
   }
 };
 
-export const getPemasukan = async (): Promise<Pemasukan[]> => {
+export const getPemasukan = async (sessionId?: number | null): Promise<Pemasukan[]> => {
   try {
-    const res = await fetch(`${API_BASE_URL}/pemasukan`, {
+    let url = `${API_BASE_URL}/pemasukan`;
+    if (sessionId) {
+      url += `?session_id=${sessionId}`;
+    }
+    const res = await fetch(url, {
       headers: getHeaders(),
     });
 
-    if (!res.ok) throw new Error("Gagal ambil pemasukan");
+    const text = await res.text();
+    if (!res.ok) {
+      let msg = "Gagal ambil pemasukan";
+      try { const j = JSON.parse(text); msg = j.message || j.error || msg; } catch {}
+      throw new Error(msg);
+    }
 
-    return await res.json();
+    return JSON.parse(text);
   } catch (err) {
     console.error(err);
     return [];

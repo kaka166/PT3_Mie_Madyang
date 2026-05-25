@@ -9,6 +9,7 @@ use App\Models\ProduksiDetail;
 use App\Models\Bahan;
 use App\Models\Menu;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ProduksiController extends Controller
 {
@@ -66,7 +67,7 @@ class ProduksiController extends Controller
                 'tanggal_produksi' => $request->tanggal_produksi,
                 'jumlah_porsi' => $request->jumlah_porsi,
                 'hpp_per_porsi' => $hpp,
-                'created_by' => 1 // nanti bisa pakai auth()
+                'created_by' => Auth::id()
             ]);
 
             // 🔹 simpan detail bahan

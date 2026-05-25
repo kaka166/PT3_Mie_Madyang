@@ -19,7 +19,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap"
         />
       </head>
-      <body className={`${pjs.variable} font-sans antialiased min-h-screen flex flex-col`}>
+      <body className={`${pjs.variable} font-sans antialiased min-h-screen flex flex-col`} suppressHydrationWarning>
         {children}
       </body>
     </html>

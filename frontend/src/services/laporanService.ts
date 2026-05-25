@@ -7,16 +7,24 @@ const getHeaders = () => {
   return headers;
 };
 
+const fetchJson = async (url: string, init?: RequestInit) => {
+  const res = await fetch(url, init);
+  const text = await res.text();
+  if (!res.ok) {
+    let msg = "Request gagal";
+    try { const j = JSON.parse(text); msg = j.message || j.error || msg; } catch {}
+    throw new Error(msg);
+  }
+  return JSON.parse(text);
+};
+
 export const getLabaRugi = async (params?: { start_date?: string; end_date?: string }) => {
   const query = new URLSearchParams();
   if (params?.start_date) query.set("start_date", params.start_date);
   if (params?.end_date) query.set("end_date", params.end_date);
   const qs = query.toString();
 
-  const res = await fetch(`${API_BASE_URL}/laba-rugi${qs ? "?" + qs : ""}`, {
-    headers: getHeaders(),
-  });
-  return res.json();
+  return fetchJson(`${API_BASE_URL}/laba-rugi${qs ? "?" + qs : ""}`, { headers: getHeaders() });
 };
 
 export const getLaporanPemasukan = async (params?: {
@@ -32,10 +40,7 @@ export const getLaporanPemasukan = async (params?: {
   if (params?.metode) query.set("metode", params.metode);
   const qs = query.toString();
 
-  const res = await fetch(`${API_BASE_URL}/laporan/pemasukan${qs ? "?" + qs : ""}`, {
-    headers: getHeaders(),
-  });
-  return res.json();
+  return fetchJson(`${API_BASE_URL}/laporan/pemasukan${qs ? "?" + qs : ""}`, { headers: getHeaders() });
 };
 
 export const getLaporanPengeluaran = async (params?: {
@@ -51,15 +56,11 @@ export const getLaporanPengeluaran = async (params?: {
   if (params?.kategori) query.set("kategori", params.kategori);
   const qs = query.toString();
 
-  const res = await fetch(`${API_BASE_URL}/laporan/pengeluaran${qs ? "?" + qs : ""}`, {
-    headers: getHeaders(),
-  });
-  return res.json();
+  return fetchJson(`${API_BASE_URL}/laporan/pengeluaran${qs ? "?" + qs : ""}`, { headers: getHeaders() });
 };
 
 export const getLaporanUsers = async () => {
-  const res = await fetch(`${API_BASE_URL}/laporan/users`, { headers: getHeaders() });
-  return res.json();
+  return fetchJson(`${API_BASE_URL}/laporan/users`, { headers: getHeaders() });
 };
 
 export const getLaporanShifts = async (params?: { start_date?: string; end_date?: string }) => {
@@ -68,15 +69,11 @@ export const getLaporanShifts = async (params?: { start_date?: string; end_date?
   if (params?.end_date) query.set("end_date", params.end_date);
   const qs = query.toString();
 
-  const res = await fetch(`${API_BASE_URL}/laporan/shifts${qs ? "?" + qs : ""}`, {
-    headers: getHeaders(),
-  });
-  return res.json();
+  return fetchJson(`${API_BASE_URL}/laporan/shifts${qs ? "?" + qs : ""}`, { headers: getHeaders() });
 };
 
 export const getLaporanMenuItems = async () => {
-  const res = await fetch(`${API_BASE_URL}/laporan/menu-items`, { headers: getHeaders() });
-  return res.json();
+  return fetchJson(`${API_BASE_URL}/laporan/menu-items`, { headers: getHeaders() });
 };
 
 export const updateUser = async (id: number, data: {
@@ -87,20 +84,18 @@ export const updateUser = async (id: number, data: {
   password?: string;
   role?: number;
 }) => {
-  const res = await fetch(`${API_BASE_URL}/users/${id}`, {
+  return fetchJson(`${API_BASE_URL}/users/${id}`, {
     method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  return res.json();
 };
 
 export const deleteUser = async (id: number) => {
-  const res = await fetch(`${API_BASE_URL}/users/${id}`, {
+  return fetchJson(`${API_BASE_URL}/users/${id}`, {
     method: "DELETE",
     headers: getHeaders(),
   });
-  return res.json();
 };
 
 export const getAttendanceHistory = async (params?: { start_date?: string; end_date?: string }) => {
@@ -108,8 +103,8 @@ export const getAttendanceHistory = async (params?: { start_date?: string; end_d
   if (params?.start_date) query.set("start_date", params.start_date);
   if (params?.end_date) query.set("end_date", params.end_date);
   const qs = query.toString();
-  const res = await fetch(`${API_BASE_URL}/attendance/history${qs ? "?" + qs : ""}`, { headers: getHeaders() });
-  return res.json();
+
+  return fetchJson(`${API_BASE_URL}/attendance/history${qs ? "?" + qs : ""}`, { headers: getHeaders() });
 };
 
 export const createUser = async (data: {
@@ -120,10 +115,9 @@ export const createUser = async (data: {
   password: string;
   role: number;
 }) => {
-  const res = await fetch(`${API_BASE_URL}/users`, {
+  return fetchJson(`${API_BASE_URL}/users`, {
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify(data),
   });
-  return res.json();
 };

@@ -39,7 +39,8 @@ class LaporanController extends Controller
         $data = $query->latest()->get()->map(function ($p) {
             $penjualan = $p->penjualan;
             $dt = \Carbon\Carbon::parse($p->waktu ?? now())->setTimezone('Asia/Jakarta');
-            $noTrx = $dt->format('Ymd') . str_pad($p->penjualan_id, 3, '0', STR_PAD_LEFT);
+            $seq = $penjualan ? ($penjualan->daily_seq ?? $penjualan->id) : $p->penjualan_id;
+            $noTrx = $dt->format('Ymd') . str_pad($seq, 3, '0', STR_PAD_LEFT);
             return [
                 'id' => $p->id,
                 'no' => $noTrx,

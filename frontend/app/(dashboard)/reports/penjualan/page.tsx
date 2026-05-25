@@ -276,14 +276,14 @@ export default function LaporanPemasukan() {
             <div className="flex gap-1">
               <button onClick={() => setCurrentPage(p => Math.max(p-1,1))}
                 disabled={currentPage === 1}
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 disabled:opacity-40">‹</button>
+                className="w-9 h-9 flex items-center justify-center rounded bg-gray-100 disabled:opacity-40">‹</button>
               {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => (
                 <button key={i} onClick={() => setCurrentPage(i+1)}
-                  className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === i+1 ? "bg-[#F53E1B] text-white" : "bg-gray-100"}`}>{i+1}</button>
+                  className={`w-9 h-9 flex items-center justify-center rounded ${currentPage === i+1 ? "bg-[#F53E1B] text-white" : "bg-gray-100"}`}>{i+1}</button>
               ))}
               <button onClick={() => setCurrentPage(p => Math.min(p+1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-100 disabled:opacity-40">›</button>
+                className="w-9 h-9 flex items-center justify-center rounded bg-gray-100 disabled:opacity-40">›</button>
             </div>
           </div>
         </div>

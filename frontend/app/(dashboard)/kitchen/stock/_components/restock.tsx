@@ -153,9 +153,16 @@ export default function RestockModal({
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
-      <div className="flex w-full max-w-4xl flex-col md:flex-row overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh]">
+      <div className="flex w-full max-w-4xl flex-col md:flex-row overflow-hidden rounded-2xl bg-white shadow-2xl max-h-[90vh] relative">
+        {/* CLOSE BUTTON — always visible */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-10 bg-red-200 hover:bg-red-300 p-2 rounded-md">
+          <X size={20} />
+        </button>
+
         {/* ================= LEFT ================= */}
-        <div className="flex-1 p-6 overflow-y-auto flex flex-col">
+        <div className="flex-1 p-4 sm:p-6 overflow-y-auto flex flex-col max-h-[50vh] md:max-h-none">
           <h2 className="mb-6 text-2xl font-bold text-gray-900">
             Laporan Restock
           </h2>
@@ -247,7 +254,7 @@ export default function RestockModal({
           </div>
 
           {/* JUMLAH */}
-          <div className="flex gap-4 mb-6">
+          <div className="flex-col sm:flex-row gap-4 mb-6">
             <div className="flex-1">
               <label className="text-sm font-semibold mb-2">
                 Jumlah Sekarang
@@ -285,7 +292,7 @@ export default function RestockModal({
             </div>
           </div>
 
-          <div className="flex gap-4 mb-6">
+          <div className="flex-col sm:flex-row gap-4 mb-6">
             {/* HARGA */}
             <div className="flex-1">
               <label className="text-sm font-semibold mb-2">
@@ -325,14 +332,8 @@ export default function RestockModal({
         </div>
 
         {/* ================= RIGHT ================= */}
-        <div className="flex-1 bg-gray-100 p-6 relative flex flex-col border-l">
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 bg-red-200 p-1 rounded-md">
-            <X size={20} />
-          </button>
-
-          <h3 className="font-bold text-xl mb-6 mt-2">Keranjang</h3>
+        <div className="flex-1 bg-gray-100 p-4 sm:p-6 relative flex flex-col border-t md:border-t-0 md:border-l max-h-[40vh] md:max-h-none">
+          <h3 className="font-bold text-xl mb-4 mt-1 md:mt-2">Keranjang</h3>
           <div className="flex-1 overflow-y-auto space-y-3">
             {keranjang.map((item, i) => (
               <div
@@ -340,7 +341,7 @@ export default function RestockModal({
                 className="bg-white p-4 rounded-xl relative">
                 <button
                   onClick={() => handleRemoveItem(i)}
-                  className="absolute top-0 right-0 m-2 text-gray-400 hover:text-red-500">
+                  className="absolute top-0 right-0 p-2.5 text-gray-400 hover:text-red-500">
                   <X size={16} />
                 </button>
 

@@ -57,7 +57,7 @@ const PaginationBar = ({
       <div className="flex gap-1">
         <button
           onClick={() => setCurrentPage((p: number) => Math.max(p - 1, 1))}
-          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+          className="w-9 h-9 flex items-center justify-center rounded bg-gray-100">
           ‹
         </button>
 
@@ -65,7 +65,7 @@ const PaginationBar = ({
           <button
             key={i}
             onClick={() => setCurrentPage(i + 1)}
-            className={`w-8 h-8 flex items-center justify-center rounded ${
+            className={`w-9 h-9 flex items-center justify-center rounded ${
               currentPage === i + 1 ? "bg-red-400 text-white" : "bg-gray-100"
             }`}>
             {i + 1}
@@ -76,7 +76,7 @@ const PaginationBar = ({
           onClick={() =>
             setCurrentPage((p: number) => Math.min(p + 1, totalPages || 1))
           }
-          className="w-8 h-8 flex items-center justify-center rounded bg-gray-100">
+          className="w-9 h-9 flex items-center justify-center rounded bg-gray-100">
           ›
         </button>
       </div>
@@ -116,18 +116,56 @@ export default function StockBahanPage() {
     load();
   }, []);
 
-  // ================= FILTER =================
-  const filteredRiwayat = selectedFilter
-    ? riwayatData.filter((r) =>
-        r.tipe.toLowerCase().includes(selectedFilter.toLowerCase()),
-      )
-    : riwayatData;
+  const downloadCSV = () => {
+    const rows: string[] = [];
+
+    const esc = (v: any) => {
+      const s = String(v ?? "");
+      return s.includes(",") || s.includes('"') || s.includes("\n")
+        ? `"${s.replace(/"/g, '""')}"`
+        : s;
+    };
+
+    rows.push("STOCK LIST");
+    rows.push(["ID", "Nama Barang", "Jumlah Stock", "Stock Limit", "Status"].map(esc).join(","));
+    stockListData.forEach((item) => {
+      rows.push([item.id, item.nama, item.jumlah, item.stock_limit, item.status].map(esc).join(","));
+    });
+
+    rows.push("");
+    rows.push("RIWAYAT PERUBAHAN");
+    rows.push(["ID", "Item ID", "Nama Barang", "Tipe", "Alasan", "Kuantiti", "Waktu", "Dibuat Oleh"].map(esc).join(","));
+    riwayatData.forEach((item) => {
+      rows.push([item.id, item.itemId, item.nama, item.tipe, item.alasan, item.kuantiti, formatTanggal(item.waktu), item.pembuat].map(esc).join(","));
+    });
+
+    const bom = "\uFEFF";
+    const blob = new Blob([bom + rows.join("\r\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `stock_bahan_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const [stockPage, setStockPage] = useState(1);
   const [stockLimit, setStockLimit] = useState(10);
 
+  const [riwayatSearch, setRiwayatSearch] = useState("");
   const [riwayatPage, setRiwayatPage] = useState(1);
   const [riwayatLimit, setRiwayatLimit] = useState(10);
+
+  // ================= FILTER =================
+  const filteredRiwayat = riwayatData.filter((r) => {
+    const matchTipe = selectedFilter
+      ? r.tipe.toLowerCase().includes(selectedFilter.toLowerCase())
+      : true;
+    const matchSearch = riwayatSearch
+      ? r.nama.toLowerCase().includes(riwayatSearch.toLowerCase())
+      : true;
+    return matchTipe && matchSearch;
+  });
 
   // STOCK
   const stockTotal = stockListData.length;
@@ -155,7 +193,9 @@ export default function StockBahanPage() {
         <p className="text-gray-500 text-sm">Real-time Finance Tracking</p>
       </div>
 
-      <button className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 mb-6">
+      <button
+        onClick={downloadCSV}
+        className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 mb-6">
         <Download size={16} />
         Download Report
       </button>
@@ -190,7 +230,10 @@ export default function StockBahanPage() {
 
             <tbody>
               {(paginatedStock || []).map((item, i) => (
-                <tr key={`${item.nama}-${i}`} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                <tr
+                  key={`${item.nama}-${i}`}
+                  onClick={() => { setRiwayatSearch(item.nama); setRiwayatPage(1); }}
+                  className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors cursor-pointer">
                   <td className="px-5 py-3.5 text-left">{item.id}</td>
                   <td className="px-5 py-3.5 text-left">{item.nama}</td>
                   <td className="px-5 py-3.5 ">{item.jumlah}</td>
@@ -222,8 +265,8 @@ export default function StockBahanPage() {
       </div>
 
       {/* ================= ACTION ================= */}
-      <div className="flex justify-between items-end mb-6">
-        <div className="flex gap-3">
+      <div className="flex flex-wrap justify-between items-end mb-6">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => setIsRestockOpen(true)}
             className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2">
@@ -252,7 +295,7 @@ export default function StockBahanPage() {
           </button>
 
           {isFilterOpen && (
-            <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border p-2 space-y-1 z-50">
+            <div className="absolute right-0 sm:left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border p-2 space-y-1 z-50">
               {/* OPTION */}
               {filterOptions.map((opt) => (
                 <button
@@ -289,8 +332,18 @@ export default function StockBahanPage() {
 
       {/* ================= RIWAYAT ================= */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b">
+        <div className="p-4 border-b flex items-center justify-between gap-4">
           <h2 className="text-lg font-bold">Riwayat Perubahan</h2>
+          <div className="relative w-full sm:w-56">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input
+              type="text"
+              placeholder="Cari nama barang..."
+              value={riwayatSearch}
+              onChange={(e) => { setRiwayatSearch(e.target.value); setRiwayatPage(1); }}
+              className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 w-full"
+            />
+          </div>
         </div>
 
         <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
@@ -310,7 +363,9 @@ export default function StockBahanPage() {
 
             <tbody>
               {(paginatedRiwayat || []).map((item, i) => (
-                <tr key={`${item.nama}-${i}`} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                <tr
+                  key={`${item.nama}-${i}`}
+                  className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
                   <td className="px-5 py-3.5 text-neutral-700">{item.id}</td>
 
                   <td className="px-5 py-3.5 text-neutral-600">{item.itemId}</td>

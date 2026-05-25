@@ -10,6 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  Play,
+  Check,
 } from "lucide-react";
 import { formatTanggal } from "@/utils/formatTanggal";
 import { formatRupiah } from "@/utils/formatRupiah";
@@ -232,9 +234,9 @@ export default function KitchenDashboardPage() {
 
         {/* Kanban Board / Quick Summary */}
         {activeTab === "aktif" && (
-          <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 border-b bg-white">
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-b bg-white">
             {/* Kolom Antri */}
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 h-[400px] overflow-y-auto custom-scrollbar">
+            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 min-h-[80px] custom-scrollbar">
               <h3 className="font-bold text-gray-700 mb-3 sticky top-0 bg-gray-50 py-1">Pesanan Selanjutnya</h3>
               <div className="space-y-3">
                 {orders.filter(o => o.status === "Antri").map((order, idx) => (
@@ -257,7 +259,7 @@ export default function KitchenDashboardPage() {
             </div>
 
             {/* Kolom Dimasak */}
-            <div className="bg-orange-50 rounded-xl p-4 border border-orange-100 h-[400px] overflow-y-auto custom-scrollbar">
+            <div className="bg-orange-50 rounded-xl p-4 border border-orange-100 min-h-[80px] custom-scrollbar">
               <h3 className="font-bold text-orange-800 mb-3 sticky top-0 bg-orange-50 py-1">Pesanan Dimasak</h3>
               <div className="space-y-3">
                 {orders.filter(o => o.status === "Dimasak").map((order, idx) => (
@@ -279,28 +281,7 @@ export default function KitchenDashboardPage() {
               </div>
             </div>
 
-            {/* Kolom Selesai */}
-            <div className="bg-green-50 rounded-xl p-4 border border-green-100 h-[400px] overflow-y-auto custom-scrollbar">
-              <h3 className="font-bold text-green-800 mb-3 sticky top-0 bg-green-50 py-1">Pesanan Selesai</h3>
-              <div className="space-y-3">
-                {orders.filter(o => o.status === "Ready").map((order, idx) => (
-                  <div key={idx} className="bg-white p-3 rounded-lg shadow-sm border border-green-100 opacity-75">
-                    <div className="flex justify-between items-start mb-2">
-                      <p className="font-bold text-gray-800">{order.id}</p>
-                      <p className="text-xs font-semibold text-gray-500">{order.customer}</p>
-                    </div>
-                    <ul className="text-sm space-y-1.5">
-                      {(order.details || []).map((d: any, i: number) => (
-                        <li key={i} className="flex justify-between text-gray-700">
-                          <span><span className="font-bold text-[#F53E1B]">{d.qty}x</span> {d.nama}</span>
-                          {d.note && <span className="text-xs text-green-500 italic bg-green-100 px-1.5 rounded">{d.note}</span>}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
+
           </div>
         )}
 
@@ -309,19 +290,19 @@ export default function KitchenDashboardPage() {
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="px-5 py-3 font-medium">Order ID</th>
-                <th className="px-5 py-3 font-medium">Waktu</th>
-                <th className="px-5 py-3 font-medium">Customer</th>
-                <th className="px-5 py-3 font-medium">Total Item</th>
-                <th className="px-5 py-3 font-medium">Total Harga</th>
-                <th className="px-5 py-3 font-medium">Kondisi</th>
-                <th className="px-5 py-3 font-medium">Status</th>
-                <th className="px-5 py-3 font-medium">Aksi</th>
+                <th className="px-5 py-3.5 font-medium">Order ID</th>
+                <th className="px-5 py-3.5 font-medium">Waktu</th>
+                <th className="px-5 py-3.5 font-medium">Customer</th>
+                <th className="px-5 py-3.5 font-medium">Total Item</th>
+                <th className="px-5 py-3.5 font-medium">Total Harga</th>
+                <th className="px-5 py-3.5 font-medium">Kondisi</th>
+                <th className="px-5 py-3.5 font-medium">Status</th>
+                <th className="px-5 py-3.5 font-medium">Aksi</th>
               </tr>
             </thead>
             <tbody>
               {currentData.map((item, index) => (
-                <tr key={index} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                <tr key={index} onClick={() => handleOpenModal(item)} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors cursor-pointer">
                   <td className="px-5 py-3.5 font-bold text-gray-800">
                     {item.id}
                   </td>
@@ -338,39 +319,42 @@ export default function KitchenDashboardPage() {
                   <td className="px-5 py-3.5 font-bold text-gray-800">
                     {item.kondisi}
                   </td>
-                  <td className="px-5 py-3.5 ">
+                  <td className="px-5 py-3.5">
                     <span
-                      className={`px-4 py-1.5 rounded-full text-xs font-bold inline-block w-24 text-center ${getStatusBadge(item.status)}`}>
+                      className={`px-4 py-1.5 rounded-full text-xs font-bold inline-flex items-center w-24 text-center ${getStatusBadge(item.status)}`}>
                       {item.status}
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-gray-500">
-                    <div className="flex items-center justify-center gap-2">
-                      {item.status === "Antri" && (
+                    <div className="flex items-center gap-2">
+                      {item.status === "Antri" ? (
                         <button
-                          onClick={async () => {
+                          onClick={async (e) => {
+                            e.stopPropagation();
                             const ok = await updateOrderStatus(Number(item.original_id), "cooking");
                             if (ok) {
                               addNotification(`#${String(item.id).replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
                               fetchOrders();
                             }
                           }}
-                          className="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
-                          Proses
+                          className="min-w-[88px] inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
+                          <Play size={12} fill="currentColor" /> Proses
                         </button>
-                      )}
-                      {item.status === "Dimasak" && (
+                      ) : (
                         <button
-                          onClick={() => setConfirmSelesai(item)}
-                          className="px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg text-xs font-bold transition-all active:scale-95">
-                          Selesai
+                          disabled={item.status === "Ready"}
+                          onClick={(e) => { e.stopPropagation(); setConfirmSelesai(item); }}
+                          className={`min-w-[88px] inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all text-center ${
+                            item.status === "Dimasak"
+                              ? "bg-green-500 hover:bg-green-600 text-white active:scale-95"
+                              : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                          }`}>
+                          <Check size={14} /> Selesai
                         </button>
                       )}
-                      <button
-                        onClick={() => handleOpenModal(item)}
-                        className="p-2 hover:bg-gray-200 rounded-full transition-colors text-gray-400 hover:text-gray-700">
+                      <span className="text-gray-300">
                         <MoreHorizontal size={18} />
-                      </button>
+                      </span>
                     </div>
                   </td>
                 </tr>
@@ -382,7 +366,7 @@ export default function KitchenDashboardPage() {
         {/* Mobile Card View */}
         <div className="md:hidden space-y-3 px-2 py-4">
           {currentData.map((item, index) => (
-            <div key={index} className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm">
+            <div key={index} onClick={() => handleOpenModal(item)} className="bg-white rounded-2xl p-4 border border-neutral-100 shadow-sm cursor-pointer active:scale-[0.99] transition-transform">
               <div className="flex justify-between items-start mb-3">
                 <div>
                   <p className="font-bold text-gray-800 text-base">{item.id}</p>
@@ -398,31 +382,34 @@ export default function KitchenDashboardPage() {
                 <span className="font-bold text-gray-700">{formatRupiah(item.harga)}</span>
               </div>
               <div className="flex items-center gap-2">
-                {item.status === 'Antri' && (
+                {item.status === 'Antri' ? (
                   <button
-                    onClick={async () => {
+                    onClick={async (e) => {
+                      e.stopPropagation();
                       const ok = await updateOrderStatus(Number(item.original_id), "cooking");
                       if (ok) {
                         addNotification(`#${String(item.id).replace("#","")} diproses`, `${item.customer} → Dimasak`, "warning", true, "kitchen");
                         fetchOrders();
                       }
                     }}
-                    className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
-                    Proses
+                    className="flex-1 py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95 inline-flex items-center justify-center gap-1.5">
+                    <Play size={12} fill="currentColor" /> Proses
                   </button>
-                )}
-                {item.status === 'Dimasak' && (
+                ) : (
                   <button
-                    onClick={() => setConfirmSelesai(item)}
-                    className="flex-1 py-2.5 bg-green-500 hover:bg-green-600 text-white rounded-xl text-xs font-bold transition-all active:scale-95">
-                    Selesai
+                    disabled={item.status === "Ready"}
+                    onClick={(e) => { e.stopPropagation(); setConfirmSelesai(item); }}
+                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all inline-flex items-center justify-center gap-1.5 ${
+                      item.status === 'Dimasak'
+                        ? "bg-green-500 hover:bg-green-600 text-white active:scale-95"
+                        : "bg-gray-200 text-gray-400 cursor-not-allowed"
+                    }`}>
+                    <Check size={14} /> Selesai
                   </button>
                 )}
-                <button
-                  onClick={() => handleOpenModal(item)}
-                  className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
-                  <MoreHorizontal size={16} className="text-gray-500" />
-                </button>
+                <span className="p-2.5 bg-gray-100 rounded-xl">
+                  <MoreHorizontal size={16} className="text-gray-400" />
+                </span>
               </div>
             </div>
           ))}
@@ -453,7 +440,7 @@ export default function KitchenDashboardPage() {
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
-              className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${
+              className={`w-9 h-9 flex items-center justify-center rounded transition-colors ${
                 currentPage === 1
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-red-500 hover:bg-red-600 text-white"
@@ -467,7 +454,7 @@ export default function KitchenDashboardPage() {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(page)}
-                  className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${
+                  className={`w-9 h-9 flex items-center justify-center rounded transition-colors ${
                     currentPage === page
                       ? "bg-red-500 text-white shadow-sm"
                       : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -482,7 +469,7 @@ export default function KitchenDashboardPage() {
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
               disabled={currentPage === totalPages || totalPages === 0}
-              className={`w-8 h-8 flex items-center justify-center rounded transition-colors ${
+              className={`w-9 h-9 flex items-center justify-center rounded transition-colors ${
                 currentPage === totalPages || totalPages === 0
                   ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                   : "bg-red-500 hover:bg-red-600 text-white"
@@ -495,102 +482,101 @@ export default function KitchenDashboardPage() {
 
       {/* --- KOMPONEN POP UP MODAL --- */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl flex w-full max-w-4xl h-[550px] overflow-hidden relative">
-            {/* PANEL KIRI - Info Pesanan */}
-            <div className="w-[35%] bg-white p-8 flex flex-col border-r border-gray-200">
-              <h2 className="text-2xl font-bold mb-6 text-black">Pesanan</h2>
-
-              <div className="bg-[#f0f0f0] rounded-xl p-5 mb-8">
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500 font-medium">ID</p>
-                  <p className="text-xl font-bold text-black">
-                    {selectedOrder.id}
-                  </p>
-                </div>
-                <div className="mb-4">
-                  <p className="text-sm text-gray-500 font-medium">Kondisi:</p>
-                  <p className="font-semibold text-black">
-                    {selectedOrder.kondisi}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500 font-medium">
-                    Total Item:
-                  </p>
-                  <p className="font-semibold text-black">
-                    {selectedOrder.items}
-                  </p>
-                </div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={handleCloseModal}>
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            {/* HEADER */}
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+              <div>
+                <h2 className="text-2xl font-black text-gray-900">#{selectedOrder.id}</h2>
+                <p className="text-sm font-bold text-gray-500 mt-0.5">{selectedOrder.customer}</p>
               </div>
-
-              <h3 className="font-bold text-lg mb-3 text-black">Status:</h3>
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={() => setModalStatus("Dimasak")}
-                  className={`py-2.5 rounded-lg font-semibold transition-colors ${
-                    modalStatus === "Dimasak"
-                      ? "bg-[#e5e5e5] text-black"
-                      : "bg-[#f5f5f5] text-gray-500 hover:bg-[#e5e5e5]"
-                  }`}>
-                  Dimasak
-                </button>
-                <button
-                  onClick={() => setModalStatus("Ready")}
-                  className={`py-2.5 rounded-lg font-semibold transition-colors ${
-                    modalStatus === "Ready"
-                      ? "bg-[#e5e5e5] text-black"
-                      : "bg-[#f5f5f5] text-gray-500 hover:bg-[#e5e5e5]"
-                  }`}>
-                  Ready
-                </button>
-              </div>
-            </div>
-
-            {/* PANEL KANAN - Detail Item */}
-            <div className="w-[65%] bg-[#f3f4f6] p-8 flex flex-col relative">
               <button
                 onClick={handleCloseModal}
-                className="absolute top-6 right-6 bg-[#fca5a5] hover:bg-[#f87171] text-red-900 rounded-lg p-1.5 transition-colors">
-                <X size={20} strokeWidth={3} />
+                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
+                <X size={18} />
               </button>
+            </div>
 
-              <h2 className="text-2xl font-bold mb-6 text-black">Item</h2>
+            {/* BODY */}
+            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+              {/* Info Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Kondisi</p>
+                  <p className="text-sm font-bold text-gray-800">{selectedOrder.kondisi}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Item</p>
+                  <p className="text-sm font-bold text-gray-800">{selectedOrder.items}</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-4 text-center">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total</p>
+                  <p className="text-sm font-bold text-gray-800">{formatRupiah(selectedOrder.harga)}</p>
+                </div>
+              </div>
 
-              <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                {(selectedOrder.details ?? []).map(
-                  (detail: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="bg-white p-5 rounded-2xl shadow-sm">
-                      <div className="flex justify-between items-center mb-3">
-                        <h4 className="text-lg font-bold text-black">
-                          {detail.nama}
-                        </h4>
-                        <span className="text-[#e11d48] font-bold text-lg">
-                          x {detail.qty}
-                        </span>
+              {/* Daftar Item */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Daftar Item</h3>
+                <div className="space-y-2">
+                  {(selectedOrder.details ?? []).map((detail: any, idx: number) => (
+                    <div key={idx} className="flex items-start justify-between bg-gray-50 rounded-xl px-4 py-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-gray-800 truncate">{detail.nama}</p>
+                        {detail.note && (
+                          <p className="text-xs text-gray-400 font-medium mt-0.5">Note: {detail.note}</p>
+                        )}
                       </div>
-                      <p className="text-sm text-gray-400 font-medium">
-                        Note: {detail.note || "-"}
-                      </p>
+                      <span className="text-sm font-black text-[#F53E1B] ml-3 shrink-0">x{detail.qty}</span>
                     </div>
-                  ),
-                )}
+                  ))}
+                </div>
               </div>
 
-              <div className="mt-6 pt-2">
-                {statusError && (
-                  <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
-                    {statusError}
-                  </div>
-                )}
-                <button
-                  onClick={handleSimpanStatus}
-                  className="w-full bg-[#f85656] hover:bg-[#e04545] text-white py-3.5 rounded-xl font-bold text-lg transition-colors shadow-sm">
-                  Simpan
-                </button>
+              {/* Ubah Status */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Ubah Status</h3>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setModalStatus("Dimasak")}
+                    className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${
+                      modalStatus === "Dimasak"
+                        ? "bg-yellow-400 text-yellow-900 shadow-sm ring-2 ring-yellow-500 ring-offset-2"
+                        : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    }`}>
+                    Dimasak
+                  </button>
+                  <button
+                    onClick={() => setModalStatus("Ready")}
+                    className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${
+                      modalStatus === "Ready"
+                        ? "bg-green-400 text-green-900 shadow-sm ring-2 ring-green-500 ring-offset-2"
+                        : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                    }`}>
+                    Ready
+                  </button>
+                </div>
               </div>
+
+              {statusError && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                  {statusError}
+                </div>
+              )}
+            </div>
+
+            {/* FOOTER */}
+            <div className="flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+              <button
+                onClick={handleCloseModal}
+                className="flex-1 py-3 rounded-xl font-bold text-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all active:scale-[0.98]">
+                Tutup
+              </button>
+              <button
+                onClick={handleSimpanStatus}
+                className="flex-[2] py-3 rounded-xl font-bold text-sm bg-[#F53E1B] hover:bg-[#d93515] text-white transition-all active:scale-[0.98] shadow-sm">
+                Simpan
+              </button>
             </div>
           </div>
         </div>

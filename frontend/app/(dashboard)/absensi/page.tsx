@@ -371,7 +371,7 @@ export default function AbsensiPage() {
                 <tr>
                   <td
                     colSpan={roleId === 1 ? 7 : 5}
-                    className="py-12 text-gray-400 font-medium">
+                    className="py-12 text-gray-400 font-medium text-center">
                     Belum ada riwayat absensi.
                   </td>
                 </tr>

@@ -23,7 +23,7 @@ export default function Pagination({
       <div className="flex gap-1.5 font-bold ml-auto">
         <button
           onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
-          className="w-8 h-8 flex items-center justify-center rounded bg-gray-200">
+          className="w-9 h-9 flex items-center justify-center rounded bg-gray-200">
           <ChevronLeft size={16} />
         </button>
 
@@ -31,7 +31,7 @@ export default function Pagination({
           <button
             key={i}
             onClick={() => onPageChange(i + 1)}
-            className={`w-8 h-8 flex items-center justify-center rounded ${
+            className={`w-9 h-9 flex items-center justify-center rounded ${
               currentPage === i + 1 ? "bg-[#f85656] text-white" : "bg-gray-200"
             }`}>
             {i + 1}

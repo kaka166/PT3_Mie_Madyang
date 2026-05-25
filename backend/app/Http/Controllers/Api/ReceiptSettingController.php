@@ -37,15 +37,18 @@ class ReceiptSettingController extends Controller
 
     public function update(Request $request)
     {
+        $allowedKeys = ['store_name', 'store_motto', 'store_address', 'store_phone', 'footer_msg1', 'footer_msg2', 'print_server_url'];
+
         $data = $request->all();
 
         foreach ($data as $key => $value) {
-            if (is_string($value) || is_numeric($value) || is_null($value)) {
-                ReceiptSetting::updateOrCreate(
-                    ['key' => $key],
-                    ['value' => $value]
-                );
+            if (!in_array($key, $allowedKeys)) {
+                continue;
             }
+            ReceiptSetting::updateOrCreate(
+                ['key' => $key],
+                ['value' => $value]
+            );
         }
 
         return response()->json([

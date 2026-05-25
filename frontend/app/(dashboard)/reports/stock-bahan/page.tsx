@@ -50,7 +50,7 @@ export default function StockBahanPage() {
 
   return (
     <div className="min-h-screen bg-neutral-100 p-8 font-sans pb-24">
-      <div className="max-w-1xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-[#F53E1B] mb-1">
             Laporan Stock Bahan
@@ -161,7 +161,7 @@ export default function StockBahanPage() {
             <div className="flex gap-1">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-100"
+                className="w-9 h-9 flex items-center justify-center rounded bg-gray-100"
               >
                 <ChevronLeft size={16} />
               </button>
@@ -169,7 +169,7 @@ export default function StockBahanPage() {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === i + 1
+                  className={`w-9 h-9 flex items-center justify-center rounded ${currentPage === i + 1
                     ? "bg-red-400 text-white"
                     : "bg-gray-100"
                     }`}
@@ -181,7 +181,7 @@ export default function StockBahanPage() {
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
-                className="w-8 h-8 flex items-center justify-center rounded bg-gray-100"
+                className="w-9 h-9 flex items-center justify-center rounded bg-gray-100"
               >
                 <ChevronRight size={16} />
               </button>

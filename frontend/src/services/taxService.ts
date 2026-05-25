@@ -24,11 +24,14 @@ export const getTax = async (): Promise<TaxSetting> => {
     headers,
   });
 
+  const text = await res.text();
   if (!res.ok) {
-    throw new Error("Gagal fetch tax");
+    let msg = "Gagal fetch tax";
+    try { const j = JSON.parse(text); msg = j.message || j.error || msg; } catch {}
+    throw new Error(msg);
   }
 
-  return res.json();
+  return JSON.parse(text);
 };
 
 // ================= UPDATE TAX =================
@@ -45,9 +48,12 @@ export const updateTax = async (payload: TaxSetting): Promise<TaxSetting> => {
     body: JSON.stringify(payload),
   });
 
+  const text = await res.text();
   if (!res.ok) {
-    throw new Error("Gagal update tax");
+    let msg = "Gagal update tax";
+    try { const j = JSON.parse(text); msg = j.message || j.error || msg; } catch {}
+    throw new Error(msg);
   }
 
-  return res.json();
+  return JSON.parse(text);
 };

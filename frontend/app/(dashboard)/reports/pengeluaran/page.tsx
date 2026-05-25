@@ -221,7 +221,7 @@ export default function LaporanPengeluaran() {
 
   return (
     <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24">
-      <div className="max-w-1xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-start">
           <div>
             <h1 className="text-3xl font-bold text-[#F53E1B]">Laporan Pengeluaran</h1>
@@ -288,20 +288,20 @@ export default function LaporanPengeluaran() {
             </div>
             <div className="flex items-center gap-1.5 font-bold">
               <button onClick={() => setRekapPage((p) => Math.max(p - 1, 1))} disabled={rekapPage === 1}
-                className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === 1 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
+                className={`w-9 h-9 flex items-center justify-center rounded ${rekapPage === 1 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronLeft size={16} />
               </button>
               {Array.from({ length: totalRekapPages }, (_, i) => {
                 const page = i + 1;
                 return (
                   <button key={i} onClick={() => setRekapPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === page ? "bg-red-400 text-white" : "bg-gray-100"}`}>
+                    className={`w-9 h-9 flex items-center justify-center rounded ${rekapPage === page ? "bg-red-400 text-white" : "bg-gray-100"}`}>
                     {page}
                   </button>
                 );
               })}
               <button onClick={() => setRekapPage((p) => Math.min(p + 1, totalRekapPages))} disabled={rekapPage === totalRekapPages || totalRekapPages === 0}
-                className={`w-8 h-8 flex items-center justify-center rounded ${rekapPage === totalRekapPages || totalRekapPages === 0 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
+                className={`w-9 h-9 flex items-center justify-center rounded ${rekapPage === totalRekapPages || totalRekapPages === 0 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronRight size={16} />
               </button>
             </div>
@@ -406,20 +406,20 @@ export default function LaporanPengeluaran() {
             </div>
             <div className="flex items-center gap-1.5 font-bold">
               <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}
-                className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === 1 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
+                className={`w-9 h-9 flex items-center justify-center rounded ${currentPage === 1 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronLeft size={16} />
               </button>
               {Array.from({ length: totalPages }, (_, i) => {
                 const page = i + 1;
                 return (
                   <button key={i} onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === page ? "bg-red-400 text-white" : "bg-gray-100"}`}>
+                    className={`w-9 h-9 flex items-center justify-center rounded ${currentPage === page ? "bg-red-400 text-white" : "bg-gray-100"}`}>
                     {page}
                   </button>
                 );
               })}
               <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages || totalPages === 0}
-                className={`w-8 h-8 flex items-center justify-center rounded ${currentPage === totalPages || totalPages === 0 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
+                className={`w-9 h-9 flex items-center justify-center rounded ${currentPage === totalPages || totalPages === 0 ? "bg-gray-100 text-gray-400" : "bg-red-400 text-white"}`}>
                 <ChevronRight size={16} />
               </button>
             </div>

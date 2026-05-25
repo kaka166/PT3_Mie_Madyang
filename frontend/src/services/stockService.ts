@@ -35,7 +35,8 @@ export interface CreateStockPayload {
 // AUTH HEADER HELPER 🔥
 // ==========================
 const getAuthHeaders = () => {
-  const token = localStorage.getItem("token");
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   if (!token) {
     throw new Error("Token tidak ditemukan, silakan login ulang");
@@ -54,14 +55,17 @@ const handleResponse = async (res: Response) => {
   const text = await res.text();
 
   if (!res.ok) {
-    console.error("API ERROR:", text);
-    throw new Error("Request gagal");
+    let msg = "Request gagal";
+    try {
+      const json = JSON.parse(text);
+      msg = json.message || json.error || msg;
+    } catch {}
+    throw new Error(msg);
   }
 
   try {
     return JSON.parse(text);
   } catch {
-    console.error("Bukan JSON:", text);
     throw new Error("Response bukan JSON");
   }
 };

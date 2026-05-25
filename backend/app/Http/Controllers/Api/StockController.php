@@ -7,7 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\StokMovement;
 use App\Models\StokBahan;
 use App\Models\Bahan;
+use App\Models\Pengeluaran;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class StockController extends Controller
 {
@@ -57,98 +59,107 @@ class StockController extends Controller
     // ==========================
     public function store(Request $request)
     {
-        // ==========================
-        // HANDLE BAHAN BARU DULU
-        // ==========================
-        $bahanId = $request->bahan_id;
+        DB::beginTransaction();
 
-        if (!$bahanId) {
-            $bahan = \App\Models\Bahan::create([
-                'nama_bahan' => $request->nama,
-                'satuan' => $request->satuan ?? 'Kg',
-                'stock_limit' => $request->stock_limit ?? 5,
-                'harga' => $request->harga ?? 0,
-            ]);
+        try {
+            // ==========================
+            // HANDLE BAHAN BARU DULU
+            // ==========================
+            $bahanId = $request->bahan_id;
 
-            $bahanId = $bahan->id;
-        }
+            if (!$bahanId) {
+                $bahan = Bahan::create([
+                    'nama_bahan' => $request->nama,
+                    'satuan' => $request->satuan ?? 'Kg',
+                    'stock_limit' => $request->stock_limit ?? 5,
+                    'harga' => $request->harga ?? 0,
+                ]);
 
-        // ✅ TAMBAHAN DI SINI (WAJIB)
-        if ($bahanId && $request->stock_limit !== null) {
-            \App\Models\Bahan::where('id', $bahanId)->update([
-                'stock_limit' => $request->stock_limit
-            ]);
-        }
-
-        if ($bahanId && $request->harga !== null) {
-            \App\Models\Bahan::where('id', $bahanId)->update([
-                'harga' => $request->harga
-            ]);
-        }
-
-        // ==========================
-        // VALIDASI (SETELAH ADA bahan_id)
-        // ==========================
-        $data = $request->validate([
-            'jumlah' => 'required|numeric|min:0',
-            'tipe' => 'required|in:plus,minus',
-            'satuan' => 'required|string',
-            'kategori' => 'required|string',
-            'alasan' => 'nullable|string',
-            'stock_limit' => 'nullable|integer|min:0',
-            'harga' => 'nullable|numeric|min:0',
-        ]);
-
-        $data['bahan_id'] = $bahanId;
-
-        // ==========================
-        // SIMPAN HISTORI
-        // ==========================
-        $movement = StokMovement::create([
-            ...$data,
-            'user_id' => Auth::id()
-        ]);
-
-        // ==========================
-        // MASUKKAN KE PENGELUARAN (KHUSUS RESTOCK)
-        // ==========================
-        if ($request->kategori === 'restock') {
-            \App\Models\Pengeluaran::create([
-                'nama_pengeluaran' => $request->nama ?? 'Restock Bahan',
-                'jumlah' => ($request->harga ?? 0) * $request->jumlah,
-                'user_id' => Auth::id(),
-                'tanggal' => now()->toDateString(),
-            ]);
-        }
-        // ==========================
-        // UPDATE STOK
-        // ==========================
-        $stok = StokBahan::where('bahan_id', $bahanId)->first();
-
-        if (!$stok) {
-            $stok = StokBahan::create([
-                'bahan_id' => $bahanId,
-                'qty' => 0
-            ]);
-        }
-
-        if ($data['tipe'] === 'plus') {
-            $stok->qty += $data['jumlah'];
-        } else {
-            if ($stok->qty < $data['jumlah']) {
-                return response()->json([
-                    'message' => 'Stok tidak mencukupi. Sisa stok: ' . $stok->qty . ' ' . $data['satuan']
-                ], 400);
+                $bahanId = $bahan->id;
             }
-            $stok->qty -= $data['jumlah'];
+
+            if ($bahanId && $request->stock_limit !== null) {
+                Bahan::where('id', $bahanId)->update([
+                    'stock_limit' => $request->stock_limit
+                ]);
+            }
+
+            if ($bahanId && $request->harga !== null) {
+                Bahan::where('id', $bahanId)->update([
+                    'harga' => $request->harga
+                ]);
+            }
+
+            // ==========================
+            // VALIDASI (SETELAH ADA bahan_id)
+            // ==========================
+            $data = $request->validate([
+                'jumlah' => 'required|numeric|min:0',
+                'tipe' => 'required|in:plus,minus',
+                'satuan' => 'required|string',
+                'kategori' => 'required|string',
+                'alasan' => 'nullable|string',
+                'stock_limit' => 'nullable|integer|min:0',
+                'harga' => 'nullable|numeric|min:0',
+            ]);
+
+            $data['bahan_id'] = $bahanId;
+
+            // ==========================
+            // SIMPAN HISTORI
+            // ==========================
+            $movement = StokMovement::create([
+                ...$data,
+                'user_id' => Auth::id()
+            ]);
+
+            // ==========================
+            // MASUKKAN KE PENGELUARAN (KHUSUS RESTOCK)
+            // ==========================
+            if ($request->kategori === 'restock') {
+                Pengeluaran::create([
+                    'nama_pengeluaran' => $request->nama ?? 'Restock Bahan',
+                    'jumlah' => ($request->harga ?? 0) * $request->jumlah,
+                    'user_id' => Auth::id(),
+                    'tanggal' => now()->toDateString(),
+                ]);
+            }
+
+            // ==========================
+            // UPDATE STOK
+            // ==========================
+            $stok = StokBahan::where('bahan_id', $bahanId)->first();
+
+            if (!$stok) {
+                $stok = StokBahan::create([
+                    'bahan_id' => $bahanId,
+                    'qty' => 0
+                ]);
+            }
+
+            if ($data['tipe'] === 'plus') {
+                $stok->qty += $data['jumlah'];
+            } else {
+                if ($stok->qty < $data['jumlah']) {
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Stok tidak mencukupi. Sisa stok: ' . $stok->qty . ' ' . $data['satuan']
+                    ], 400);
+                }
+                $stok->qty -= $data['jumlah'];
+            }
+
+            $stok->save();
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Berhasil disimpan',
+                'data' => $movement
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Gagal menyimpan stok'], 500);
         }
-
-        $stok->save();
-
-        return response()->json([
-            'message' => 'Berhasil disimpan',
-            'data' => $movement
-        ]);
     }
 
     public function produksi(Request $request)
@@ -163,60 +174,67 @@ class StockController extends Controller
             'bahan.*.satuan' => 'required|string',
         ]);
 
-        // =========================
-        // 1. TAMBAH STOCK HASIL
-        // =========================
-        $stokHasil = StokBahan::where('bahan_id', $data['hasil_id'])->first();
-        if (!$stokHasil) {
-            $stokHasil = StokBahan::create([
-                'bahan_id' => $data['hasil_id'],
-                'qty' => 0
-            ]);
-        }
+        DB::beginTransaction();
 
-        $stokHasil->qty += $data['jumlah_hasil'];
-        $stokHasil->save();
-
-        // simpan history hasil
-        StokMovement::create([
-            'bahan_id' => $data['hasil_id'],
-            'jumlah' => $data['jumlah_hasil'],
-            'tipe' => 'plus',
-            'kategori' => 'produksi',
-            'satuan' => $data['satuan'],
-            'alasan' => 'Produksi',
-            'user_id' => 1
-        ]);
-
-        // =========================
-        // 2. KURANGI BAHAN BAKU
-        // =========================
-        foreach ($data['bahan'] as $bahan) {
-
-            $stok = StokBahan::where('bahan_id', $bahan['id'])->first();
-
-            if (!$stok || $stok->qty < $bahan['jumlah']) {
-                $nama = \App\Models\Bahan::find($bahan['id'])->nama_bahan ?? 'Unknown';
-                return response()->json([
-                    'message' => "Stok bahan '$nama' tidak mencukupi."
-                ], 400);
+        try {
+            // =========================
+            // 1. TAMBAH STOCK HASIL
+            // =========================
+            $stokHasil = StokBahan::where('bahan_id', $data['hasil_id'])->first();
+            if (!$stokHasil) {
+                $stokHasil = StokBahan::create([
+                    'bahan_id' => $data['hasil_id'],
+                    'qty' => 0
+                ]);
             }
 
-            $stok->qty -= $bahan['jumlah'];
-            $stok->save();
+            $stokHasil->qty += $data['jumlah_hasil'];
+            $stokHasil->save();
 
             StokMovement::create([
-                'bahan_id' => $bahan['id'],
-                'jumlah' => $bahan['jumlah'],
-                'tipe' => 'minus',
+                'bahan_id' => $data['hasil_id'],
+                'jumlah' => $data['jumlah_hasil'],
+                'tipe' => 'plus',
                 'kategori' => 'produksi',
-                'satuan' => $bahan['satuan'],
+                'satuan' => $data['satuan'],
                 'alasan' => 'Produksi',
-                'user_id' => 1
+                'user_id' => Auth::id()
             ]);
-        }
 
-        return response()->json(['message' => 'Produksi berhasil']);
+            // =========================
+            // 2. KURANGI BAHAN BAKU
+            // =========================
+            foreach ($data['bahan'] as $bahan) {
+                $stok = StokBahan::where('bahan_id', $bahan['id'])->first();
+
+                if (!$stok || $stok->qty < $bahan['jumlah']) {
+                    DB::rollBack();
+                    $nama = Bahan::find($bahan['id'])->nama_bahan ?? 'Unknown';
+                    return response()->json([
+                        'message' => "Stok bahan '$nama' tidak mencukupi."
+                    ], 400);
+                }
+
+                $stok->qty -= $bahan['jumlah'];
+                $stok->save();
+
+                StokMovement::create([
+                    'bahan_id' => $bahan['id'],
+                    'jumlah' => $bahan['jumlah'],
+                    'tipe' => 'minus',
+                    'kategori' => 'produksi',
+                    'satuan' => $bahan['satuan'],
+                    'alasan' => 'Produksi',
+                    'user_id' => Auth::id()
+                ]);
+            }
+
+            DB::commit();
+            return response()->json(['message' => 'Produksi berhasil']);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Gagal menyimpan produksi'], 500);
+        }
     }
 
     public function stockList()
@@ -267,7 +285,7 @@ class StockController extends Controller
             ->map(function ($item) {
                 $user = $item->user;
                 return [
-                    'id' => '#' . str_pad($item->id, 6, '0', STR_PAD_LEFT),
+                    'id' => '#' . str_pad($item->id, 3, '0', STR_PAD_LEFT),
                     'itemId' => $item->itemId,
                     'nama' => $item->nama,
                     'tipe' => ucfirst($item->tipe),

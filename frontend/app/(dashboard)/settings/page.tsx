@@ -16,7 +16,7 @@ const settingsItems = [
 export default function SettingsPage() {
   return (
     <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24">
-      <div className="max-w-1xl mx-auto space-y-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-[#F53E1B]">Settings</h1>
           <p className="text-sm text-neutral-500 mt-1">Pengaturan sistem</p>

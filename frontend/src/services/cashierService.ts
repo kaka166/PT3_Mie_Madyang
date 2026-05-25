@@ -42,9 +42,14 @@ export const getMenus = async (): Promise<MenuItem[]> => {
       headers: getCashierHeaders(),
     });
 
-    if (!res.ok) throw new Error("Gagal ambil data dari server");
+    const text = await res.text();
+    if (!res.ok) {
+      let msg = "Gagal ambil data dari server";
+      try { const j = JSON.parse(text); msg = j.message || j.error || msg; } catch {}
+      throw new Error(msg);
+    }
 
-    const data: { data: ApiMenu[] } = await res.json();
+    const data: { data: ApiMenu[] } = JSON.parse(text);
     return (data.data || [])
       .filter((item) => item.is_active === 1)
       .map((item) => ({
@@ -67,9 +72,15 @@ export const getCategories = async (): Promise<string[]> => {
     const res = await fetch(`${API_BASE_URL}/kategori`, {
       headers: getCashierHeaders(),
     });
-    if (!res.ok) throw new Error("Gagal ambil kategori");
 
-    const data: { data: ApiCategory[] } = await res.json();
+    const text = await res.text();
+    if (!res.ok) {
+      let msg = "Gagal ambil kategori";
+      try { const j = JSON.parse(text); msg = j.message || j.error || msg; } catch {}
+      throw new Error(msg);
+    }
+
+    const data: { data: ApiCategory[] } = JSON.parse(text);
     const activeCats = (data.data || [])
       .filter((cat) => cat.is_active === 1)
       .map((cat) => cat.nama_kategori);
