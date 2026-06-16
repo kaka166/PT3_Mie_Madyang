@@ -17,6 +17,7 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
+  Pizza,
 } from "lucide-react";
 import { authService } from "@/services/authService";
 import { getActiveSession } from "@/services/sessionService";
@@ -70,6 +71,7 @@ export default function Sidebar({
       subItems: [
         { label: "Pesanan Masuk", href: "/kitchen" },
         { label: "Stok Bahan", href: "/kitchen/stock" },
+        { label: "Stok Menu", href: "/kitchen/menu-stok" },
       ],
     },
     {

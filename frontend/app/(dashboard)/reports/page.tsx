@@ -93,16 +93,7 @@ const StockIcon = () => (
   </svg>
 );
 
-const DownloadIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-    <polyline points="7 10 12 15 17 10" />
-    <line x1="12" y1="15" x2="12" y2="3" />
-  </svg>
-);
-
 export default function ReportsAnalyticsPage() {
-  const [downloading, setDownloading] = useState(false);
   const [data, setData] = useState<{ ringkasan: ReportsRingkasan | null; stock: ReportsStockItem[] } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -142,41 +133,12 @@ export default function ReportsAnalyticsPage() {
       ]
     : [];
 
-  const handleDownloadEvidence = async () => {
-    setDownloading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${API_BASE_URL}/laporan/download-evidence?type=all`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) { alert("Tidak ada evidence untuk periode ini"); return; }
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "evidence.zip";
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setDownloading(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-neutral-100 p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-4">
-        {/* --- Header Title --- */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-[#F53E1B]">
-            Reports &amp; Analytics
-          </h1>
-          <button onClick={handleDownloadEvidence} disabled={downloading}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
-            <DownloadIcon /> {downloading ? "Mengunduh..." : "Download Evidence"}
-          </button>
-        </div>
+        <h1 className="text-3xl font-bold text-[#F53E1B]">
+          Reports &amp; Analytics
+        </h1>
 
         {loading ? (
           <div className="space-y-4 animate-pulse">

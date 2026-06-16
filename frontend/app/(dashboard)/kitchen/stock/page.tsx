@@ -152,6 +152,7 @@ export default function StockBahanPage() {
   const [stockPage, setStockPage] = useState(1);
   const [stockLimit, setStockLimit] = useState(10);
 
+  const [stockSearch, setStockSearch] = useState("");
   const [riwayatSearch, setRiwayatSearch] = useState("");
   const [riwayatPage, setRiwayatPage] = useState(1);
   const [riwayatLimit, setRiwayatLimit] = useState(10);
@@ -168,10 +169,15 @@ export default function StockBahanPage() {
   });
 
   // STOCK
-  const stockTotal = stockListData.length;
+  const filteredStock = stockSearch
+    ? stockListData.filter((s) =>
+        s.nama?.toLowerCase().includes(stockSearch.toLowerCase()),
+      )
+    : stockListData;
+  const stockTotal = filteredStock.length;
   const stockStart = (stockPage - 1) * stockLimit;
 
-  const paginatedStock = stockListData.slice(
+  const paginatedStock = filteredStock.slice(
     stockStart,
     stockStart + stockLimit,
   );
@@ -210,6 +216,8 @@ export default function StockBahanPage() {
               size={16}
             />
             <input
+              value={stockSearch}
+              onChange={(e) => { setStockSearch(e.target.value); setStockPage(1); }}
               className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200"
               placeholder="Cari..."
             />

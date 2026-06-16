@@ -85,9 +85,6 @@ export function addNotification(
   const list = [notif, ...getNotifications()].slice(0, MAX_NOTIFS);
   saveNotifications(list);
 
-  if (!silent) {
-    showToast(title, type);
-  }
   return notif;
 }
 

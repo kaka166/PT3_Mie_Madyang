@@ -88,7 +88,7 @@ export default function Navbar({
   return (
     <>
       {/* NAVBAR */}
-      <header className="bg-white h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 border-b border-gray-100 shadow-sm">
+      <header className="bg-white h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-[160] border-b border-gray-100 shadow-sm">
         {/* LEFT — hamburger (mobile only) */}
         <div className="flex items-center gap-3">
           <button
@@ -130,7 +130,7 @@ export default function Navbar({
 
       {/* MODAL EDIT PROFILE */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[170] flex items-center justify-center p-4">
           {/* BACKDROP */}
           <div
             className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm"

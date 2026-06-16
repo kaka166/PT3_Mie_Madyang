@@ -37,7 +37,6 @@ export default function POSPage() {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<"QRIS" | "Tunai">("QRIS");
   const [customerName, setCustomerName] = useState("");
-  const [tableNumber, setTableNumber] = useState("");
   const [uangTunai, setUangTunai] = useState<number | "">("");
 
   const [isTaxEnabled, setIsTaxEnabled] = useState(true);
@@ -590,19 +589,12 @@ export default function POSPage() {
                 Pembayaran
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+              <div className="mb-6">
                 <input
                   type="text"
                   placeholder="Nama Customer"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-[#b93b3b] rounded-xl px-4 py-3 outline-none transition-all text-sm font-medium"
-                />
-                <input
-                  type="text"
-                  placeholder="Nomor Meja"
-                  value={tableNumber}
-                  onChange={(e) => setTableNumber(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 focus:border-[#b93b3b] rounded-xl px-4 py-3 outline-none transition-all text-sm font-medium"
                 />
               </div>
@@ -796,7 +788,6 @@ export default function POSPage() {
                     setShowPaymentModal(false);
                     setCart([]);
                     setCustomerName("");
-                    setTableNumber("");
                     setUangTunai("");
                   }
                 }}
@@ -852,43 +843,37 @@ export default function POSPage() {
 
       {showEndSessionModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
-          <div className="bg-white w-full max-w-3xl rounded-3xl shadow-2xl flex-col md:flex-row overflow-y-auto relative">
+          <div className="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-8 relative">
             {/* 🔥 TOMBOL CLOSE */}
             <button
-              onClick={() => {
-                setShowEndSessionModal(false);
-              }}
+              onClick={() => setShowEndSessionModal(false)}
               className="absolute top-4 right-4 bg-red-100 hover:bg-red-200 text-red-500 w-8 h-8 flex items-center justify-center rounded-full font-bold">
               ×
             </button>
-            {/* LEFT */}
-            <div className="flex-1 p-8">
-              <h2 className="text-2xl font-black mb-6">Tutup Sesi Kasir</h2>
 
-              <label className="text-sm font-bold text-gray-500">
-                Uang Akhir (Fisik)
-              </label>
+            <h2 className="text-2xl font-black mb-6 text-center">Tutup Sesi Kasir</h2>
 
-              <input
-                type="text"
-                inputMode="numeric"
-                value={formatRupiah(closingCash)}
-                onChange={(e) => {
-                  const raw = e.target.value.replace(/\D/g, "");
-                  setClosingCash(raw);
-                }}
-                placeholder="Masukkan uang akhir"
-                className="w-full mt-2 border-2 border-gray-100 rounded-2xl px-4 py-3 outline-none focus:border-red-400"
-              />
-            </div>
+            <label className="text-sm font-bold text-gray-500">
+              Uang Akhir (Fisik)
+            </label>
 
-            {/* RIGHT */}
-            <div className="w-full md:w-[40%] bg-gray-50 p-8 flex flex-col">
+            <input
+              type="text"
+              inputMode="numeric"
+              value={formatRupiah(closingCash)}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/\D/g, "");
+                setClosingCash(raw);
+              }}
+              placeholder="Masukkan uang akhir"
+              className="w-full mt-2 border-2 border-gray-100 rounded-2xl px-4 py-3 outline-none focus:border-red-400"
+            />
+
+            <div className="bg-gray-50 rounded-2xl p-6 mt-8 flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-black text-gray-400 uppercase mb-4">
+                <h3 className="font-black text-gray-400 uppercase text-xs mb-1">
                   Konfirmasi
                 </h3>
-
                 <p className="text-sm text-gray-500">
                   Pastikan uang fisik sudah dihitung sebelum menutup sesi.
                 </p>
@@ -912,7 +897,7 @@ export default function POSPage() {
                   }
                 }}
                 disabled={loadingEnd}
-                className="w-full bg-red-500 text-white py-4 rounded-2xl font-black shadow-xl disabled:opacity-50 disabled:cursor-not-allowed mt-auto">
+                className="shrink-0 bg-[#b93b3b] text-white px-6 py-3 rounded-xl font-black shadow-xl disabled:opacity-50 text-sm">
                 {loadingEnd ? "Memproses..." : "Konfirmasi Tutup"}
               </button>
             </div>

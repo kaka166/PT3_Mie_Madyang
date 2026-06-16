@@ -23,7 +23,10 @@ export default function ReceiptSettings() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`${API_BASE_URL}/receipt-settings`);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${API_BASE_URL}/receipt-settings`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const result = await res.json();
       if (result.success && result.data) {
         setData({
