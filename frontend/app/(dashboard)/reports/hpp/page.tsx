@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { Search, Plus, Package, Pencil, X } from "lucide-react";
+import { Search, Plus, Package, Pencil, X, CircleHelp } from "lucide-react";
 import { hppService, HppHistory, HppRequestBahan } from "@/services/hppService";
 import { formatRupiah, parseRupiah } from "@/utils/formatRupiah";
 import { menuService, Menu } from "@/services/menuService";
@@ -16,11 +16,13 @@ export default function HPPPage() {
   // --- STATE MODAL ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMenu, setSelectedMenu] = useState<HppHistory | null>(null);
+  const [showRincian, setShowRincian] = useState(false);
 
   // --- STATE FORM (Pakai string kosong agar placeholder muncul) ---
   const [namaMenu, setNamaMenu] = useState("");
   const [targetPenjualan, setTargetPenjualan] = useState<string | number>("");
-  const [bebanOperasional, setBebanOperasional] = useState<string | number>("");
+  const [bebanSewa, setBebanSewa] = useState<string | number>("");
+  const [bebanGaji, setBebanGaji] = useState<string | number>("");
   const [bebanLain, setBebanLain] = useState<string | number>("");
 
   const [bahanList, setBahanList] = useState<
@@ -28,12 +30,11 @@ export default function HPPPage() {
       id: number;
       nama: string;
       jumlah: string;
-      unit: string;
       harga: string;
     }>
   >([
-    { id: 1, nama: "", jumlah: "", unit: "Kg", harga: "" },
-    { id: 2, nama: "", jumlah: "", unit: "Kg", harga: "" },
+    { id: 1, nama: "", jumlah: "", harga: "" },
+    { id: 2, nama: "", jumlah: "", harga: "" },
   ]);
 
   useEffect(() => {
@@ -77,14 +78,14 @@ export default function HPPPage() {
       setSelectedMenu(menu);
       setNamaMenu(menu.nama_menu);
       setTargetPenjualan(menu.target_penjualan);
-      setBebanOperasional(Number(menu.beban_sewa) + Number(menu.beban_gaji));
+      setBebanSewa(Number(menu.beban_sewa));
+      setBebanGaji(Number(menu.beban_gaji));
       setBebanLain(Number(menu.beban_lain_per_porsi));
       setBahanList(
         menu.details.map((d, i) => ({
           id: i,
           nama: d.nama_bahan,
           jumlah: Number(d.jumlah_porsi).toString(),
-          unit: "Kg",
           harga: Number(d.harga_beli).toString(),
         })),
       );
@@ -97,18 +98,19 @@ export default function HPPPage() {
     setSelectedMenu(null);
     setNamaMenu("");
     setTargetPenjualan("");
-    setBebanOperasional("");
+    setBebanSewa("");
+    setBebanGaji("");
     setBebanLain("");
     setBahanList([
-      { id: 1, nama: "", jumlah: "", unit: "Kg", harga: "" },
-      { id: 2, nama: "", jumlah: "", unit: "Kg", harga: "" },
+      { id: 1, nama: "", jumlah: "", harga: "" },
+      { id: 2, nama: "", jumlah: "", harga: "" },
     ]);
   };
 
   const handleAddBahan = () => {
     setBahanList([
       ...bahanList,
-      { id: Date.now(), nama: "", jumlah: "", unit: "Kg", harga: "" },
+      { id: Date.now(), nama: "", jumlah: "", harga: "" },
     ]);
   };
 
@@ -139,17 +141,29 @@ export default function HPPPage() {
         nama_menu: namaMenu,
         bahan: payloadBahan,
         target_penjualan: Number(targetPenjualan) || 1,
-        beban_sewa: Number(bebanOperasional) || 0,
-        beban_gaji: 0,
+        beban_sewa: Number(bebanSewa) || 0,
+        beban_gaji: Number(bebanGaji) || 0,
         beban_lain_lain: Number(bebanLain) || 0,
       };
 
       if (selectedMenu) {
         await hppService.updateHistory(selectedMenu.id, payload);
-        addNotification("HPP Diperbarui", `HPP untuk "${namaMenu}" berhasil diperbarui`, "success", true, "admin");
+        addNotification(
+          "HPP Diperbarui",
+          `HPP untuk "${namaMenu}" berhasil diperbarui`,
+          "success",
+          true,
+          "admin",
+        );
       } else {
         await hppService.calculateAndSave(payload);
-        addNotification("HPP Tersimpan", `HPP untuk "${namaMenu}" berhasil disimpan`, "success", true, "admin");
+        addNotification(
+          "HPP Tersimpan",
+          `HPP untuk "${namaMenu}" berhasil disimpan`,
+          "success",
+          true,
+          "admin",
+        );
       }
 
       fetchData();
@@ -162,21 +176,31 @@ export default function HPPPage() {
   };
 
   const calculationPreview = useMemo(() => {
-    const totalBiayaBahan = bahanList.reduce((acc, curr) => {
-      return acc + (parseFloat(curr.harga) || 0);
+    const hppPerPorsiBahan = bahanList.reduce((acc, curr) => {
+      const harga = parseFloat(curr.harga) || 0;
+      const jumlahPorsi = parseFloat(curr.jumlah) || 1;
+      return acc + harga / jumlahPorsi;
     }, 0);
 
     const target = Number(targetPenjualan) || 1;
-    const totalOperasional = Number(bebanOperasional) + Number(bebanLain);
-    const totalHpp = (totalBiayaBahan + totalOperasional) / target;
+    const sewaPerPorsi = (Number(bebanSewa) || 0) / target;
+
+    const gajiPerPorsi = (Number(bebanGaji) || 0) / target;
+
+    const bebanLainPerPorsi = (Number(bebanLain) || 0) / target;
+
+    const totalOpex = sewaPerPorsi + gajiPerPorsi + bebanLainPerPorsi;
+
+    const hppPerPorsi = hppPerPorsiBahan + totalOpex;
+    const totalBiayaBahan = hppPerPorsiBahan * target;
 
     return {
       totalBiayaBahan,
-      totalOperasional,
+      totalOpex,
+      hppPerPorsi,
       target,
-      totalHpp,
     };
-  }, [bahanList, bebanOperasional, targetPenjualan, bebanLain]);
+  }, [bahanList, targetPenjualan, bebanSewa, bebanGaji, bebanLain]);
 
   return (
     <div className="h-full w-full overflow-y-auto bg-neutral-100 p-8 pb-12 font-sans text-gray-800">
@@ -184,19 +208,6 @@ export default function HPPPage() {
         <h1 className="text-3xl font-bold text-[#F53E1B] mb-1">HPP</h1>
         <p className="text-gray-500 font-medium">
           Laporan Harga Pokok Penjualan Mi Madyang
-        </p>
-      </div>
-
-      {/* Summary Card */}
-      <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 w-full max-w-sm">
-        <div className="bg-red-50 p-2.5 rounded-lg w-max mb-4">
-          <Package className="text-[#f85656]" size={20} />
-        </div>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-          HPP Per Porsi Terakhir
-        </p>
-        <p className="text-3xl font-extrabold text-gray-900">
-          {formatRupiah(riwayat[0]?.total_hpp || 0)}
         </p>
       </div>
 
@@ -242,7 +253,9 @@ export default function HPPPage() {
                   i.nama_menu.toLowerCase().includes(search.toLowerCase()),
                 )
                 .map((item, index) => (
-                  <tr key={item.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                  <tr
+                    key={item.id}
+                    className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
                     <td className="px-5 py-3.5 font-semibold text-gray-700">
                       #{item.id}
                     </td>
@@ -268,20 +281,20 @@ export default function HPPPage() {
 
       {/* --- MODAL PRODUKSI --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl flex-col md:flex-row w-full max-w-5xl max-h-[90vh] h-auto overflow-hidden relative">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row w-full max-w-5xl max-h-[90vh] h-full min-h-0 overflow-hidden relative">
             {/* PANEL KIRI */}
-            <div className="w-full md:w-[40%] bg-white p-8 flex flex-col border-r border-gray-200 overflow-y-auto custom-scrollbar">
-              <h2 className="text-3xl font-bold mb-8 text-black">Hitung HPP</h2>
-              <div className="space-y-4 mb-6">
+            <div className="w-full md:w-[40%] bg-white p-6 flex flex-col border-r border-gray-200 h-full min-h-0">
+              <h2 className="text-2xl font-bold mb-4 text-black">Hitung HPP</h2>
+              <div className="space-y-3 mb-4">
                 <div>
-                  <label className="block font-bold text-gray-800 mb-1">
+                  <label className="block font-bold text-gray-800 mb-0.5">
                     Nama Menu
                   </label>
                   <select
                     value={namaMenu}
                     onChange={(e) => setNamaMenu(e.target.value)}
-                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-3 focus:outline-none font-medium">
+                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 focus:outline-none font-medium text-sm">
                     <option value="">Pilih menu...</option>
                     {menuList
                       .filter((m) => m.is_active !== 0)
@@ -293,7 +306,7 @@ export default function HPPPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-gray-800 mb-1">
+                  <label className="block font-bold text-gray-800 mb-0.5">
                     Target Jual (Porsi)
                   </label>
                   <input
@@ -304,21 +317,35 @@ export default function HPPPage() {
                     type="number"
                     min="0"
                     placeholder="Contoh: 1000"
-                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-3 focus:outline-none"
+                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 focus:outline-none text-sm"
                   />
                 </div>
                 <div>
                   <label className="block font-bold text-gray-800 mb-1 text-xs">
-                    Beban Operasional (Rp)
+                    Beban Sewa (Rp)
                   </label>
                   <input
                     type="text"
-                    value={formatRupiah(bebanOperasional)}
+                    value={formatRupiah(bebanSewa)}
                     onChange={(e) => {
                       const raw = parseRupiah(e.target.value);
-                      setBebanOperasional(raw);
+                      setBebanSewa(raw);
                     }}
-                    min="0"
+                    placeholder="0"
+                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 text-sm focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-gray-800 mb-1 text-xs">
+                    Beban Gaji (Rp)
+                  </label>
+                  <input
+                    type="text"
+                    value={formatRupiah(bebanGaji)}
+                    onChange={(e) => {
+                      const raw = parseRupiah(e.target.value);
+                      setBebanGaji(raw);
+                    }}
                     placeholder="0"
                     className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 text-sm focus:outline-none"
                   />
@@ -334,76 +361,98 @@ export default function HPPPage() {
                       const raw = parseRupiah(e.target.value);
                       setBebanLain(raw);
                     }}
-                    min="0"
                     placeholder="0"
                     className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 text-sm focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="bg-[#f0f0f0] rounded-2xl p-6 mt-auto">
-                <h3 className="font-bold text-lg mb-4">
-                  Hasil perhitungan HPP
-                </h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Total Bahan Baku:</span>
-                    <span className="font-bold">
-                      {formatRupiah(calculationPreview.totalBiayaBahan)}
-                    </span>
+              <div className="mt-auto space-y-3">
+                <div
+                  className="bg-[#f0f0f0] rounded-2xl p-4 cursor-pointer hover:bg-[#e8e8e8] transition-colors"
+                  onClick={() => setShowRincian(true)}
+                >
+                  <div className="flex items-center gap-1.5 mb-3">
+                    <h3 className="font-bold">Hasil perhitungan HPP</h3>
+                    <CircleHelp size={13} className="text-gray-400" />
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Total Operasional:</span>
-                    <span className="font-bold">
-                      {formatRupiah(calculationPreview.totalOperasional)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-300 pb-2">
-                    <span className="text-gray-400">Target Porsi:</span>
-                    <span className="font-bold">
-                      {calculationPreview.target} porsi
-                    </span>
-                  </div>
-                  <div className="flex justify-between pt-1">
-                    <span className="font-bold">HPP per Porsi:</span>
-                    <span className="font-extrabold text-[#f85656]">
-                      {formatRupiah(calculationPreview.totalHpp)}
-                    </span>
+                  <div className="space-y-1 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-400">
+                        Estimasi Total Produksi:
+                      </span>
+                      <span className="font-bold">
+                        {formatRupiah(calculationPreview.totalBiayaBahan)}
+                      </span>
+                    </div>
+                    {calculationPreview.totalOpex > 0 && (
+                      <div className="flex justify-between">
+                        <span className="text-gray-400">
+                          Total Operasional:
+                        </span>
+                        <span className="font-bold">
+                          {formatRupiah(calculationPreview.totalOpex)}
+                        </span>
+                      </div>
+                    )}
+                    <div className="flex justify-between border-b border-gray-300 pb-1">
+                      <span className="text-gray-400">Target Porsi:</span>
+                      <span className="font-bold">
+                        {calculationPreview.target} porsi
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="font-bold">HPP per Porsi:</span>
+                      <span className="font-extrabold text-[#f85656]">
+                        {formatRupiah(calculationPreview.hppPerPorsi)}
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                <button
+                  disabled={isLoading}
+                  onClick={handleSave}
+                  className={`w-full ${
+                    isLoading
+                      ? "bg-gray-400"
+                      : "bg-[#f85656] hover:bg-[#e04545]"
+                  } text-white py-3 rounded-xl font-bold transition-colors shadow-sm shrink-0`}>
+                  {isLoading ? "Menyimpan..." : "Simpan HPP"}
+                </button>
               </div>
             </div>
 
             {/* PANEL KANAN */}
-            <div className="w-full md:w-[60%] bg-[#f4f4f5] p-8 flex flex-col relative overflow-y-auto custom-scrollbar">
+            <div className="w-full md:w-[60%] bg-[#f4f4f5] p-6 flex flex-col relative h-full min-h-0 overflow-y-auto custom-scrollbar">
               <button
                 onClick={handleCloseModal}
-                className="absolute top-6 right-6 text-gray-400 hover:text-gray-700 transition-colors z-10">
-                <X size={24} />
+                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors z-10">
+                ×
               </button>
-              <h2 className="text-3xl font-bold mb-8 text-black">
+              <h2 className="text-2xl font-bold mb-4 text-black">
                 Masukan Bahan Baku
               </h2>
 
-              <div className="flex-1 overflow-y-auto pr-2 space-y-4 mb-6">
+              <div className="space-y-3">
                 {bahanList.map((bahan, index) => (
                   <div
                     key={bahan.id}
-                    className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-xl font-bold text-black">
+                    className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-center mb-3">
+                      <h4 className="font-bold text-black">
                         Bahan {index + 1}
                       </h4>
                       {bahanList.length > 1 && (
                         <button
                           onClick={() => handleRemoveBahan(bahan.id)}
-                          className="bg-[#fca5a5] text-red-900 rounded-lg p-1">
-                          <X size={16} />
+                          className="bg-[#fca5a5] text-red-900 rounded-lg p-0.5">
+                          <X size={14} />
                         </button>
                       )}
                     </div>
-                    <div className="mb-4">
-                      <label className="block font-bold text-gray-800 mb-2 text-sm">
+                    <div className="mb-3">
+                      <label className="block font-bold text-gray-800 mb-1 text-xs">
                         Nama Bahan
                       </label>
                       <input
@@ -414,17 +463,31 @@ export default function HPPPage() {
                           setBahanList(newList);
                         }}
                         placeholder="Masukan nama bahan"
-                        className="w-full bg-[#f5f5f5] rounded-xl px-4 py-3 focus:outline-none"
+                        className="w-full bg-[#f5f5f5] rounded-xl px-4 py-2 focus:outline-none text-sm"
                       />
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex gap-3">
                       <div className="flex-[2]">
-                        <label className="block font-bold text-gray-800 mb-2 text-sm">
-                          Jumlah
-                        </label>
+                        <div className="flex items-center gap-1 mb-1">
+                          <label className="font-bold text-gray-800 text-xs">
+                            Bisa Untuk (Porsi)
+                          </label>
+
+                          <div className="relative group">
+                            <CircleHelp
+                              size={14}
+                              className="text-gray-400 cursor-help"
+                            />
+
+                            <div className="absolute left-5 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block w-64 bg-gray-900 text-white text-[11px] rounded-lg px-3 py-2 shadow-lg">
+                              Contoh: 1 pack mie seharga Rp120.000 dapat
+                              digunakan untuk 40 porsi.
+                            </div>
+                          </div>
+                        </div>
                         <input
                           type="number"
-                          min="0"
+                          min="1"
                           value={bahan.jumlah}
                           onChange={(e) => {
                             const val = e.target.value;
@@ -434,37 +497,12 @@ export default function HPPPage() {
                               setBahanList(newList);
                             }
                           }}
-                          placeholder="0"
-                          className="w-full bg-[#f5f5f5] rounded-xl px-4 py-3 focus:outline-none"
+                          placeholder="1"
+                          className="w-full bg-[#f5f5f5] rounded-xl px-4 py-2 focus:outline-none text-sm"
                         />
                       </div>
-                      <div className="flex-1">
-                        <label className="block font-bold text-gray-800 mb-2 text-sm">
-                          Satuan
-                        </label>
-                        <select
-                          value={bahan.unit}
-                          onChange={(e) => {
-                            const newList = [...bahanList];
-                            newList[index].unit = e.target.value;
-                            setBahanList(newList);
-                          }}
-                          className="w-full bg-[#f5f5f5] rounded-xl px-4 py-3 focus:outline-none font-medium">
-                          <option value="Kg">Kg</option>
-                          <option value="gr">gr</option>
-                          <option value="ml">ml</option>
-                          <option value="liter">liter</option>
-                          <option value="pcs">pcs</option>
-                          <option value="ons">ons</option>
-                          <option value="sachet">sachet</option>
-                          <option value="pack">pack</option>
-                          <option value="botol">botol</option>
-                          <option value="ikat">ikat</option>
-                          <option value="tray">tray</option>
-                        </select>
-                      </div>
                       <div className="flex-[2]">
-                        <label className="block font-bold text-gray-800 mb-2 text-sm">
+                        <label className="block font-bold text-gray-800 mb-1 text-xs">
                           Harga Beli (Rp)
                         </label>
                         <input
@@ -477,7 +515,7 @@ export default function HPPPage() {
                             setBahanList(newList);
                           }}
                           placeholder="0"
-                          className="w-full bg-[#f5f5f5] rounded-xl px-4 py-3 focus:outline-none"
+                          className="w-full bg-[#f5f5f5] rounded-xl px-4 py-2 focus:outline-none text-sm"
                         />
                       </div>
                     </div>
@@ -485,21 +523,118 @@ export default function HPPPage() {
                 ))}
                 <button
                   onClick={handleAddBahan}
-                  className="w-full border-2 border-dashed border-gray-400 text-gray-800 font-bold py-6 rounded-2xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
-                  <Plus size={20} /> Klik Untuk Menambahkan Bahan Tambahan
+                  className="w-full border-2 border-dashed border-gray-400 text-gray-800 font-bold py-4 rounded-2xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 text-sm">
+                  <Plus size={18} /> Klik Untuk Menambahkan Bahan Tambahan
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-              <div className="mt-auto">
-                <button
-                  disabled={isLoading}
-                  onClick={handleSave}
-                  className={`w-full ${isLoading
-                    ? "bg-gray-400"
-                    : "bg-[#f85656] hover:bg-[#e04545]"
-                    } text-white py-4 rounded-xl font-bold text-xl transition-colors shadow-sm`}>
-                  {isLoading ? "Menyimpan..." : "Simpan HPP"}
-                </button>
+      {/* --- MODAL RINCIAN HPP --- */}
+      {showRincian && (
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] h-full flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center px-6 pt-6 pb-0 shrink-0">
+              <h2 className="text-xl font-bold">Rincian Perhitungan HPP</h2>
+              <button onClick={() => setShowRincian(false)}
+                className="p-1 hover:bg-gray-100 rounded-full transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+            <div className="overflow-y-auto flex-1 min-h-0 px-6 pb-6">
+              <div className="pt-6 space-y-5">
+                {/* BAHAN BAKU */}
+                <div>
+                  <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-2">Bahan Baku</h3>
+                  <div className="space-y-2">
+                    {bahanList
+                      .filter(b => b.nama.trim() !== "")
+                      .map((b, i) => {
+                        const harga = parseFloat(b.harga) || 0;
+                        const jumlah = parseFloat(b.jumlah) || 1;
+                        const perPorsi = harga / jumlah;
+                        return (
+                          <div key={i} className="bg-gray-50 rounded-xl px-4 py-3">
+                            <div className="flex justify-between items-center">
+                              <span className="font-semibold text-sm">{b.nama}</span>
+                              <span className="font-bold text-sm">{formatRupiah(perPorsi)}</span>
+                            </div>
+                            <div className="text-[11px] text-gray-400 mt-0.5">
+                              {formatRupiah(harga)} &divide; {jumlah} porsi = {formatRupiah(perPorsi)} / porsi
+                            </div>
+                          </div>
+                        );
+                      })}
+                    <div className="flex justify-between px-4 py-2 border-t border-gray-200">
+                      <span className="font-bold text-sm">Total Biaya Bahan / Porsi</span>
+                      <span className="font-bold text-sm">
+                        {formatRupiah(bahanList
+                          .filter(b => b.nama.trim() !== "")
+                          .reduce((acc, b) => acc + (parseFloat(b.harga) || 0) / (parseFloat(b.jumlah) || 1), 0)
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* BEBAN OPERASIONAL */}
+                {(Number(bebanSewa) || Number(bebanGaji) || Number(bebanLain)) > 0 && (
+                  <div>
+                    <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-2">Beban Operasional</h3>
+                    <div className="space-y-2">
+                      {[
+                        { label: "Sewa", total: Number(bebanSewa) || 0 },
+                        { label: "Gaji", total: Number(bebanGaji) || 0 },
+                        { label: "Lain-lain", total: Number(bebanLain) || 0 },
+                      ].filter(b => b.total > 0).map((b, i) => {
+                        const target = Number(targetPenjualan) || 1;
+                        return (
+                          <div key={i} className="bg-gray-50 rounded-xl px-4 py-3">
+                            <div className="flex justify-between items-center">
+                              <span className="font-semibold text-sm">{b.label}</span>
+                              <span className="font-bold text-sm">{formatRupiah(b.total / target)}</span>
+                            </div>
+                            <div className="text-[11px] text-gray-400 mt-0.5">
+                              {formatRupiah(b.total)} &divide; {target} porsi = {formatRupiah(b.total / target)} / porsi
+                            </div>
+                          </div>
+                        );
+                      })}
+                      <div className="flex justify-between px-4 py-2 border-t border-gray-200">
+                        <span className="font-bold text-sm">Total Operasional / Porsi</span>
+                        <span className="font-bold text-sm">
+                          {formatRupiah(calculationPreview.totalOpex)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* TARGET */}
+                <div className="flex justify-between items-center bg-gray-50 rounded-xl px-4 py-3">
+                  <span className="font-bold text-sm">Target Penjualan</span>
+                  <span className="font-bold text-sm">{calculationPreview.target} porsi</span>
+                </div>
+
+                {/* TOTAL HPP */}
+                <div className="bg-red-50 rounded-2xl p-5 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Total Biaya Bahan / Porsi</span>
+                    <span className="font-semibold">
+                      {formatRupiah(calculationPreview.hppPerPorsi - calculationPreview.totalOpex)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span>Total Operasional / Porsi</span>
+                    <span className="font-semibold">{formatRupiah(calculationPreview.totalOpex)}</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-extrabold border-t border-red-200 pt-2">
+                    <span>HPP per Porsi</span>
+                    <span className="text-[#f85656]">{formatRupiah(calculationPreview.hppPerPorsi)}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

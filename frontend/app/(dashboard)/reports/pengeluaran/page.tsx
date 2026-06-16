@@ -39,6 +39,7 @@ function FilterDropdown({
   onChange: (v: FilterPeriod) => void;
 }) {
   const [open, setOpen] = useState(false);
+  const [dropStyle, setDropStyle] = useState<React.CSSProperties>({});
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,18 +50,39 @@ function FilterDropdown({
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => setOpen(false);
+    window.addEventListener("scroll", handler, true);
+    return () => window.removeEventListener("scroll", handler, true);
+  }, [open]);
+
   const options: FilterPeriod[] = ["Minggu", "Bulan", "Tahun"];
 
   return (
-    <div ref={ref} className="relative">
-      <button onClick={() => setOpen((o) => !o)}
+    <div ref={ref}>
+      <button onClick={() => {
+          const next = !open;
+          setOpen(next);
+          if (next) {
+            const rect = ref.current?.getBoundingClientRect();
+            if (rect) {
+              setDropStyle({
+                position: "fixed",
+                top: rect.bottom + 8,
+                right: window.innerWidth - rect.right,
+                width: 144,
+              });
+            }
+          }
+        }}
         className="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
         <SlidersHorizontal size={14} className="text-neutral-400" />
         Filter: {value}
         <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-36 bg-white rounded-xl border border-neutral-200 shadow-lg z-20 py-1 overflow-hidden">
+        <div style={dropStyle} className="bg-white rounded-xl border border-neutral-200 shadow-lg z-[9999] py-1">
           {options.map((opt) => (
             <button key={opt} onClick={() => { onChange(opt); setOpen(false); }}
               className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors ${value === opt ? "bg-[#FF7067]/10 text-[#FF7067]" : "text-neutral-700 hover:bg-neutral-50"}`}>
@@ -251,7 +273,7 @@ export default function LaporanPengeluaran() {
           ))}
         </div>
 
-        <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-visible">
           <div className="p-6 flex flex-wrap justify-between items-center border-b relative z-20">
             <h2 className="text-xl font-bold text-neutral-900">Ringkasan Pengeluaran</h2>
             <FilterDropdown value={rekapFilter} onChange={(v) => { setRekapFilter(v); setCurrentPage(1); }} />

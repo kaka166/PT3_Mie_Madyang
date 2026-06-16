@@ -34,9 +34,9 @@ export interface CalculateHppRequest {
   nama_menu: string;
   bahan: HppRequestBahan[];
   target_penjualan: number;
-  beban_sewa: number;
-  beban_gaji: number;
-  beban_lain_lain: number;
+  beban_sewa?: number;
+  beban_gaji?: number;
+  beban_lain_lain?: number;
 }
 
 const getHeaders = () => {

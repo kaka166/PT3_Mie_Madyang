@@ -31,6 +31,7 @@ export function PeriodFilter({
 }) {
   const [open, setOpen] = useState(false);
   const [position, setPosition] = useState<"top" | "bottom">("bottom");
+  const [dropStyle, setDropStyle] = useState<React.CSSProperties>({});
   const [viewDate, setViewDate] = useState(() => {
     const d = value.start ? new Date(value.start) : new Date();
     return { year: d.getFullYear(), month: d.getMonth() };
@@ -44,6 +45,13 @@ export function PeriodFilter({
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => setOpen(false);
+    window.addEventListener("scroll", handler, true);
+    return () => window.removeEventListener("scroll", handler, true);
+  }, [open]);
 
   const today = new Date();
   const todayStr = getDateStr(today);
@@ -83,13 +91,20 @@ export function PeriodFilter({
     : value.start ? formatTanggalRange(value.start, "") : "Pilih Periode";
 
   return (
-    <div ref={ref} className="relative">
+    <div ref={ref}>
       <button
         onClick={() => {
           setOpen(o => !o);
           const rect = ref.current?.getBoundingClientRect();
           if (!rect) return;
-          setPosition(window.innerHeight - rect.bottom < 360 ? "top" : "bottom");
+          const pos = window.innerHeight - rect.bottom < 360 ? "top" : "bottom";
+          setPosition(pos);
+          setDropStyle({
+            position: "fixed",
+            [pos === "bottom" ? "top" : "bottom"]: pos === "bottom" ? rect.bottom + 8 : window.innerHeight - rect.top + 8,
+            right: window.innerWidth - rect.right,
+            width: 320,
+          });
         }}
         className="bg-white border border-neutral-200 pl-3 pr-4 py-2 rounded-xl text-sm focus:outline-none flex items-center gap-2 shadow-sm hover:bg-neutral-50 transition-colors"
       >
@@ -104,7 +119,7 @@ export function PeriodFilter({
       </button>
 
       {open && (
-        <div className={`absolute right-0 w-80 bg-white rounded-2xl border border-neutral-200 shadow-xl z-[9999] ${position === "bottom" ? "mt-2 top-full" : "mb-2 bottom-full"}`}>
+        <div style={dropStyle} className="bg-white rounded-2xl border border-neutral-200 shadow-xl z-[9999]">
           {showPresets && (
             <div className="p-3 border-b border-neutral-100">
               <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-2">Preset Cepat</p>

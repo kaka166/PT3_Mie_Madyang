@@ -403,7 +403,7 @@ export default function InventoryPage() {
 
       {/* CONFIRMATION POPUP */}
       {confirmPopup.isOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[210] p-4">
           <div className="bg-white rounded-[2rem] p-8 w-full max-w-sm shadow-2xl animate-in fade-in zoom-in duration-200 text-center">
             <div
               className={`w-16 h-16 rounded-2xl mb-6 mx-auto flex items-center justify-center ${confirmPopup.type === "danger" ? "bg-red-50 text-red-600" : "bg-amber-50 text-amber-600"}`}>
@@ -435,7 +435,7 @@ export default function InventoryPage() {
 
       {/* MODAL KATEGORI */}
       {showCatModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
           <div className="bg-white rounded-[2rem] p-8 w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
             <div className="flex justify-between items-center mb-8">
               <h2 className="text-xl font-bold text-neutral-800">
@@ -523,9 +523,9 @@ export default function InventoryPage() {
 
       {/* MODAL MENU */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl overflow-y-auto max-h-[90vh] animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-8">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl max-h-[90vh] h-full flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center px-10 pt-10 shrink-0">
               <h2 className="text-2xl font-bold text-neutral-800">
                 {isEdit ? "Update Menu" : "Tambah Menu Baru"}
               </h2>
@@ -536,171 +536,173 @@ export default function InventoryPage() {
               </button>
             </div>
 
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
-                    Nama Menu
-                  </label>
-                  <input
-                    type="text"
-                    value={form.nama_menu}
-                    onChange={(e) =>
-                      setForm({ ...form, nama_menu: e.target.value })
-                    }
-                    className="w-full border-b-2 border-zinc-100 py-2 outline-none focus:border-red-500 font-bold text-lg transition-all"
-                    placeholder="Masukkan nama..."
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
-                    Kategori
-                  </label>
-                  <select
-                    value={form.kategori_id}
-                    onChange={(e) =>
-                      setForm({ ...form, kategori_id: e.target.value })
-                    }
-                    className="w-full border-b-2 border-zinc-100 py-2 outline-none bg-transparent font-bold">
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id.toString()}>
-                        {c.nama_kategori}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* KALKULATOR HARGA JUAL */}
-              <div className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100 space-y-5">
-                <div className="flex items-center gap-2 text-red-600 font-bold text-[11px] uppercase tracking-widest">
-                  <Calculator size={16} /> Kalkulator Harga Jual
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+            <div className="overflow-y-auto flex-1 min-h-0 px-10 custom-scrollbar">
+              <div className="space-y-6 pt-8 pb-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
-                      HPP (Modal)
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
+                      Nama Menu
                     </label>
-                    <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-3 py-2.5 shadow-sm focus-within:ring-2 ring-red-500/10">
-                      <span className="text-sm font-semibold text-zinc-500 mr-2">
-                        Rp
-                      </span>
-                      <input
-                        type="text"
-                        placeholder="0"
-                        className="w-full bg-transparent outline-none text-sm"
-                        value={formatRupiah(calc.hpp).replace("Rp", "").trim()}
-                        onChange={(e) => {
-                          const raw = parseRupiah(e.target.value);
-                          handleCalcChange("hpp", raw);
-                        }}
-                      />
-                    </div>
+                    <input
+                      type="text"
+                      value={form.nama_menu}
+                      onChange={(e) =>
+                        setForm({ ...form, nama_menu: e.target.value })
+                      }
+                      className="w-full border-b-2 border-zinc-100 py-2 outline-none focus:border-red-500 font-bold text-lg transition-all"
+                      placeholder="Masukkan nama..."
+                    />
                   </div>
                   <div>
-                    <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
-                      Metode Laba
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
+                      Kategori
                     </label>
                     <select
-                      className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2.5 text-sm outline-none shadow-sm transition-all font-medium"
-                      value={calc.mode}
+                      value={form.kategori_id}
                       onChange={(e) =>
-                        handleCalcChange("mode", e.target.value)
-                      }>
-                      <option value="manual">Harga Manual</option>
-                      <option value="margin">Margin Rp</option>
-                      <option value="percent">Persentase (%)</option>
+                        setForm({ ...form, kategori_id: e.target.value })
+                      }
+                      className="w-full border-b-2 border-zinc-100 py-2 outline-none bg-transparent font-bold">
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id.toString()}>
+                          {c.nama_kategori}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
 
-                {calc.mode !== "manual" && (
-                  <div className="animate-in slide-in-from-top-2 duration-300">
-                    <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
-                      {calc.mode === "margin"
-                        ? "Input Margin Untung (Rp)"
-                        : "Input Persentase Untung (%)"}
-                    </label>
-                    <input
-                      type="number"
-                      placeholder={
-                        calc.mode === "margin" ? "Contoh: 5000" : "Contoh: 30"
-                      }
-                      className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm transition-all"
-                      onChange={(e) =>
-                        handleCalcChange("value", e.target.value)
-                      }
-                    />
+                {/* KALKULATOR HARGA JUAL */}
+                <div className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100 space-y-5">
+                  <div className="flex items-center gap-2 text-red-600 font-bold text-[11px] uppercase tracking-widest">
+                    <Calculator size={16} /> Kalkulator Harga Jual
                   </div>
-                )}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
+                        HPP (Modal)
+                      </label>
+                      <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-3 py-2.5 shadow-sm focus-within:ring-2 ring-red-500/10">
+                        <span className="text-sm font-semibold text-zinc-500 mr-2">
+                          Rp
+                        </span>
+                        <input
+                          type="text"
+                          placeholder="0"
+                          className="w-full bg-transparent outline-none text-sm"
+                          value={formatRupiah(calc.hpp).replace("Rp", "").trim()}
+                          onChange={(e) => {
+                            const raw = parseRupiah(e.target.value);
+                            handleCalcChange("hpp", raw);
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
+                        Metode Laba
+                      </label>
+                      <select
+                        className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2.5 text-sm outline-none shadow-sm transition-all font-medium"
+                        value={calc.mode}
+                        onChange={(e) =>
+                          handleCalcChange("mode", e.target.value)
+                        }>
+                        <option value="manual">Harga Manual</option>
+                        <option value="margin">Margin Rp</option>
+                        <option value="percent">Persentase (%)</option>
+                      </select>
+                    </div>
+                  </div>
 
-                <div className="pt-4 border-t border-zinc-200">
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase block mb-2">
-                    Hasil Harga Jual Akhir
-                  </span>
-                  <div className="flex items-baseline gap-2">
-                    <input
-                      type="text"
-                      value={formatRupiah(form.harga_jual)}
-                      readOnly={calc.mode !== "manual"}
-                      onChange={(e) => {
-                        const raw = parseRupiah(e.target.value);
-                        setForm({ ...form, harga_jual: raw });
-                      }}
-                      className={`text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${
-                        calc.mode !== "manual"
-                          ? "text-green-600"
-                          : "text-neutral-800"
-                      }`}
-                    />
+                  {calc.mode !== "manual" && (
+                    <div className="animate-in slide-in-from-top-2 duration-300">
+                      <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
+                        {calc.mode === "margin"
+                          ? "Input Margin Untung (Rp)"
+                          : "Input Persentase Untung (%)"}
+                      </label>
+                      <input
+                        type="number"
+                        placeholder={
+                          calc.mode === "margin" ? "Contoh: 5000" : "Contoh: 30"
+                        }
+                        className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm transition-all"
+                        onChange={(e) =>
+                          handleCalcChange("value", e.target.value)
+                        }
+                      />
+                    </div>
+                  )}
+
+                  <div className="pt-4 border-t border-zinc-200">
+                    <span className="text-[9px] font-bold text-zinc-400 uppercase block mb-2">
+                      Hasil Harga Jual Akhir
+                    </span>
+                    <div className="flex items-baseline gap-2">
+                      <input
+                        type="text"
+                        value={formatRupiah(form.harga_jual)}
+                        readOnly={calc.mode !== "manual"}
+                        onChange={(e) => {
+                          const raw = parseRupiah(e.target.value);
+                          setForm({ ...form, harga_jual: raw });
+                        }}
+                        className={`text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${
+                          calc.mode !== "manual"
+                            ? "text-green-600"
+                            : "text-neutral-800"
+                        }`}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-between mb-3">
-                  <span>Foto Produk</span>
-                  <span className="text-[9px] bg-red-50 text-[#b93b3b] px-2 py-1 rounded">Rekomendasi: 400x400px (1:1)</span>
-                </label>
-                <div className="border-2 border-dashed border-zinc-200 rounded-3xl p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="absolute inset-0 opacity-0 cursor-pointer"
-                    onChange={(e) => {
-                      const file = e.target.files ? e.target.files[0] : null;
-                      setForm({ ...form, gambar: file });
-                      if (file) {
-                        const url = URL.createObjectURL(file);
-                        setPreviewUrl(url);
-                      }
-                    }}
-                  />
-                  <div className="flex flex-col items-center gap-2">
-                    {previewUrl ? (
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="w-24 h-24 object-cover rounded-2xl mb-1 shadow-sm"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Plus size={24} />
-                      </div>
-                    )}
-                    <p className="text-xs font-bold text-zinc-400">
-                      {form.gambar
-                        ? form.gambar.name
-                        : previewUrl
-                        ? "Klik untuk ganti foto"
-                        : "Klik untuk upload foto menu"}
-                    </p>
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-between mb-3">
+                    <span>Foto Produk</span>
+                    <span className="text-[9px] bg-red-50 text-[#b93b3b] px-2 py-1 rounded">Rekomendasi: 400x400px (1:1)</span>
+                  </label>
+                  <div className="border-2 border-dashed border-zinc-200 rounded-3xl p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 opacity-0 cursor-pointer"
+                      onChange={(e) => {
+                        const file = e.target.files ? e.target.files[0] : null;
+                        setForm({ ...form, gambar: file });
+                        if (file) {
+                          const url = URL.createObjectURL(file);
+                          setPreviewUrl(url);
+                        }
+                      }}
+                    />
+                    <div className="flex flex-col items-center gap-2">
+                      {previewUrl ? (
+                        <img
+                          src={previewUrl}
+                          alt="Preview"
+                          className="w-24 h-24 object-cover rounded-2xl mb-1 shadow-sm"
+                        />
+                      ) : (
+                        <div className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Plus size={24} />
+                        </div>
+                      )}
+                      <p className="text-xs font-bold text-zinc-400">
+                        {form.gambar
+                          ? form.gambar.name
+                          : previewUrl
+                          ? "Klik untuk ganti foto"
+                          : "Klik untuk upload foto menu"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-10">
+            <div className="flex justify-end gap-3 px-10 pb-10 pt-4 shrink-0">
               <button
                 onClick={() => setShowModal(false)}
                 className="px-8 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors">

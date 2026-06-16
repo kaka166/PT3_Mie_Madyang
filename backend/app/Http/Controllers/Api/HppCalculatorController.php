@@ -30,36 +30,39 @@ class HppCalculatorController extends Controller
         ]);
 
         return DB::transaction(function () use ($request) {
-            $totalBiayaBahan = 0;
+            $hppPerPorsi = 0;
             $bahanData = [];
-            $target = $request->target_penjualan;
+            $target = (float) $request->target_penjualan;
 
-            // 1. Total biaya semua bahan
+            // 1. HPP per porsi = total biaya bahan per porsi
             foreach ($request->bahan as $b) {
-                $totalBiayaBahan += $b['harga_beli'];
+                $jumlahPorsi = max((float) ($b['jumlah_porsi'] ?? 1), 1);
+                $hppPerPorsiBahan = (float) $b['harga_beli'] / $jumlahPorsi;
+                $hppPerPorsi += $hppPerPorsiBahan;
 
                 $bahanData[] = [
                     'nama_bahan' => $b['nama'],
                     'harga_beli' => $b['harga_beli'],
                     'jumlah_porsi' => $b['jumlah_porsi'],
-                    'hpp_per_porsi' => $target > 0 ? $b['harga_beli'] / $target : 0,
+                    'hpp_per_porsi' => $hppPerPorsiBahan,
                 ];
             }
 
-            // 2. Total biaya operasional
-            $totalOperasional = ($request->beban_sewa ?? 0) + ($request->beban_gaji ?? 0) + ($request->beban_lain_lain ?? 0);
+            // 2. Tambah biaya operasional opsional
+            $bebanSewa = (float) ($request->beban_sewa ?? 0);
+            $bebanGaji = (float) ($request->beban_gaji ?? 0);
+            $bebanLain = (float) ($request->beban_lain_lain ?? 0);
+            $totalOpex = $bebanSewa + $bebanGaji + $bebanLain;
+            $hppPerPorsi += $target > 0 ? $totalOpex / $target : 0;
 
-            // 3. HPP per porsi = (total semua biaya) / target porsi
-            $totalHppFinal = $target > 0 ? ($totalBiayaBahan + $totalOperasional) / $target : 0;
-
-            // 4. Simpan Header
+            // 3. Simpan Header
             $hppHistory = HppHistory::create([
                 'nama_menu' => $request->nama_menu,
                 'target_penjualan' => $request->target_penjualan,
-                'beban_sewa' => $request->beban_sewa ?? 0,
-                'beban_gaji' => $request->beban_gaji ?? 0,
-                'beban_lain_per_porsi' => $request->beban_lain_lain ?? 0,
-                'total_hpp' => $totalHppFinal,
+                'beban_sewa' => $bebanSewa,
+                'beban_gaji' => $bebanGaji,
+                'beban_lain_per_porsi' => $bebanLain,
+                'total_hpp' => $hppPerPorsi,
             ]);
 
             // 4. Simpan Detail Bahan
@@ -86,31 +89,36 @@ class HppCalculatorController extends Controller
         return DB::transaction(function () use ($request, $id) {
             $hppHistory = HppHistory::findOrFail($id);
 
-            $totalBiayaBahan = 0;
+            $hppPerPorsi = 0;
             $bahanData = [];
-            $target = $request->target_penjualan;
+            $target = (float) $request->target_penjualan;
 
             foreach ($request->bahan as $b) {
-                $totalBiayaBahan += $b['harga_beli'];
+                $jumlahPorsi = max((float) ($b['jumlah_porsi'] ?? 1), 1);
+                $hppPerPorsiBahan = (float) $b['harga_beli'] / $jumlahPorsi;
+                $hppPerPorsi += $hppPerPorsiBahan;
 
                 $bahanData[] = [
                     'nama_bahan' => $b['nama'],
                     'harga_beli' => $b['harga_beli'],
                     'jumlah_porsi' => $b['jumlah_porsi'],
-                    'hpp_per_porsi' => $target > 0 ? $b['harga_beli'] / $target : 0,
+                    'hpp_per_porsi' => $hppPerPorsiBahan,
                 ];
             }
 
-            $totalOperasional = ($request->beban_sewa ?? 0) + ($request->beban_gaji ?? 0) + ($request->beban_lain_lain ?? 0);
-            $totalHppFinal = $target > 0 ? ($totalBiayaBahan + $totalOperasional) / $target : 0;
+            $bebanSewa = (float) ($request->beban_sewa ?? 0);
+            $bebanGaji = (float) ($request->beban_gaji ?? 0);
+            $bebanLain = (float) ($request->beban_lain_lain ?? 0);
+            $totalOpex = $bebanSewa + $bebanGaji + $bebanLain;
+            $hppPerPorsi += $target > 0 ? $totalOpex / $target : 0;
 
             $hppHistory->update([
                 'nama_menu' => $request->nama_menu,
                 'target_penjualan' => $request->target_penjualan,
-                'beban_sewa' => $request->beban_sewa ?? 0,
-                'beban_gaji' => $request->beban_gaji ?? 0,
-                'beban_lain_per_porsi' => $request->beban_lain_lain ?? 0,
-                'total_hpp' => $totalHppFinal,
+                'beban_sewa' => $bebanSewa,
+                'beban_gaji' => $bebanGaji,
+                'beban_lain_per_porsi' => $bebanLain,
+                'total_hpp' => $hppPerPorsi,
             ]);
 
             $hppHistory->details()->delete();
