@@ -355,8 +355,8 @@ export default function POSPage() {
   const total = subtotal - diskon + tax;
 
   return (
-    // Gunakan h-screen agar layout utama tidak overflow keluar viewport dan scroll internal aktif
-    <div className="bg-gray-50 text-gray-800 flex flex-col lg:flex-row h-dvh max-h-dvh overflow-hidden font-sans relative">
+    // h-full agar pas dengan parent (flex-1 di layout, setelah navbar)
+    <div className="bg-gray-50 text-gray-800 flex flex-col lg:flex-row h-full min-h-0 overflow-hidden font-sans relative">
       {/* ================= MODAL PAJAK ================= */}
       {showTaxModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 p-4">
@@ -1178,7 +1178,7 @@ export default function POSPage() {
           </div>
 
           {/* FOOTER */}
-          <div className="px-5 lg:px-8 pt-4 pb-5 lg:pb-8 bg-white lg:bg-transparent border-t lg:border-none">
+          <div className="shrink-0 px-5 lg:px-8 pt-4 pb-5 lg:pb-8 bg-white lg:bg-transparent border-t lg:border-none">
             <div className="space-y-2 mb-4">
               <div className="flex justify-between text-xs font-bold text-gray-600">
                 <span>Subtotal</span>
@@ -1233,17 +1233,26 @@ export default function POSPage() {
             </div>
 
             <div className="bg-[#b93b3b] rounded-xl overflow-hidden shadow-sm">
-              <select
-                value={orderType}
-                onChange={(e) => setOrderType(e.target.value)}
-                className="w-full bg-white/10 text-white py-2.5 lg:py-3 px-4 text-[10px] font-black uppercase tracking-wider outline-none cursor-pointer appearance-none border-b border-white/10 text-center">
-                <option value="Dine In" className="text-gray-800 bg-white">
+              <div className="flex p-1 gap-1">
+                <button
+                  onClick={() => setOrderType("Dine In")}
+                  className={`flex-1 py-2.5 lg:py-3 rounded-lg text-[11px] lg:text-xs font-black uppercase tracking-wider transition-all ${
+                    orderType === "Dine In"
+                      ? "bg-white text-[#b93b3b] shadow-sm"
+                      : "text-white/80 hover:bg-[#a83535]"
+                  }`}>
                   🍽️ Makan di Tempat
-                </option>
-                <option value="Take Away" className="text-gray-800 bg-white">
+                </button>
+                <button
+                  onClick={() => setOrderType("Take Away")}
+                  className={`flex-1 py-2.5 lg:py-3 rounded-lg text-[11px] lg:text-xs font-black uppercase tracking-wider transition-all ${
+                    orderType === "Take Away"
+                      ? "bg-white text-[#b93b3b] shadow-sm"
+                      : "text-white/80 hover:bg-[#a83535]"
+                  }`}>
                   🥡 Bungkus
-                </option>
-              </select>
+                </button>
+              </div>
               <button
                 onClick={() => {
                   if (!sessionActive) {

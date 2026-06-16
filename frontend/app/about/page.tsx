@@ -10,7 +10,7 @@ export default function AboutPage() {
 
       <main className="w-full">
         {/* Hero Section: The Culinary Curator */}
-        <section className="relative min-h-[700px] md:h-[819px] flex items-center overflow-hidden bg-[#f3f3f3]">
+        <section className="relative min-h-screen md:h-[819px] flex items-center overflow-hidden bg-[#f3f3f3]">
           <div className="max-w-7xl mx-auto px-8 w-full grid md:grid-cols-2 gap-12 items-center relative z-10 py-20 md:py-0">
             <div className="space-y-6">
               <span className="text-primary font-bold tracking-[0.2em] uppercase text-xs">

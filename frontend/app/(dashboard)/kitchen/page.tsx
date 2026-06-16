@@ -482,52 +482,52 @@ export default function KitchenDashboardPage() {
 
       {/* --- KOMPONEN POP UP MODAL --- */}
       {selectedOrder && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4" onClick={handleCloseModal}>
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-2 sm:px-4 py-6 sm:py-10 md:py-16" onClick={handleCloseModal}>
+          <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
             {/* HEADER */}
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-              <div>
-                <h2 className="text-2xl font-black text-gray-900">#{selectedOrder.id}</h2>
-                <p className="text-sm font-bold text-gray-500 mt-0.5">{selectedOrder.customer}</p>
+            <div className="flex items-center justify-between px-4 md:px-6 py-3 md:py-5 border-b border-gray-100 shrink-0">
+              <div className="min-w-0">
+                <h2 className="text-lg md:text-2xl font-black text-gray-900 truncate">#{selectedOrder.id}</h2>
+                <p className="text-xs md:text-sm font-bold text-gray-500 mt-0.5 truncate">{selectedOrder.customer}</p>
               </div>
               <button
                 onClick={handleCloseModal}
-                className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600">
-                <X size={18} />
+                className="p-1.5 md:p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-600 shrink-0">
+                <X size={16} className="md:size-[18px]" />
               </button>
             </div>
 
             {/* BODY */}
-            <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div className="p-4 md:p-6 space-y-4 md:space-y-6 overflow-y-auto flex-1 min-h-0 custom-scrollbar">
               {/* Info Cards */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Kondisi</p>
-                  <p className="text-sm font-bold text-gray-800">{selectedOrder.kondisi}</p>
+              <div className="grid grid-cols-3 gap-2 md:gap-3">
+                <div className="bg-gray-50 rounded-xl p-3 md:p-4 text-center">
+                  <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 md:mb-1">Kondisi</p>
+                  <p className="text-xs md:text-sm font-bold text-gray-800">{selectedOrder.kondisi}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Item</p>
-                  <p className="text-sm font-bold text-gray-800">{selectedOrder.items}</p>
+                <div className="bg-gray-50 rounded-xl p-3 md:p-4 text-center">
+                  <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 md:mb-1">Item</p>
+                  <p className="text-xs md:text-sm font-bold text-gray-800">{selectedOrder.items}</p>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-4 text-center">
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Total</p>
-                  <p className="text-sm font-bold text-gray-800">{formatRupiah(selectedOrder.harga)}</p>
+                <div className="bg-gray-50 rounded-xl p-3 md:p-4 text-center">
+                  <p className="text-[9px] md:text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5 md:mb-1">Total</p>
+                  <p className="text-xs md:text-sm font-bold text-gray-800">{formatRupiah(selectedOrder.harga)}</p>
                 </div>
               </div>
 
               {/* Daftar Item */}
               <div>
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Daftar Item</h3>
-                <div className="space-y-2">
+                <h3 className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 md:mb-3">Daftar Item</h3>
+                <div className="space-y-1.5 md:space-y-2">
                   {(selectedOrder.details ?? []).map((detail: any, idx: number) => (
-                    <div key={idx} className="flex items-start justify-between bg-gray-50 rounded-xl px-4 py-3">
+                    <div key={idx} className="flex items-start justify-between bg-gray-50 rounded-xl px-3 md:px-4 py-2.5 md:py-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-gray-800 truncate">{detail.nama}</p>
+                        <p className="text-xs md:text-sm font-bold text-gray-800 truncate">{detail.nama}</p>
                         {detail.note && (
-                          <p className="text-xs text-gray-400 font-medium mt-0.5">Note: {detail.note}</p>
+                          <p className="text-[10px] md:text-xs text-gray-400 font-medium mt-0.5">Note: {detail.note}</p>
                         )}
                       </div>
-                      <span className="text-sm font-black text-[#F53E1B] ml-3 shrink-0">x{detail.qty}</span>
+                      <span className="text-xs md:text-sm font-black text-[#F53E1B] ml-2 md:ml-3 shrink-0">x{detail.qty}</span>
                     </div>
                   ))}
                 </div>
@@ -535,11 +535,11 @@ export default function KitchenDashboardPage() {
 
               {/* Ubah Status */}
               <div>
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Ubah Status</h3>
-                <div className="flex gap-3">
+                <h3 className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 md:mb-3">Ubah Status</h3>
+                <div className="flex gap-2 md:gap-3">
                   <button
                     onClick={() => setModalStatus("Dimasak")}
-                    className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${
+                    className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm transition-all ${
                       modalStatus === "Dimasak"
                         ? "bg-yellow-400 text-yellow-900 shadow-sm ring-2 ring-yellow-500 ring-offset-2"
                         : "bg-gray-100 text-gray-500 hover:bg-gray-200"
@@ -548,7 +548,7 @@ export default function KitchenDashboardPage() {
                   </button>
                   <button
                     onClick={() => setModalStatus("Ready")}
-                    className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${
+                    className={`flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm transition-all ${
                       modalStatus === "Ready"
                         ? "bg-green-400 text-green-900 shadow-sm ring-2 ring-green-500 ring-offset-2"
                         : "bg-gray-100 text-gray-500 hover:bg-gray-200"
@@ -559,22 +559,22 @@ export default function KitchenDashboardPage() {
               </div>
 
               {statusError && (
-                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                <div className="p-2.5 md:p-3 bg-red-50 border border-red-200 rounded-xl text-xs md:text-sm text-red-700 font-medium">
                   {statusError}
                 </div>
               )}
             </div>
 
             {/* FOOTER */}
-            <div className="flex gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+            <div className="flex gap-2 md:gap-3 px-4 md:px-6 py-3 md:py-4 border-t border-gray-100 bg-gray-50/50 shrink-0">
               <button
                 onClick={handleCloseModal}
-                className="flex-1 py-3 rounded-xl font-bold text-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all active:scale-[0.98]">
+                className="flex-1 py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm bg-white text-gray-600 border border-gray-200 hover:bg-gray-50 transition-all active:scale-[0.98]">
                 Tutup
               </button>
               <button
                 onClick={handleSimpanStatus}
-                className="flex-[2] py-3 rounded-xl font-bold text-sm bg-[#F53E1B] hover:bg-[#d93515] text-white transition-all active:scale-[0.98] shadow-sm">
+                className="flex-[2] py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm bg-[#F53E1B] hover:bg-[#d93515] text-white transition-all active:scale-[0.98] shadow-sm">
                 Simpan
               </button>
             </div>

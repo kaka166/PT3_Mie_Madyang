@@ -203,41 +203,45 @@ export default function HPPPage() {
   }, [bahanList, targetPenjualan, bebanSewa, bebanGaji, bebanLain]);
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-neutral-100 p-8 pb-12 font-sans text-gray-800">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-[#F53E1B] mb-1">HPP</h1>
-        <p className="text-gray-500 font-medium">
+    <div className="h-full w-full overflow-y-auto bg-neutral-100 p-4 md:p-8 pb-12 font-sans text-gray-800">
+      <div className="mb-4 md:mb-6">
+        <h1 className="text-xl md:text-3xl font-bold text-[#F53E1B] mb-0.5 md:mb-1">
+          HPP
+        </h1>
+        <p className="text-xs md:text-sm text-gray-500 font-medium">
           Laporan Harga Pokok Penjualan Mi Madyang
         </p>
       </div>
 
       <button
         onClick={() => handleOpenModal()}
-        className="flex items-center gap-2 bg-[#f85656] hover:bg-[#e04545] text-white px-4 py-2.5 rounded-lg font-semibold text-sm mb-6 transition-colors shadow-sm">
-        <Package size={18} />
+        className="flex items-center gap-1.5 md:gap-2 bg-[#f85656] hover:bg-[#e04545] text-white px-3 md:px-4 py-1.5 md:py-2.5 rounded-lg font-semibold text-xs md:text-sm mb-4 md:mb-6 transition-colors shadow-sm">
+        <Package size={16} />
         Hitung HPP
       </button>
 
       {/* --- TABEL HPP --- */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-5 flex justify-between items-center border-b ">
-          <h2 className="text-xl font-bold text-black">HPP Per Menu</h2>
-          <div className="relative">
+        <div className="p-3 md:p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 md:gap-3 border-b">
+          <h2 className="text-base md:text-xl font-bold text-black">
+            HPP Per Menu
+          </h2>
+          <div className="relative w-full sm:w-auto">
             <Search
               className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              size={16}
+              size={14}
             />
             <input
               type="text"
               placeholder="Cari menu..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="bg-gray-200 text-gray-600 placeholder-gray-400 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 w-56 font-medium"
+              className="bg-gray-200 text-gray-600 placeholder-gray-400 pl-8 md:pl-9 pr-3 md:pr-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 w-full sm:w-48 md:w-56 font-medium"
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+        <div className="hidden md:block overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
               <tr>
@@ -277,24 +281,57 @@ export default function HPPPage() {
             </tbody>
           </table>
         </div>
+        {/* Mobile cards */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {riwayat
+            .filter((i) =>
+              i.nama_menu.toLowerCase().includes(search.toLowerCase()),
+            )
+            .map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center gap-3 px-3 py-2.5 hover:bg-red-50 transition-colors">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-bold text-gray-800 truncate">
+                    {item.nama_menu}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[10px] text-gray-400">
+                      #{item.id}
+                    </span>
+                    <span className="text-xs font-semibold text-gray-700">
+                      {formatRupiah(item.total_hpp)}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleOpenModal(item)}
+                  className="shrink-0 text-gray-400 hover:text-gray-700 bg-gray-50 hover:bg-gray-200 p-1.5 rounded-lg transition-colors">
+                  <Pencil size={14} />
+                </button>
+              </div>
+            ))}
+        </div>
       </div>
 
       {/* --- MODAL PRODUKSI --- */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row w-full max-w-5xl max-h-[90vh] h-full min-h-0 overflow-hidden relative">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/50 px-2 sm:px-4 py-6 sm:py-10 md:py-16">
+          <div className="bg-white rounded-[2rem] shadow-2xl flex flex-col md:flex-row w-full max-w-5xl max-h-[85vh] min-h-0 overflow-hidden relative">
             {/* PANEL KIRI */}
-            <div className="w-full md:w-[40%] bg-white p-6 flex flex-col border-r border-gray-200 h-full min-h-0">
-              <h2 className="text-2xl font-bold mb-4 text-black">Hitung HPP</h2>
-              <div className="space-y-3 mb-4">
+            <div className="w-full md:w-[40%] bg-white p-4 md:p-6 flex flex-col border-r border-gray-200 overflow-y-auto min-h-0 custom-scrollbar">
+              <h2 className="text-lg md:text-2xl font-bold mb-3 md:mb-4 text-black">
+                Hitung HPP
+              </h2>
+              <div className="space-y-2.5 md:space-y-3 mb-4">
                 <div>
-                  <label className="block font-bold text-gray-800 mb-0.5">
+                  <label className="block font-bold text-gray-800 mb-0.5 text-xs md:text-sm">
                     Nama Menu
                   </label>
                   <select
                     value={namaMenu}
                     onChange={(e) => setNamaMenu(e.target.value)}
-                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 focus:outline-none font-medium text-sm">
+                    className="w-full bg-[#f0f0f0] rounded-xl px-3 md:px-4 py-1.5 md:py-2 focus:outline-none font-medium text-xs md:text-sm">
                     <option value="">Pilih menu...</option>
                     {menuList
                       .filter((m) => m.is_active !== 0)
@@ -306,7 +343,7 @@ export default function HPPPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block font-bold text-gray-800 mb-0.5">
+                  <label className="block font-bold text-gray-800 mb-0.5 text-xs md:text-sm">
                     Target Jual (Porsi)
                   </label>
                   <input
@@ -317,11 +354,11 @@ export default function HPPPage() {
                     type="number"
                     min="0"
                     placeholder="Contoh: 1000"
-                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 focus:outline-none text-sm"
+                    className="w-full bg-[#f0f0f0] rounded-xl px-3 md:px-4 py-1.5 md:py-2 focus:outline-none text-xs md:text-sm"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-gray-800 mb-1 text-xs">
+                  <label className="block font-bold text-gray-800 mb-1 text-[10px] md:text-xs">
                     Beban Sewa (Rp)
                   </label>
                   <input
@@ -332,11 +369,11 @@ export default function HPPPage() {
                       setBebanSewa(raw);
                     }}
                     placeholder="0"
-                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 text-sm focus:outline-none"
+                    className="w-full bg-[#f0f0f0] rounded-xl px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-gray-800 mb-1 text-xs">
+                  <label className="block font-bold text-gray-800 mb-1 text-[10px] md:text-xs">
                     Beban Gaji (Rp)
                   </label>
                   <input
@@ -347,11 +384,11 @@ export default function HPPPage() {
                       setBebanGaji(raw);
                     }}
                     placeholder="0"
-                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 text-sm focus:outline-none"
+                    className="w-full bg-[#f0f0f0] rounded-xl px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-gray-800 mb-1 text-xs">
+                  <label className="block font-bold text-gray-800 mb-1 text-[10px] md:text-xs">
                     Beban Lain (Rp)
                   </label>
                   <input
@@ -362,21 +399,22 @@ export default function HPPPage() {
                       setBebanLain(raw);
                     }}
                     placeholder="0"
-                    className="w-full bg-[#f0f0f0] rounded-xl px-4 py-2 text-sm focus:outline-none"
+                    className="w-full bg-[#f0f0f0] rounded-xl px-3 md:px-4 py-1.5 md:py-2 text-xs md:text-sm focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="mt-auto space-y-3">
+              <div className="mt-auto space-y-2.5 md:space-y-3">
                 <div
-                  className="bg-[#f0f0f0] rounded-2xl p-4 cursor-pointer hover:bg-[#e8e8e8] transition-colors"
-                  onClick={() => setShowRincian(true)}
-                >
-                  <div className="flex items-center gap-1.5 mb-3">
-                    <h3 className="font-bold">Hasil perhitungan HPP</h3>
-                    <CircleHelp size={13} className="text-gray-400" />
+                  className="bg-[#f0f0f0] rounded-2xl p-3 md:p-4 cursor-pointer hover:bg-[#e8e8e8] transition-colors"
+                  onClick={() => setShowRincian(true)}>
+                  <div className="flex items-center gap-1.5 mb-2 md:mb-3">
+                    <h3 className="font-bold text-xs md:text-sm">
+                      Hasil perhitungan HPP
+                    </h3>
+                    <CircleHelp size={12} className="text-gray-400" />
                   </div>
-                  <div className="space-y-1 text-sm">
+                  <div className="space-y-0.5 md:space-y-1 text-[11px] md:text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-400">
                         Estimasi Total Produksi:
@@ -417,30 +455,35 @@ export default function HPPPage() {
                     isLoading
                       ? "bg-gray-400"
                       : "bg-[#f85656] hover:bg-[#e04545]"
-                  } text-white py-3 rounded-xl font-bold transition-colors shadow-sm shrink-0`}>
+                  } text-white py-2.5 md:py-3 rounded-xl font-bold text-xs md:text-sm transition-colors shadow-sm shrink-0`}>
                   {isLoading ? "Menyimpan..." : "Simpan HPP"}
                 </button>
               </div>
             </div>
 
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-3 right-3 z-20 md:hidden text-gray-400 hover:text-gray-700">
+              ×
+            </button>
             {/* PANEL KANAN */}
-            <div className="w-full md:w-[60%] bg-[#f4f4f5] p-6 flex flex-col relative h-full min-h-0 overflow-y-auto custom-scrollbar">
+            <div className="w-full md:w-[60%] bg-[#f4f4f5] p-4 md:p-6 flex flex-col relative min-h-0 overflow-y-auto custom-scrollbar">
               <button
                 onClick={handleCloseModal}
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors z-10">
+                className="hidden md:block absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors z-10 text-2xl">
                 ×
               </button>
-              <h2 className="text-2xl font-bold mb-4 text-black">
+              <h2 className="text-base md:text-2xl font-bold mb-3 md:mb-4 text-black pr-6">
                 Masukan Bahan Baku
               </h2>
 
-              <div className="space-y-3">
+              <div className="space-y-2.5 md:space-y-3">
                 {bahanList.map((bahan, index) => (
                   <div
                     key={bahan.id}
-                    className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-bold text-black">
+                    className="bg-white p-3 md:p-4 rounded-2xl shadow-sm border border-gray-100">
+                    <div className="flex justify-between items-center mb-2 md:mb-3">
+                      <h4 className="font-bold text-sm md:text-base text-black">
                         Bahan {index + 1}
                       </h4>
                       {bahanList.length > 1 && (
@@ -451,8 +494,8 @@ export default function HPPPage() {
                         </button>
                       )}
                     </div>
-                    <div className="mb-3">
-                      <label className="block font-bold text-gray-800 mb-1 text-xs">
+                    <div className="mb-2 md:mb-3">
+                      <label className="block font-bold text-gray-800 mb-1 text-[10px] md:text-xs">
                         Nama Bahan
                       </label>
                       <input
@@ -463,23 +506,21 @@ export default function HPPPage() {
                           setBahanList(newList);
                         }}
                         placeholder="Masukan nama bahan"
-                        className="w-full bg-[#f5f5f5] rounded-xl px-4 py-2 focus:outline-none text-sm"
+                        className="w-full bg-[#f5f5f5] rounded-xl px-3 md:px-4 py-1.5 md:py-2 focus:outline-none text-xs md:text-sm"
                       />
                     </div>
-                    <div className="flex gap-3">
+                    <div className="flex gap-2 md:gap-3">
                       <div className="flex-[2]">
                         <div className="flex items-center gap-1 mb-1">
-                          <label className="font-bold text-gray-800 text-xs">
-                            Bisa Untuk (Porsi)
+                          <label className="font-bold text-gray-800 text-[10px] md:text-xs">
+                            Porsi
                           </label>
-
                           <div className="relative group">
                             <CircleHelp
-                              size={14}
+                              size={12}
                               className="text-gray-400 cursor-help"
                             />
-
-                            <div className="absolute left-5 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block w-64 bg-gray-900 text-white text-[11px] rounded-lg px-3 py-2 shadow-lg">
+                            <div className="absolute left-5 top-1/2 -translate-y-1/2 z-50 hidden group-hover:block w-48 md:w-64 bg-gray-900 text-white text-[10px] md:text-[11px] rounded-lg px-2 md:px-3 py-1.5 md:py-2 shadow-lg">
                               Contoh: 1 pack mie seharga Rp120.000 dapat
                               digunakan untuk 40 porsi.
                             </div>
@@ -498,12 +539,12 @@ export default function HPPPage() {
                             }
                           }}
                           placeholder="1"
-                          className="w-full bg-[#f5f5f5] rounded-xl px-4 py-2 focus:outline-none text-sm"
+                          className="w-full bg-[#f5f5f5] rounded-xl px-3 md:px-4 py-1.5 md:py-2 focus:outline-none text-xs md:text-sm"
                         />
                       </div>
                       <div className="flex-[2]">
-                        <label className="block font-bold text-gray-800 mb-1 text-xs">
-                          Harga Beli (Rp)
+                        <label className="block font-bold text-gray-800 mb-1 text-[10px] md:text-xs">
+                          Harga (Rp)
                         </label>
                         <input
                           type="text"
@@ -515,7 +556,7 @@ export default function HPPPage() {
                             setBahanList(newList);
                           }}
                           placeholder="0"
-                          className="w-full bg-[#f5f5f5] rounded-xl px-4 py-2 focus:outline-none text-sm"
+                          className="w-full bg-[#f5f5f5] rounded-xl px-3 md:px-4 py-1.5 md:py-2 focus:outline-none text-xs md:text-sm"
                         />
                       </div>
                     </div>
@@ -523,8 +564,8 @@ export default function HPPPage() {
                 ))}
                 <button
                   onClick={handleAddBahan}
-                  className="w-full border-2 border-dashed border-gray-400 text-gray-800 font-bold py-4 rounded-2xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-2 text-sm">
-                  <Plus size={18} /> Klik Untuk Menambahkan Bahan Tambahan
+                  className="w-full border-2 border-dashed border-gray-400 text-gray-800 font-bold py-3 md:py-4 rounded-2xl hover:bg-gray-200 transition-colors flex items-center justify-center gap-1.5 md:gap-2 text-xs md:text-sm">
+                  <Plus size={16} /> Tambah Bahan
                 </button>
               </div>
             </div>
@@ -534,45 +575,66 @@ export default function HPPPage() {
 
       {/* --- MODAL RINCIAN HPP --- */}
       {showRincian && (
-        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] h-full flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center px-6 pt-6 pb-0 shrink-0">
-              <h2 className="text-xl font-bold">Rincian Perhitungan HPP</h2>
-              <button onClick={() => setShowRincian(false)}
+        <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/50 px-2 sm:px-4 py-6 sm:py-10 md:py-16">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center px-4 md:px-6 pt-4 md:pt-6 pb-0 shrink-0">
+              <h2 className="text-base md:text-xl font-bold">
+                Rincian Perhitungan HPP
+              </h2>
+              <button
+                onClick={() => setShowRincian(false)}
                 className="p-1 hover:bg-gray-100 rounded-full transition-colors">
-                <X size={20} />
+                <X size={16} className="md:size-5" />
               </button>
             </div>
-            <div className="overflow-y-auto flex-1 min-h-0 px-6 pb-6">
-              <div className="pt-6 space-y-5">
+            <div className="overflow-y-auto flex-1 min-h-0 px-4 md:px-6 pb-4 md:pb-6">
+              <div className="pt-4 md:pt-6 space-y-4 md:space-y-5">
                 {/* BAHAN BAKU */}
                 <div>
-                  <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-2">Bahan Baku</h3>
-                  <div className="space-y-2">
+                  <h3 className="font-bold text-xs md:text-sm text-gray-500 uppercase tracking-wider mb-1.5 md:mb-2">
+                    Bahan Baku
+                  </h3>
+                  <div className="space-y-1.5 md:space-y-2">
                     {bahanList
-                      .filter(b => b.nama.trim() !== "")
+                      .filter((b) => b.nama.trim() !== "")
                       .map((b, i) => {
                         const harga = parseFloat(b.harga) || 0;
                         const jumlah = parseFloat(b.jumlah) || 1;
                         const perPorsi = harga / jumlah;
                         return (
-                          <div key={i} className="bg-gray-50 rounded-xl px-4 py-3">
+                          <div
+                            key={i}
+                            className="bg-gray-50 rounded-xl px-3 md:px-4 py-2 md:py-3">
                             <div className="flex justify-between items-center">
-                              <span className="font-semibold text-sm">{b.nama}</span>
-                              <span className="font-bold text-sm">{formatRupiah(perPorsi)}</span>
+                              <span className="font-semibold text-xs md:text-sm">
+                                {b.nama}
+                              </span>
+                              <span className="font-bold text-xs md:text-sm">
+                                {formatRupiah(perPorsi)}
+                              </span>
                             </div>
-                            <div className="text-[11px] text-gray-400 mt-0.5">
-                              {formatRupiah(harga)} &divide; {jumlah} porsi = {formatRupiah(perPorsi)} / porsi
+                            <div className="text-[10px] md:text-[11px] text-gray-400 mt-0.5">
+                              {formatRupiah(harga)} &divide; {jumlah} porsi ={" "}
+                              {formatRupiah(perPorsi)} / porsi
                             </div>
                           </div>
                         );
                       })}
-                    <div className="flex justify-between px-4 py-2 border-t border-gray-200">
-                      <span className="font-bold text-sm">Total Biaya Bahan / Porsi</span>
-                      <span className="font-bold text-sm">
-                        {formatRupiah(bahanList
-                          .filter(b => b.nama.trim() !== "")
-                          .reduce((acc, b) => acc + (parseFloat(b.harga) || 0) / (parseFloat(b.jumlah) || 1), 0)
+                    <div className="flex justify-between px-3 md:px-4 py-1.5 md:py-2 border-t border-gray-200">
+                      <span className="font-bold text-xs md:text-sm">
+                        Total Biaya Bahan / Porsi
+                      </span>
+                      <span className="font-bold text-xs md:text-sm">
+                        {formatRupiah(
+                          bahanList
+                            .filter((b) => b.nama.trim() !== "")
+                            .reduce(
+                              (acc, b) =>
+                                acc +
+                                (parseFloat(b.harga) || 0) /
+                                  (parseFloat(b.jumlah) || 1),
+                              0,
+                            ),
                         )}
                       </span>
                     </div>
@@ -580,31 +642,45 @@ export default function HPPPage() {
                 </div>
 
                 {/* BEBAN OPERASIONAL */}
-                {(Number(bebanSewa) || Number(bebanGaji) || Number(bebanLain)) > 0 && (
+                {(Number(bebanSewa) || Number(bebanGaji) || Number(bebanLain)) >
+                  0 && (
                   <div>
-                    <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-2">Beban Operasional</h3>
-                    <div className="space-y-2">
+                    <h3 className="font-bold text-xs md:text-sm text-gray-500 uppercase tracking-wider mb-1.5 md:mb-2">
+                      Beban Operasional
+                    </h3>
+                    <div className="space-y-1.5 md:space-y-2">
                       {[
                         { label: "Sewa", total: Number(bebanSewa) || 0 },
                         { label: "Gaji", total: Number(bebanGaji) || 0 },
                         { label: "Lain-lain", total: Number(bebanLain) || 0 },
-                      ].filter(b => b.total > 0).map((b, i) => {
-                        const target = Number(targetPenjualan) || 1;
-                        return (
-                          <div key={i} className="bg-gray-50 rounded-xl px-4 py-3">
-                            <div className="flex justify-between items-center">
-                              <span className="font-semibold text-sm">{b.label}</span>
-                              <span className="font-bold text-sm">{formatRupiah(b.total / target)}</span>
+                      ]
+                        .filter((b) => b.total > 0)
+                        .map((b, i) => {
+                          const target = Number(targetPenjualan) || 1;
+                          return (
+                            <div
+                              key={i}
+                              className="bg-gray-50 rounded-xl px-3 md:px-4 py-2 md:py-3">
+                              <div className="flex justify-between items-center">
+                                <span className="font-semibold text-xs md:text-sm">
+                                  {b.label}
+                                </span>
+                                <span className="font-bold text-xs md:text-sm">
+                                  {formatRupiah(b.total / target)}
+                                </span>
+                              </div>
+                              <div className="text-[10px] md:text-[11px] text-gray-400 mt-0.5">
+                                {formatRupiah(b.total)} &divide; {target} porsi
+                                = {formatRupiah(b.total / target)} / porsi
+                              </div>
                             </div>
-                            <div className="text-[11px] text-gray-400 mt-0.5">
-                              {formatRupiah(b.total)} &divide; {target} porsi = {formatRupiah(b.total / target)} / porsi
-                            </div>
-                          </div>
-                        );
-                      })}
-                      <div className="flex justify-between px-4 py-2 border-t border-gray-200">
-                        <span className="font-bold text-sm">Total Operasional / Porsi</span>
-                        <span className="font-bold text-sm">
+                          );
+                        })}
+                      <div className="flex justify-between px-3 md:px-4 py-1.5 md:py-2 border-t border-gray-200">
+                        <span className="font-bold text-xs md:text-sm">
+                          Total Operasional / Porsi
+                        </span>
+                        <span className="font-bold text-xs md:text-sm">
                           {formatRupiah(calculationPreview.totalOpex)}
                         </span>
                       </div>
@@ -613,26 +689,37 @@ export default function HPPPage() {
                 )}
 
                 {/* TARGET */}
-                <div className="flex justify-between items-center bg-gray-50 rounded-xl px-4 py-3">
-                  <span className="font-bold text-sm">Target Penjualan</span>
-                  <span className="font-bold text-sm">{calculationPreview.target} porsi</span>
+                <div className="flex justify-between items-center bg-gray-50 rounded-xl px-3 md:px-4 py-2 md:py-3">
+                  <span className="font-bold text-xs md:text-sm">
+                    Target Penjualan
+                  </span>
+                  <span className="font-bold text-xs md:text-sm">
+                    {calculationPreview.target} porsi
+                  </span>
                 </div>
 
                 {/* TOTAL HPP */}
-                <div className="bg-red-50 rounded-2xl p-5 space-y-2">
-                  <div className="flex justify-between text-sm">
+                <div className="bg-red-50 rounded-2xl p-4 md:p-5 space-y-1.5 md:space-y-2">
+                  <div className="flex justify-between text-xs md:text-sm">
                     <span>Total Biaya Bahan / Porsi</span>
                     <span className="font-semibold">
-                      {formatRupiah(calculationPreview.hppPerPorsi - calculationPreview.totalOpex)}
+                      {formatRupiah(
+                        calculationPreview.hppPerPorsi -
+                          calculationPreview.totalOpex,
+                      )}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
+                  <div className="flex justify-between text-xs md:text-sm">
                     <span>Total Operasional / Porsi</span>
-                    <span className="font-semibold">{formatRupiah(calculationPreview.totalOpex)}</span>
+                    <span className="font-semibold">
+                      {formatRupiah(calculationPreview.totalOpex)}
+                    </span>
                   </div>
-                  <div className="flex justify-between text-lg font-extrabold border-t border-red-200 pt-2">
+                  <div className="flex justify-between text-base md:text-lg font-extrabold border-t border-red-200 pt-1.5 md:pt-2">
                     <span>HPP per Porsi</span>
-                    <span className="text-[#f85656]">{formatRupiah(calculationPreview.hppPerPorsi)}</span>
+                    <span className="text-[#f85656]">
+                      {formatRupiah(calculationPreview.hppPerPorsi)}
+                    </span>
                   </div>
                 </div>
               </div>

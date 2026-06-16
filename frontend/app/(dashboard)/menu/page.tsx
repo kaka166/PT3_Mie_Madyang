@@ -290,51 +290,51 @@ export default function InventoryPage() {
         ))}
       </div>
 
-      {/* 3. MENU TABLE */}
-      <div className="bg-white rounded-3xl shadow-sm border border-zinc-100 overflow-hidden mb-12">
-        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
-          <table className="w-full text-sm text-left whitespace-nowrap">
+      {/* 3. MENU TABLE - Desktop */}
+      <div className="hidden md:block bg-white rounded-3xl shadow-sm border border-zinc-100 mb-12">
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs lg:text-sm text-left">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="px-5 py-3 text-left">Nama Makanan</th>
-                <th className="px-5 py-3 text-left">Kategori</th>
-                <th className="px-5 py-3 text-left">Harga Jual</th>
-                <th className="px-5 py-3 text-center">Stok</th>
-                <th className="px-5 py-3 text-center">Visibilitas POS</th>
-                <th className="px-5 py-3 text-right">Aksi</th>
+                <th className="px-3 lg:px-5 py-3 text-left whitespace-nowrap">Nama Makanan</th>
+                <th className="px-3 lg:px-5 py-3 text-left whitespace-nowrap">Kategori</th>
+                <th className="px-3 lg:px-5 py-3 text-left whitespace-nowrap">Harga Jual</th>
+                <th className="px-3 lg:px-5 py-3 text-center whitespace-nowrap">Stok</th>
+                <th className="px-3 lg:px-5 py-3 text-center whitespace-nowrap">Visibilitas POS</th>
+                <th className="px-3 lg:px-5 py-3 text-right whitespace-nowrap">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-50">
               {filteredMenus.map((item) => (
                   <tr key={item.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
-                    <td className="px-5 py-3.5 text-neutral-700">
-                      <div className="flex items-center gap-3">
+                    <td className="px-3 lg:px-5 py-3 text-neutral-700">
+                      <div className="flex items-center gap-2 lg:gap-3">
                         {item.gambar ? (
                           <img
                             src={`${STORAGE_BASE_URL}/menu/${item.gambar}`}
                             alt={item.nama_menu}
-                            className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                            className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg object-cover flex-shrink-0"
                             onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/eeeeee/999999?text=Menu'; }}
                           />
                         ) : (
-                          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center text-lg flex-shrink-0">🍜</div>
+                          <div className="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-gray-100 flex items-center justify-center text-base lg:text-lg flex-shrink-0">🍜</div>
                         )}
-                        {item.nama_menu}
+                        <span className="truncate max-w-[120px] lg:max-w-none">{item.nama_menu}</span>
                       </div>
                     </td>
-                  <td className="px-5 py-3.5 ">
-                    <span className="bg-zinc-100 text-zinc-500 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-tight">
+                  <td className="px-3 lg:px-5 py-3">
+                    <span className="bg-zinc-100 text-zinc-500 px-2 py-0.5 lg:px-2.5 lg:py-1 rounded-lg text-[9px] lg:text-[10px] font-bold uppercase tracking-tight whitespace-nowrap">
                       {item.kategori?.nama_kategori}
                     </span>
                   </td>
-                  <td className="px-5 py-3.5 text-neutral-800">
+                  <td className="px-3 lg:px-5 py-3 text-neutral-800 whitespace-nowrap">
                     {formatRupiah(item.harga_jual)}
                   </td>
-                  <td className="px-5 py-3.5 text-center">
+                  <td className="px-3 lg:px-5 py-3 text-center">
                     <input
                       type="number"
                       defaultValue={item.stock ?? 0}
-                      className="w-20 text-center border rounded-lg px-2 py-1"
+                      className="w-14 lg:w-20 text-center border rounded-lg px-1 lg:px-2 py-1 text-xs lg:text-sm"
                       onBlur={async (e) => {
                         const newStock = Number(e.target.value);
 
@@ -357,17 +357,17 @@ export default function InventoryPage() {
                       }}
                     />
                   </td>
-                  <td className="px-5 py-3.5 text-center">
+                  <td className="px-3 lg:px-5 py-3 text-center">
                     <button
                       onClick={() => toggleMenu(item)}
-                      className={`w-11 h-6 flex items-center rounded-full transition-all mx-auto ${item.is_active ? "bg-green-500" : "bg-zinc-300"}`}>
+                      className={`w-9 lg:w-11 h-5 lg:h-6 flex items-center rounded-full transition-all mx-auto ${item.is_active ? "bg-green-500" : "bg-zinc-300"}`}>
                       <div
-                        className={`w-4 h-4 bg-white rounded-full shadow-md transform transition-all ${item.is_active ? "translate-x-6" : "translate-x-1"}`}
+                        className={`w-3.5 h-3.5 lg:w-4 lg:h-4 bg-white rounded-full shadow-md transform transition-all ${item.is_active ? "translate-x-[18px] lg:translate-x-6" : "translate-x-0.5 lg:translate-x-1"}`}
                       />
                     </button>
                   </td>
-                  <td className="px-5 py-3.5 ">
-                    <div className="flex justify-end gap-2 text-zinc-400">
+                  <td className="px-3 lg:px-5 py-3">
+                    <div className="flex justify-end gap-1 lg:gap-2 text-zinc-400">
                       <button
                         onClick={() => {
                           setIsEdit(true);
@@ -381,15 +381,9 @@ export default function InventoryPage() {
                           });
                           setShowModal(true);
                         }}
-                        className="p-2 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">
-                        <Pencil size={16} />
+                        className="p-1.5 lg:p-2 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all">
+                        <Pencil size={14} className="lg:size-4" />
                       </button>
-                      {/* <button
-                        onClick={() => deleteMenu(item.id)}
-                        className="p-2 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all"
-                      >
-                        <Trash2 size={16} />
-                      </button> */}
                     </div>
                   </td>
                 </tr>
@@ -397,6 +391,86 @@ export default function InventoryPage() {
             </tbody>
           </table>
         </div>
+      </div>
+
+      {/* 3b. MENU CARDS - Mobile */}
+      <div className="md:hidden space-y-2 mb-12">
+        {filteredMenus.map((item) => (
+          <div key={item.id} className="bg-white rounded-2xl shadow-sm border border-zinc-100 p-3">
+            <div className="flex items-start gap-2.5">
+              {item.gambar ? (
+                <img
+                  src={`${STORAGE_BASE_URL}/menu/${item.gambar}`}
+                  alt={item.nama_menu}
+                  className="w-12 h-12 rounded-xl object-cover flex-shrink-0"
+                  onError={(e) => { e.currentTarget.src = 'https://placehold.co/100x100/eeeeee/999999?text=Menu'; }}
+                />
+              ) : (
+                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-lg flex-shrink-0">🍜</div>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between gap-1.5">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-neutral-800 text-sm truncate">{item.nama_menu}</h3>
+                    <span className="inline-block mt-0.5 bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-lg text-[9px] font-bold uppercase tracking-tight">
+                      {item.kategori?.nama_kategori}
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold text-neutral-800 whitespace-nowrap shrink-0">{formatRupiah(item.harga_jual)}</span>
+                </div>
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-zinc-50">
+                  <div className="flex items-center gap-1.5">
+                    <label className="text-[9px] font-bold text-zinc-400 uppercase">Stok</label>
+                    <input
+                      type="number"
+                      defaultValue={item.stock ?? 0}
+                      className="w-12 text-center border rounded-lg px-1 py-0.5 text-[11px]"
+                      onBlur={async (e) => {
+                        const newStock = Number(e.target.value);
+                        try {
+                          await menuService.updateStock(item.id, newStock);
+                          setMenus((prev) =>
+                            prev.map((m) =>
+                              m.id === item.id ? { ...m, stock: newStock } : m,
+                            ),
+                          );
+                        } catch (err) {
+                          alert("Gagal update stok");
+                          fetchData();
+                        }
+                      }}
+                    />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => toggleMenu(item)}
+                      className={`w-8 h-4.5 flex items-center rounded-full transition-all ${item.is_active ? "bg-green-500" : "bg-zinc-300"}`}>
+                      <div
+                        className={`w-3 h-3 bg-white rounded-full shadow-md transform transition-all ${item.is_active ? "translate-x-[15px]" : "translate-x-0.5"}`}
+                      />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEdit(true);
+                        setSelectedId(item.id);
+                        setPreviewUrl(item.gambar ? `${STORAGE_BASE_URL}/menu/${item.gambar}` : null);
+                        setForm({
+                          nama_menu: item.nama_menu,
+                          harga_jual: String(item.harga_jual),
+                          kategori_id: String(item.kategori_id),
+                          gambar: null,
+                        });
+                        setShowModal(true);
+                      }}
+                      className="p-1 hover:bg-blue-50 hover:text-blue-600 rounded-xl transition-all text-zinc-400">
+                      <Pencil size={12} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* --- MODAL POPUPS --- */}
@@ -523,24 +597,24 @@ export default function InventoryPage() {
 
       {/* MODAL MENU */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] p-4">
-          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl max-h-[90vh] h-full flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center px-10 pt-10 shrink-0">
-              <h2 className="text-2xl font-bold text-neutral-800">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] px-2 sm:px-4 py-6 sm:py-10 md:py-16">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl max-h-[85vh] h-full flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center px-4 md:px-8 pt-4 md:pt-8 shrink-0">
+              <h2 className="text-lg md:text-2xl font-bold text-neutral-800">
                 {isEdit ? "Update Menu" : "Tambah Menu Baru"}
               </h2>
               <button
                 onClick={() => setShowModal(false)}
                 className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
-                <X size={24} />
+                <X size={22} className="md:size-6" />
               </button>
             </div>
 
-            <div className="overflow-y-auto flex-1 min-h-0 px-10 custom-scrollbar">
-              <div className="space-y-6 pt-8 pb-10">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="overflow-y-auto flex-1 min-h-0 px-4 md:px-8 custom-scrollbar">
+              <div className="space-y-4 md:space-y-6 pt-4 md:pt-8 pb-6 md:pb-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                   <div>
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1 md:mb-2">
                       Nama Menu
                     </label>
                     <input
@@ -549,12 +623,12 @@ export default function InventoryPage() {
                       onChange={(e) =>
                         setForm({ ...form, nama_menu: e.target.value })
                       }
-                      className="w-full border-b-2 border-zinc-100 py-2 outline-none focus:border-red-500 font-bold text-lg transition-all"
+                      className="w-full border-b-2 border-zinc-100 py-1.5 md:py-2 outline-none focus:border-red-500 font-bold text-base md:text-lg transition-all"
                       placeholder="Masukkan nama..."
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">
+                    <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1 md:mb-2">
                       Kategori
                     </label>
                     <select
@@ -562,7 +636,7 @@ export default function InventoryPage() {
                       onChange={(e) =>
                         setForm({ ...form, kategori_id: e.target.value })
                       }
-                      className="w-full border-b-2 border-zinc-100 py-2 outline-none bg-transparent font-bold">
+                      className="w-full border-b-2 border-zinc-100 py-1.5 md:py-2 outline-none bg-transparent font-bold text-base md:text-lg">
                       {categories.map((c) => (
                         <option key={c.id} value={c.id.toString()}>
                           {c.nama_kategori}
@@ -573,16 +647,16 @@ export default function InventoryPage() {
                 </div>
 
                 {/* KALKULATOR HARGA JUAL */}
-                <div className="bg-zinc-50 p-6 rounded-3xl border border-zinc-100 space-y-5">
+                <div className="bg-zinc-50 p-4 md:p-6 rounded-3xl border border-zinc-100 space-y-3 md:space-y-5">
                   <div className="flex items-center gap-2 text-red-600 font-bold text-[11px] uppercase tracking-widest">
-                    <Calculator size={16} /> Kalkulator Harga Jual
+                    <Calculator size={14} className="md:size-4" /> Kalkulator Harga Jual
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
                     <div>
                       <label className="text-[9px] font-bold text-zinc-400 uppercase block mb-1">
                         HPP (Modal)
                       </label>
-                      <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-3 py-2.5 shadow-sm focus-within:ring-2 ring-red-500/10">
+                      <div className="flex items-center bg-white border border-zinc-200 rounded-xl px-3 py-2 shadow-sm focus-within:ring-2 ring-red-500/10">
                         <span className="text-sm font-semibold text-zinc-500 mr-2">
                           Rp
                         </span>
@@ -603,7 +677,7 @@ export default function InventoryPage() {
                         Metode Laba
                       </label>
                       <select
-                        className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2.5 text-sm outline-none shadow-sm transition-all font-medium"
+                        className="w-full bg-white border border-zinc-200 rounded-xl px-3 py-2 text-sm outline-none shadow-sm transition-all font-medium"
                         value={calc.mode}
                         onChange={(e) =>
                           handleCalcChange("mode", e.target.value)
@@ -627,7 +701,7 @@ export default function InventoryPage() {
                         placeholder={
                           calc.mode === "margin" ? "Contoh: 5000" : "Contoh: 30"
                         }
-                        className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2.5 text-sm outline-none shadow-sm transition-all"
+                        className="w-full bg-white border border-zinc-200 rounded-xl px-4 py-2 text-sm outline-none shadow-sm transition-all"
                         onChange={(e) =>
                           handleCalcChange("value", e.target.value)
                         }
@@ -635,8 +709,8 @@ export default function InventoryPage() {
                     </div>
                   )}
 
-                  <div className="pt-4 border-t border-zinc-200">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase block mb-2">
+                  <div className="pt-3 md:pt-4 border-t border-zinc-200">
+                    <span className="text-[9px] font-bold text-zinc-400 uppercase block mb-1 md:mb-2">
                       Hasil Harga Jual Akhir
                     </span>
                     <div className="flex items-baseline gap-2">
@@ -648,7 +722,7 @@ export default function InventoryPage() {
                           const raw = parseRupiah(e.target.value);
                           setForm({ ...form, harga_jual: raw });
                         }}
-                        className={`text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${
+                        className={`text-2xl md:text-4xl font-black bg-transparent outline-none w-full tracking-tighter ${
                           calc.mode !== "manual"
                             ? "text-green-600"
                             : "text-neutral-800"
@@ -659,11 +733,11 @@ export default function InventoryPage() {
                 </div>
 
                 <div>
-                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-between mb-3">
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest flex items-center justify-between mb-2 md:mb-3">
                     <span>Foto Produk</span>
-                    <span className="text-[9px] bg-red-50 text-[#b93b3b] px-2 py-1 rounded">Rekomendasi: 400x400px (1:1)</span>
+                    <span className="text-[9px] bg-red-50 text-[#b93b3b] px-2 py-1 rounded">400x400px</span>
                   </label>
-                  <div className="border-2 border-dashed border-zinc-200 rounded-3xl p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
+                  <div className="border-2 border-dashed border-zinc-200 rounded-3xl p-4 md:p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
                     <input
                       type="file"
                       accept="image/*"
@@ -682,11 +756,11 @@ export default function InventoryPage() {
                         <img
                           src={previewUrl}
                           alt="Preview"
-                          className="w-24 h-24 object-cover rounded-2xl mb-1 shadow-sm"
+                          className="w-20 h-20 md:w-24 md:h-24 object-cover rounded-2xl mb-1 shadow-sm"
                         />
                       ) : (
-                        <div className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <Plus size={24} />
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Plus size={20} className="md:size-6" />
                         </div>
                       )}
                       <p className="text-xs font-bold text-zinc-400">
@@ -702,15 +776,15 @@ export default function InventoryPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 px-10 pb-10 pt-4 shrink-0">
+            <div className="flex justify-end gap-2 md:gap-3 px-4 md:px-8 pb-4 md:pb-8 pt-3 md:pt-4 shrink-0">
               <button
                 onClick={() => setShowModal(false)}
-                className="px-8 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors">
+                className="px-5 md:px-8 py-2.5 md:py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors">
                 Batal
               </button>
               <button
                 onClick={submitMenu}
-                className="px-10 py-3 bg-neutral-900 hover:bg-black text-white rounded-2xl text-sm font-bold active:scale-95 transition-all shadow-xl shadow-zinc-200">
+                className="px-6 md:px-10 py-2.5 md:py-3 bg-neutral-900 hover:bg-black text-white rounded-2xl text-sm font-bold active:scale-95 transition-all shadow-xl shadow-zinc-200">
                 Simpan Menu
               </button>
             </div>

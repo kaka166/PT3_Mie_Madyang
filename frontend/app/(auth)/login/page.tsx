@@ -84,7 +84,6 @@ export default function LoginPage() {
           <div className="text-center mb-1">
             <h2
               className="text-2xl font-bold tracking-[0.25em] text-gray-800"
-              style={{ fontFamily: "Georgia, serif" }}
             >
               Login
             </h2>

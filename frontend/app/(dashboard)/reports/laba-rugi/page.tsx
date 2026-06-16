@@ -81,7 +81,7 @@ export default function LabaRugiPage() {
     : [];
 
   return (
-    <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24">
+    <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-4 md:p-8 font-sans pb-24">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-start gap-4">
           <div>
@@ -118,18 +118,18 @@ export default function LabaRugiPage() {
         </div>
 
         {loading ? (
-          <div className="space-y-6 animate-pulse">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-4 md:space-y-6 animate-pulse">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               {[1,2,3,4,5,6].map((i) => (
-                <div key={i} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm min-h-[130px]">
-                  <div className="h-10 w-10 bg-gray-200 rounded-xl mb-4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-24 mb-2"></div>
-                  <div className="h-6 bg-gray-200 rounded w-28"></div>
+                <div key={i} className="bg-white rounded-2xl p-4 md:p-6 border border-neutral-100 shadow-sm">
+                  <div className="h-8 md:h-10 w-8 md:w-10 bg-gray-200 rounded-xl mb-3 md:mb-4"></div>
+                  <div className="h-2 md:h-3 bg-gray-200 rounded w-20 md:w-24 mb-1 md:mb-2"></div>
+                  <div className="h-5 md:h-6 bg-gray-200 rounded w-24 md:w-28"></div>
                 </div>
               ))}
             </div>
-            <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-6">
-              <div className="h-5 bg-gray-200 rounded w-48 mb-6"></div>
+            <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm p-4 md:p-6">
+              <div className="h-5 bg-gray-200 rounded w-36 md:w-48 mb-4 md:mb-6"></div>
               <div className="space-y-3">
                 <div className="h-4 bg-gray-200 rounded w-full"></div>
                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
@@ -139,32 +139,32 @@ export default function LabaRugiPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
               {metrics.map((m, i) => (
                 <div
                   key={i}
-                  className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px] transition-all hover:shadow-md"
+                  className="bg-white rounded-2xl p-4 md:p-6 border border-neutral-100 shadow-sm transition-all hover:shadow-md"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className={`p-2.5 bg-${m.color}-50 text-${m.color}-500 rounded-xl`}>
-                      <m.icon size={20} />
-                    </div>
+                  <div className="p-2 md:p-2.5 bg-red-50 text-red-500 rounded-xl w-fit mb-2 md:mb-3">
+                    <m.icon size={18} />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">
+                    <p className="text-[9px] md:text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5 md:mb-1">
                       {m.label}
                     </p>
-                    <p className="text-2xl font-extrabold text-neutral-800">{m.value}</p>
+                    <p className="text-xl md:text-2xl font-extrabold text-neutral-800">{m.value}</p>
                   </div>
                 </div>
               ))}
             </div>
 
             <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
-              <div className="p-6 border-b">
-                <h2 className="text-xl font-bold text-neutral-900">Ringkasan Laba Rugi</h2>
+              <div className="p-4 md:p-6 border-b">
+                <h2 className="text-base md:text-xl font-bold text-neutral-900">Ringkasan Laba Rugi</h2>
               </div>
-              <div className="p-6 overflow-x-auto">
+              <div className="p-4 md:p-6">
+                {/* Desktop table */}
+                <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-sm text-left whitespace-nowrap">
                   <tbody>
                     {[
@@ -179,7 +179,7 @@ export default function LabaRugiPage() {
                       ) : (
                         <tr key={i} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
                           <td className="px-5 py-3.5 font-semibold text-neutral-700">{row.label}</td>
-                          <td className={`py-3 text-right font-bold ${
+                          <td className={`pr-5 py-3.5 text-right font-bold ${
                             row.type === "result"
                               ? (ringkasan!.laba_bersih >= 0 ? "text-green-600" : "text-red-600")
                               : row.type === "plus" ? "text-green-600" : "text-red-600"
@@ -192,58 +192,83 @@ export default function LabaRugiPage() {
                     )}
                   </tbody>
                 </table>
-                <div className="mt-4 p-4 bg-green-50 rounded-xl">
-                  <p className="text-sm font-semibold text-green-700">
+                </div>
+                {/* Mobile cards */}
+                <div className="md:hidden space-y-1.5">
+                  {[
+                    { label: "Total Penjualan", value: ringkasan?.total_penjualan, type: "plus" },
+                    { label: "HPP (Harga Pokok Penjualan)", value: ringkasan?.total_hpp, type: "minus" },
+                    { label: "Total Pengeluaran Operasional", value: ringkasan?.total_pengeluaran, type: "minus" },
+                    { label: "", value: null, type: "separator" },
+                    { label: "Laba Bersih", value: ringkasan?.laba_bersih, type: "result" },
+                  ]
+                    .filter(row => row.type !== "separator")
+                    .map((row, i) => (
+                      <div key={i} className="flex justify-between items-center bg-gray-50 rounded-xl px-3 py-2.5">
+                        <span className="text-xs font-semibold text-neutral-700">{row.label}</span>
+                        <span className={`text-xs font-bold shrink-0 ml-2 ${
+                          row.type === "result"
+                            ? (ringkasan!.laba_bersih >= 0 ? "text-green-600" : "text-red-600")
+                            : row.type === "plus" ? "text-green-600" : "text-red-600"
+                        }`}>
+                          {row.type === "result" ? "" : (row.type === "plus" ? "+ " : "- ")}
+                          {formatRupiah(row.value ?? 0)}
+                        </span>
+                      </div>
+                    ))}
+                </div>
+                <div className="mt-3 md:mt-4 p-3 md:p-4 bg-green-50 rounded-xl">
+                  <p className="text-xs md:text-sm font-semibold text-green-700">
                     {ringkasan!.laba_bersih >= 0
                       ? `UNTUNG: ${formatRupiah(ringkasan!.laba_bersih)}`
                       : `RUGI: ${formatRupiah(Math.abs(ringkasan!.laba_bersih))}`}
                   </p>
-                  <p className="text-xs text-green-600 mt-1">
+                  <p className="text-[10px] md:text-xs text-green-600 mt-0.5 md:mt-1">
                     Porsi terjual: {ringkasan?.total_porsi_terjual || 0} porsi
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
-                <div className="p-4 border-b">
-                  <h3 className="font-bold text-neutral-900">Riwayat Pemasukan</h3>
+                <div className="px-4 md:px-4 py-2.5 md:py-3 border-b">
+                  <h3 className="text-sm md:text-base font-bold text-neutral-900">Riwayat Pemasukan</h3>
                 </div>
                 <div className="max-h-60 overflow-y-auto">
                   {pemasukanList.length > 0 ? (
                     pemasukanList.map((item: RiwayatItem, i: number) => (
-                      <div key={i} className="flex justify-between px-4 py-3 border-b border-neutral-50 text-sm">
-                        <div>
-                          <p className="font-semibold">{item.nama}</p>
-                          <p className="text-xs text-neutral-400">{formatTanggal(item.waktu)}</p>
+                      <div key={i} className="flex justify-between px-3 py-2.5 border-b border-neutral-50">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold truncate">{item.nama}</p>
+                          <p className="text-[10px] text-neutral-400">{formatTanggal(item.waktu)}</p>
                         </div>
-                        <p className="font-bold text-green-600">{formatRupiah(item.total)}</p>
+                        <p className="text-xs font-bold text-green-600 shrink-0 ml-2">{formatRupiah(item.total)}</p>
                       </div>
                     ))
                   ) : (
-                    <p className="p-4 text-sm text-neutral-400">Belum ada data</p>
+                    <p className="p-3 text-xs text-neutral-400">Belum ada data</p>
                   )}
                 </div>
               </div>
 
               <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-hidden">
-                <div className="p-4 border-b">
-                  <h3 className="font-bold text-neutral-900">Riwayat Pengeluaran</h3>
+                <div className="px-4 md:px-4 py-2.5 md:py-3 border-b">
+                  <h3 className="text-sm md:text-base font-bold text-neutral-900">Riwayat Pengeluaran</h3>
                 </div>
                 <div className="max-h-60 overflow-y-auto">
                   {pengeluaranList.length > 0 ? (
                     pengeluaranList.map((item: RiwayatItem, i: number) => (
-                      <div key={i} className="flex justify-between px-4 py-3 border-b border-neutral-50 text-sm">
-                        <div>
-                          <p className="font-semibold">{item.nama}</p>
-                          <p className="text-xs text-neutral-400">{item.kategori}</p>
+                      <div key={i} className="flex justify-between px-3 py-2.5 border-b border-neutral-50">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold truncate">{item.nama}</p>
+                          <p className="text-[10px] text-neutral-400">{item.kategori}</p>
                         </div>
-                        <p className="font-bold text-red-600">{formatRupiah(item.total)}</p>
+                        <p className="text-xs font-bold text-red-600 shrink-0 ml-2">{formatRupiah(item.total)}</p>
                       </div>
                     ))
                   ) : (
-                    <p className="p-4 text-sm text-neutral-400">Belum ada data</p>
+                    <p className="p-3 text-xs text-neutral-400">Belum ada data</p>
                   )}
                 </div>
               </div>

@@ -71,7 +71,7 @@ export default function LandingPage() {
       <main className="pt-20">
         {/* Hero Section */}
         <section 
-          className="relative overflow-hidden min-h-[870px] flex items-center bg-background bg-cover bg-center"
+          className="relative overflow-hidden min-h-screen md:min-h-[870px] flex items-center bg-background bg-cover bg-center"
           style={settings.hero_image ? { backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.4) 100%), url(${settings.hero_image})` } : {}}
         >
           <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center relative z-10">

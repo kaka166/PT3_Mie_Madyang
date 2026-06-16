@@ -60,9 +60,10 @@ function FilterDropdown({
             }
           }
         }}
-        className="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
-        <SlidersHorizontal size={14} className="text-neutral-400" />
-        Rekap: {value}
+        className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-xl border border-neutral-200 bg-white text-xs md:text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
+        <SlidersHorizontal size={13} className="text-neutral-400" />
+        <span className="hidden sm:inline">Rekap: {value}</span>
+        <span className="sm:hidden">{value}</span>
         <ChevronDown
           size={14}
           className={`transition-transform ${open ? "rotate-180" : ""}`}
@@ -294,7 +295,7 @@ export default function LaporanPemasukan() {
         </div>
 
         {/* Stat Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
           {[
             {
               title: "TOTAL PENJUALAN",
@@ -314,15 +315,15 @@ export default function LaporanPemasukan() {
           ].map((m, i) => (
             <div
               key={i}
-              className="bg-white rounded-2xl p-5 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[120px] hover:shadow-md transition-all">
-              <div className="p-2.5 bg-blue-50 text-blue-500 rounded-xl w-fit">
-                <m.icon size={20} />
+              className="bg-white rounded-2xl p-4 md:p-5 border border-neutral-100 shadow-sm hover:shadow-md transition-all">
+              <div className="p-2 md:p-2.5 bg-blue-50 text-blue-500 rounded-xl w-fit mb-2 md:mb-3">
+                <m.icon size={18} />
               </div>
               <div>
-                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">
+                <p className="text-[9px] md:text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5 md:mb-1">
                   {m.title}
                 </p>
-                <p className="text-2xl font-extrabold text-neutral-800">
+                <p className="text-xl md:text-2xl font-extrabold text-neutral-800">
                   {loading ? "..." : m.value}
                 </p>
               </div>
@@ -332,19 +333,19 @@ export default function LaporanPemasukan() {
 
         {/* Rekap Table */}
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-visible">
-          <div className="p-5 flex flex-wrap justify-between items-center border-b gap-3 relative z-50">
-            <h2 className="text-lg font-bold text-neutral-900">
+          <div className="p-4 md:p-5 flex flex-wrap justify-between items-center border-b gap-2 md:gap-3 relative z-50">
+            <h2 className="text-base md:text-lg font-bold text-neutral-900">
               Ringkasan Penjualan
             </h2>
             <FilterDropdown value={rekapFilter} onChange={setRekapFilter} />
           </div>
-          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-gray-50/50">
                 <tr>
-                  <th className="px-5 py-3 ">Rentang Waktu</th>
-                  <th className="px-5 py-3 ">Total Penghasilan</th>
-                  <th className="px-5 py-3 ">Jumlah Transaksi</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Rentang Waktu</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Total Penghasilan</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Jumlah Transaksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -380,47 +381,61 @@ export default function LaporanPemasukan() {
               </tbody>
             </table>
           </div>
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-gray-100">
+            {loading ? (
+              <div className="py-6 text-center text-gray-400 text-sm">Memuat...</div>
+            ) : groupedRekap.length === 0 ? (
+              <div className="py-6 text-center text-gray-400 text-sm">Belum ada data</div>
+            ) : (
+              groupedRekap.map((row: any, idx) => (
+                <div key={idx} className="flex items-center justify-between px-3 py-2.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-neutral-700 truncate">{row.rentang}</p>
+                    <p className="text-[10px] text-neutral-400">{row.transaksi} transaksi</p>
+                  </div>
+                  <span className="text-sm font-bold text-neutral-800 shrink-0 ml-2">{formatRupiah(row.total)}</span>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         {/* Detail Table */}
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-visible">
-          <div className="p-5 flex flex-wrap justify-between items-center border-b gap-3 relative z-20">
-            <h2 className="text-lg font-bold text-neutral-900">
+          <div className="p-4 md:p-5 flex flex-wrap justify-between items-center border-b gap-2 md:gap-3 relative z-20">
+            <h2 className="text-base md:text-lg font-bold text-neutral-900">
               Detail Pemasukan
             </h2>
-            <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex flex-wrap gap-1.5 md:gap-2 items-center">
               <select
                 value={metodeFilter}
                 onChange={(e) => {
                   setMetodeFilter(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="bg-gray-100 px-3 py-2 rounded-lg text-sm focus:outline-none">
+                className="bg-gray-100 px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm focus:outline-none">
                 <option value="">Semua Metode</option>
                 <option value="Tunai">Tunai</option>
                 <option value="QRIS">QRIS</option>
               </select>
               <div className="relative">
-                <User
-                  size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                />
+                <User size={12} className="md:size-[14px] absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   type="text"
-                  placeholder="Filter kasir..."
+                  placeholder="Kasir..."
                   value={kasirFilter}
                   onChange={(e) => {
                     setKasirFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none w-32"
+                  className="bg-gray-100 pl-7 md:pl-9 pr-2 md:pr-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm focus:outline-none w-24 md:w-32"
                 />
               </div>
               <div className="relative">
                 <Search
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                  size={14}
-                />
+                  className="absolute left-2.5 md:left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  size={12} />
                 <input
                   type="text"
                   placeholder="Cari..."
@@ -429,68 +444,99 @@ export default function LaporanPemasukan() {
                     setSearch(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none"
+                  className="bg-gray-100 pl-7 md:pl-9 pr-2 md:pr-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm focus:outline-none w-20 md:w-auto"
                 />
               </div>
             </div>
           </div>
-          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
-            <table className="w-full text-sm text-left whitespace-nowrap">
-              <thead className="bg-gray-50/50">
-                <tr>
-                  <th className="px-5 py-3 ">No. Transaksi</th>
-                  <th className="px-5 py-3 ">Customer</th>
-                  <th className="px-5 py-3 ">Waktu</th>
-                  <th className="px-5 py-3 ">Kasir</th>
-                  <th className="px-5 py-3 ">Metode</th>
-                  <th className="px-5 py-3 ">Jumlah</th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
+          <div className="hidden md:block">
+            <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+              <table className="w-full text-sm text-left whitespace-nowrap">
+                <thead className="bg-gray-50/50">
                   <tr>
-                    <td colSpan={6} className="py-8 text-center text-gray-400">
-                      Memuat data...
-                    </td>
+                    <th className="px-5 py-3 ">No. Transaksi</th>
+                    <th className="px-5 py-3 ">Customer</th>
+                    <th className="px-5 py-3 ">Waktu</th>
+                    <th className="px-5 py-3 ">Kasir</th>
+                    <th className="px-5 py-3 ">Metode</th>
+                    <th className="px-5 py-3 ">Jumlah</th>
                   </tr>
-                ) : paginatedData.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="py-10 text-center text-gray-400">
-                      Belum ada data penjualan
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedData.map((row, idx) => (
-                    <tr
-                      key={idx}
-                      onClick={() => setSelectedRow(row)}
-                      className={`cursor-pointer ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-red-50 transition`}>
-                      <td className="px-5 py-3.5 font-semibold text-neutral-700">
-                        {row.no}
-                      </td>
-                      <td className="px-5 py-3.5 font-bold text-neutral-800">
-                        {row.nama}
-                      </td>
-                      <td className="px-5 py-3.5 text-neutral-500 text-xs">
-                        {formatTanggal(row.waktu)}
-                      </td>
-                      <td className="px-5 py-3.5 text-neutral-600">
-                        {row.kasir}
-                      </td>
-                      <td className="px-5 py-3.5 ">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-xs font-bold ${row.metode === "QRIS" ? "bg-purple-50 text-purple-600" : "bg-green-50 text-green-600"}`}>
-                          {row.metode}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3.5 font-semibold text-neutral-800">
-                        {formatRupiah(row.jumlah)}
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-gray-400">
+                        Memuat data...
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : paginatedData.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-10 text-center text-gray-400">
+                        Belum ada data penjualan
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedData.map((row, idx) => (
+                      <tr
+                        key={idx}
+                        onClick={() => setSelectedRow(row)}
+                        className={`cursor-pointer ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"} hover:bg-red-50 transition`}>
+                        <td className="px-5 py-3.5 font-semibold text-neutral-700">
+                          {row.no}
+                        </td>
+                        <td className="px-5 py-3.5 font-bold text-neutral-800">
+                          {row.nama}
+                        </td>
+                        <td className="px-5 py-3.5 text-neutral-500 text-xs">
+                          {formatTanggal(row.waktu)}
+                        </td>
+                        <td className="px-5 py-3.5 text-neutral-600">
+                          {row.kasir}
+                        </td>
+                        <td className="px-5 py-3.5 ">
+                          <span
+                            className={`px-2.5 py-1 rounded-full text-xs font-bold ${row.metode === "QRIS" ? "bg-purple-50 text-purple-600" : "bg-green-50 text-green-600"}`}>
+                            {row.metode}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 font-semibold text-neutral-800">
+                          {formatRupiah(row.jumlah)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div className="md:hidden divide-y divide-gray-100">
+            {loading ? (
+              <div className="py-6 text-center text-gray-400 text-sm">Memuat data...</div>
+            ) : paginatedData.length === 0 ? (
+              <div className="py-6 text-center text-gray-400 text-sm">Belum ada data penjualan</div>
+            ) : (
+              paginatedData.map((row, idx) => (
+                <div
+                  key={idx}
+                  onClick={() => setSelectedRow(row)}
+                  className="px-3 py-2.5 hover:bg-red-50 transition cursor-pointer">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-xs font-semibold text-neutral-800 truncate">{row.no}</span>
+                      <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-orange-50 text-[#F53E1B] shrink-0">{row.kondisi}</span>
+                    </div>
+                    <span className={`shrink-0 px-1.5 py-0.5 rounded-full text-[9px] font-bold ${row.metode === "QRIS" ? "bg-purple-50 text-purple-600" : "bg-green-50 text-green-600"}`}>{row.metode}</span>
+                  </div>
+                  <div className="flex items-center justify-between mt-1">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs text-neutral-800 truncate">{row.nama}</p>
+                      <p className="text-[10px] text-neutral-400 truncate">{row.kasir} &middot; {formatTanggal(row.waktu)}</p>
+                    </div>
+                    <span className="text-xs font-bold text-neutral-800 shrink-0 ml-2">{formatRupiah(row.jumlah)}</span>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
           {/* Pagination */}
           <div className="p-4 border-t flex justify-between items-center text-sm text-gray-500">

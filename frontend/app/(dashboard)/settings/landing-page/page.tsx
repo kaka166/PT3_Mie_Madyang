@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Save, Image as ImageIcon } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Save, ChevronDown } from "lucide-react";
 import Swal from "sweetalert2";
 import { API_BASE_URL } from "@/config";
 import { getMenus, MenuItem } from "@/services/cashierService";
@@ -27,6 +27,7 @@ export default function LandingPageSettings() {
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [heroImage, setHeroImage] = useState<File | null>(null);
   const [mascotImage, setMascotImage] = useState<File | null>(null);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -62,6 +63,18 @@ export default function LandingPageSettings() {
       console.error("Gagal load setting", error);
     }
   };
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +127,7 @@ export default function LandingPageSettings() {
         <p className="text-gray-500 mb-8 font-medium">Ubah tampilan halaman utama website Anda.</p>
 
         <form onSubmit={handleSave} className="space-y-6">
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+          <div className="bg-white p-4 md:p-8 rounded-3xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold mb-6 text-gray-800">Teks Utama (Hero)</h2>
             
             <div className="space-y-4">
@@ -171,7 +184,7 @@ export default function LandingPageSettings() {
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+          <div className="bg-white p-4 md:p-8 rounded-3xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold mb-6 text-gray-800">Konten Tambahan</h2>
             
             <div className="space-y-4">
@@ -203,61 +216,77 @@ export default function LandingPageSettings() {
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+          <div className="bg-white p-4 md:p-8 rounded-3xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold mb-6 text-gray-800">Menu Andalan (Katalog)</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">
-                  Menu Utama (Mie)
-                </label>
-                <select
-                  value={data.featured_mie}
-                  onChange={(e) => setData({ ...data, featured_mie: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium bg-white"
-                >
-                  <option value="">Pilih Menu Mie</option>
-                  {menus.map((m) => (
-                    <option key={m.id} value={m.id.toString()}>{m.name}</option>
-                  ))}
-                </select>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6" ref={dropdownRef}>
+              {([
+                { key: "featured_mie", label: "Menu Utama (Mie)", placeholder: "Pilih Menu Mie" },
+                { key: "featured_topping", label: "Topping / Side Dish", placeholder: "Pilih Topping" },
+                { key: "featured_minuman", label: "Minuman", placeholder: "Pilih Minuman" },
+              ] as const).map(({ key, label, placeholder }) => {
+                const value = data[key];
+                const selected = menus.find((m) => m.id.toString() === value);
+                return (
+                  <div key={key} className="relative">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">
+                      {label}
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setOpenDropdown(openDropdown === key ? null : key)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl border text-sm font-medium transition-all bg-white ${
+                        value
+                          ? "border-[#b93b3b] text-gray-800"
+                          : "border-gray-200 text-gray-400 hover:border-gray-300"
+                      }`}>
+                      <span className={value ? "font-medium" : ""}>
+                        {selected ? selected.name : placeholder}
+                      </span>
+                      <ChevronDown size={16} className={`transition-transform ${openDropdown === key ? "rotate-180" : ""} text-gray-400 shrink-0`} />
+                    </button>
 
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">
-                  Topping / Side Dish
-                </label>
-                <select
-                  value={data.featured_topping}
-                  onChange={(e) => setData({ ...data, featured_topping: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium bg-white"
-                >
-                  <option value="">Pilih Topping</option>
-                  {menus.map((m) => (
-                    <option key={m.id} value={m.id.toString()}>{m.name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">
-                  Minuman
-                </label>
-                <select
-                  value={data.featured_minuman}
-                  onChange={(e) => setData({ ...data, featured_minuman: e.target.value })}
-                  className="w-full px-4 py-3 rounded-2xl border border-gray-200 focus:border-[#b93b3b] focus:ring-2 focus:ring-red-100 outline-none transition-all font-medium bg-white"
-                >
-                  <option value="">Pilih Minuman</option>
-                  {menus.map((m) => (
-                    <option key={m.id} value={m.id.toString()}>{m.name}</option>
-                  ))}
-                </select>
-              </div>
+                    {openDropdown === key && (
+                      <div className="absolute left-0 right-0 mt-1.5 bg-white rounded-xl shadow-lg border p-1.5 z-50 max-h-48 overflow-y-auto">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setData({ ...data, [key]: "" });
+                            setOpenDropdown(null);
+                          }}
+                          className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
+                            !value
+                              ? "bg-red-100 text-red-600 font-medium"
+                              : "hover:bg-gray-100 text-gray-500"
+                          }`}>
+                          {placeholder}
+                        </button>
+                        <div className="border-t my-1" />
+                        {menus.map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => {
+                              setData({ ...data, [key]: m.id.toString() });
+                              setOpenDropdown(null);
+                            }}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
+                              value === m.id.toString()
+                                ? "bg-red-100 text-red-600 font-medium"
+                                : "hover:bg-gray-100 text-gray-700"
+                            }`}>
+                            {m.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+          <div className="bg-white p-4 md:p-8 rounded-3xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold mb-6 text-gray-800">Informasi Footer & Kontak</h2>
             
             <div className="space-y-4">
@@ -274,7 +303,7 @@ export default function LandingPageSettings() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 block">
                     No Telepon / WhatsApp
@@ -303,7 +332,7 @@ export default function LandingPageSettings() {
             </div>
           </div>
 
-          <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+          <div className="bg-white p-4 md:p-8 rounded-3xl shadow-sm border border-gray-100">
             <h2 className="text-xl font-bold mb-6 text-gray-800">Gambar (Assets)</h2>
             
             <div className="space-y-6">

@@ -99,21 +99,24 @@ export function PeriodFilter({
           if (!rect) return;
           const pos = window.innerHeight - rect.bottom < 360 ? "top" : "bottom";
           setPosition(pos);
+          const w = Math.min(320, window.innerWidth - 32);
+          const right = window.innerWidth - rect.right;
+          const left = Math.max(16, window.innerWidth - right - w);
           setDropStyle({
             position: "fixed",
             [pos === "bottom" ? "top" : "bottom"]: pos === "bottom" ? rect.bottom + 8 : window.innerHeight - rect.top + 8,
-            right: window.innerWidth - rect.right,
-            width: 320,
+            right: window.innerWidth - left - w,
+            width: w,
           });
         }}
-        className="bg-white border border-neutral-200 pl-3 pr-4 py-2 rounded-xl text-sm focus:outline-none flex items-center gap-2 shadow-sm hover:bg-neutral-50 transition-colors"
+        className="bg-white border border-neutral-200 pl-2.5 pr-3 py-1.5 sm:pl-3 sm:pr-4 sm:py-2 rounded-xl text-xs sm:text-sm focus:outline-none flex items-center gap-1.5 sm:gap-2 shadow-sm hover:bg-neutral-50 transition-colors max-w-full truncate"
       >
-        <Calendar size={14} className="text-neutral-400" />
-        <span className="font-medium text-neutral-600">{displayLabel}</span>
+        <Calendar size={13} className="sm:size-[14px] text-neutral-400 shrink-0" />
+        <span className="font-medium text-neutral-600 truncate">{displayLabel}</span>
         {value.start && (
           <span onClick={(e) => { e.stopPropagation(); onChange({ start: "", end: "" }); }}
-            className="ml-1 text-neutral-400 hover:text-red-500">
-            <X size={12} />
+            className="ml-0.5 sm:ml-1 text-neutral-400 hover:text-red-500 shrink-0">
+            <X size={11} className="sm:size-3" />
           </span>
         )}
       </button>

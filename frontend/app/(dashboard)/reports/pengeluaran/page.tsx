@@ -76,9 +76,10 @@ function FilterDropdown({
             }
           }
         }}
-        className="flex items-center gap-2 px-4 py-2 rounded-xl border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
-        <SlidersHorizontal size={14} className="text-neutral-400" />
-        Filter: {value}
+        className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-xl border border-neutral-200 bg-white text-xs md:text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
+        <SlidersHorizontal size={13} className="text-neutral-400" />
+        <span className="hidden sm:inline">Filter: {value}</span>
+        <span className="sm:hidden">{value}</span>
         <ChevronDown size={14} className={`transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
@@ -242,49 +243,47 @@ export default function LaporanPengeluaran() {
   };
 
   return (
-    <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-8 font-sans pb-24">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-start">
+    <div className="h-full overflow-y-auto min-h-screen bg-neutral-100 p-4 md:p-8 font-sans pb-24">
+      <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
+        <div className="flex flex-wrap justify-between items-start gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-[#F53E1B]">Laporan Pengeluaran</h1>
-            <p className="text-sm text-neutral-500 mt-1">Laporan Pengeluaran Mi Madyang</p>
+            <h1 className="text-xl md:text-3xl font-bold text-[#F53E1B]">Laporan Pengeluaran</h1>
+            <p className="text-xs md:text-sm text-neutral-500 mt-0.5 md:mt-1">Laporan Pengeluaran Mi Madyang</p>
           </div>
           <button onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
-            <Printer size={16} /> Export CSV
+            className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-white border border-neutral-200 rounded-xl text-xs md:text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition-colors shadow-sm">
+            <Printer size={14} /> CSV
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
           {[
             { title: "TOTAL PENGELUARAN", value: formatRupiah(totalPengeluaran), icon: Banknote },
             { title: "TOTAL TRANSAKSI", value: totalTransaksi.toLocaleString("id-ID"), icon: Receipt },
             { title: "RATA RATA NOMINAL PENGELUARAN", value: formatRupiah(rataRata), icon: Wallet },
           ].map((metric, idx) => (
-            <div key={idx} className="bg-white rounded-2xl p-6 border border-neutral-100 shadow-sm flex flex-col justify-between min-h-[130px] transition-all hover:shadow-md">
-              <div className="flex justify-between items-start mb-3">
-                <div className="p-2.5 bg-red-50 text-red-500 rounded-xl"><metric.icon size={20} /></div>
-              </div>
+            <div key={idx} className="bg-white rounded-2xl p-4 md:p-6 border border-neutral-100 shadow-sm transition-all hover:shadow-md">
+              <div className="p-2 md:p-2.5 bg-red-50 text-red-500 rounded-xl w-fit mb-2 md:mb-3"><metric.icon size={18} /></div>
               <div>
-                <p className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1">{metric.title}</p>
-                <p className="text-2xl font-extrabold text-neutral-800">{metric.value}</p>
+                <p className="text-[9px] md:text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5 md:mb-1">{metric.title}</p>
+                <p className="text-xl md:text-2xl font-extrabold text-neutral-800">{metric.value}</p>
               </div>
             </div>
           ))}
         </div>
 
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-visible">
-          <div className="p-6 flex flex-wrap justify-between items-center border-b relative z-20">
-            <h2 className="text-xl font-bold text-neutral-900">Ringkasan Pengeluaran</h2>
+          <div className="p-4 md:p-6 flex flex-wrap justify-between items-center border-b relative z-20">
+            <h2 className="text-base md:text-xl font-bold text-neutral-900">Ringkasan Pengeluaran</h2>
             <FilterDropdown value={rekapFilter} onChange={(v) => { setRekapFilter(v); setCurrentPage(1); }} />
           </div>
-          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-gray-50/50">
                 <tr>
-                  <th className="px-5 py-3 ">Rentang Waktu</th>
-                  <th className="px-5 py-3 ">Total Pengeluaran</th>
-                  <th className="px-5 py-3 ">Jumlah Transaksi</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Rentang Waktu</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Total Pengeluaran</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Jumlah Transaksi</th>
                 </tr>
               </thead>
               <tbody>
@@ -297,6 +296,22 @@ export default function LaporanPengeluaran() {
                 ))}
               </tbody>
             </table>
+          </div>
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-gray-100">
+            {paginatedRekap.length === 0 ? (
+              <div className="py-6 text-center text-gray-400 text-sm">Belum ada data</div>
+            ) : (
+              paginatedRekap.map((row, idx) => (
+                <div key={idx} className="flex items-center justify-between px-3 py-2.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium text-neutral-700 truncate">{row.rentang}</p>
+                    <p className="text-[10px] text-neutral-400">{row.transaksi} transaksi</p>
+                  </div>
+                  <span className="text-sm font-bold text-neutral-800 shrink-0 ml-2">{formatRupiah(row.total)}</span>
+                </div>
+              ))
+            )}
           </div>
           <div className="p-4 border-t flex justify-between items-center bg-white">
             <div className="flex items-center gap-4">
@@ -331,64 +346,39 @@ export default function LaporanPengeluaran() {
         </div>
 
         <div className="bg-white rounded-2xl border border-neutral-100 shadow-sm overflow-visible">
-          <div className="p-6 flex flex-wrap justify-between items-center border-b relative z-20">
-            <h2 className="text-xl font-bold text-neutral-900">Detail Pengeluaran</h2>
-            <div className="flex flex-wrap gap-2 items-center">
+          <div className="p-4 md:p-6 flex flex-col md:flex-row md:flex-wrap justify-between items-start md:items-center border-b gap-2 md:gap-3 relative z-20">
+            <h2 className="text-base md:text-xl font-bold text-neutral-900">Detail Pengeluaran</h2>
+            <div className="flex flex-wrap gap-1.5 md:gap-2 items-center w-full md:w-auto">
               <select value={kategoriFilter} onChange={(e) => setKategoriFilter(e.target.value)}
-                className="bg-gray-100 px-3 py-2 rounded-lg text-sm focus:outline-none">
+                className="bg-gray-100 px-2 md:px-3 py-1.5 md:py-2 rounded-lg text-xs md:text-sm focus:outline-none">
                 {kategoriOptions.map((k) => (
-                  <option key={k} value={k}>{k || "Semua Kategori"}</option>
+                  <option key={k} value={k}>{k || "Semua"}</option>
                 ))}
               </select>
               <div className="relative">
-                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input type="text" placeholder="Filter user..." value={userFilter}
+                <User size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input type="text" placeholder="User..." value={userFilter}
                   onChange={(e) => setUserFilter(e.target.value)}
-                  className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 w-32" />
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {PERIOD_PRESETS.map((p) => {
-                  const today = new Date();
-                  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-                  const startDate = p.days === 0 ? todayStr : (() => { const d = new Date(); d.setDate(d.getDate() - p.days); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
-                  const isActive = dateRange.start === startDate && dateRange.end === todayStr;
-                  return (
-                    <button
-                      key={p.label}
-                      onClick={() => { setDateRange({ start: startDate, end: todayStr }); setCurrentPage(1); }}
-                      className={`px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all ${
-                        isActive ? "bg-[#F53E1B] text-white border-[#F53E1B]" : "bg-white border-neutral-200 text-neutral-600 hover:border-red-300 hover:text-red-500"
-                      }`}
-                    >
-                      {p.label}
-                    </button>
-                  );
-                })}
-                <div className="flex-shrink-0">
-                  <PeriodFilter value={dateRange} onChange={(v) => { setDateRange(v); setCurrentPage(1); }} showPresets={false} />
-                </div>
-                {(dateRange.start || dateRange.end) && (
-                  <button onClick={() => { setDateRange({ start: "", end: "" }); setCurrentPage(1); }} className="text-xs text-gray-400 hover:text-red-500 underline">Reset</button>
-                )}
+                  className="bg-gray-100 pl-7 md:pl-9 pr-2 md:pr-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm focus:outline-none w-20 md:w-32" />
               </div>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                <input type="text" placeholder="Cari transaksi..." value={search}
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={12} />
+                <input type="text" placeholder="Cari..." value={search}
                   onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                  className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200" />
+                  className="bg-gray-100 pl-7 md:pl-9 pr-2 md:pr-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm focus:outline-none w-20 md:w-auto" />
               </div>
             </div>
           </div>
-          <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm text-left whitespace-nowrap">
               <thead className="bg-gray-50/50">
                 <tr>
-                  <th className="px-5 py-3 ">ID Transaksi</th>
-                  <th className="px-5 py-3 ">Nama Pengeluaran</th>
-                  <th className="px-5 py-3 ">Kategori</th>
-                  <th className="px-5 py-3 ">Waktu</th>
-                  <th className="px-5 py-3 ">Dibuat Oleh</th>
-                  <th className="px-5 py-3 ">Total</th>
+                  <th className="px-5 py-3 whitespace-nowrap">ID Transaksi</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Nama Pengeluaran</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Kategori</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Waktu</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Dibuat Oleh</th>
+                  <th className="px-5 py-3 whitespace-nowrap">Total</th>
                 </tr>
               </thead>
               <tbody>
@@ -415,6 +405,32 @@ export default function LaporanPengeluaran() {
                 )}
               </tbody>
             </table>
+          </div>
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-gray-100">
+            {paginatedData.length > 0 ? (
+              paginatedData.map((row, idx) => (
+                <div key={idx} className="px-3 py-2.5 hover:bg-red-50 transition-colors">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-semibold text-neutral-800 truncate">{row.nama}</p>
+                      <p className="text-[10px] text-neutral-400">#{row.id}</p>
+                    </div>
+                    <span className="text-xs font-bold text-neutral-800 shrink-0">{formatRupiah(row.jumlah)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-0.5 text-[10px] text-neutral-400">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold" style={{
+                      backgroundColor: row.kategori === "Operasional" ? "#e0f2fe" : row.kategori === "Gaji" ? "#dcfce7" : row.kategori === "Sewa" ? "#fef3c7" : row.kategori === "Bahan Baku" ? "#fae8ff" : "#f3e8ff",
+                      color: row.kategori === "Operasional" ? "#0369a1" : row.kategori === "Gaji" ? "#166534" : row.kategori === "Sewa" ? "#92400e" : row.kategori === "Bahan Baku" ? "#86198f" : "#5b21b6",
+                    }}>{row.kategori}</span>
+                    <span>{formatTanggal(row.waktu)}</span>
+                    <span>{row.user_id}</span>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="py-6 text-center text-neutral-400 text-sm">Belum ada data pengeluaran</div>
+            )}
           </div>
           <div className="p-4 border-t flex justify-between items-center bg-white">
             <div className="flex items-center gap-4">

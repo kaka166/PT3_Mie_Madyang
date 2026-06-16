@@ -350,6 +350,7 @@ export default function AbsensiPage() {
 
         {/* Tabel Riwayat */}
         <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
+          <div className="hidden md:block">
           <table className="w-full text-sm text-left whitespace-nowrap">
             <thead className="bg-gray-50/50">
               <tr>
@@ -421,6 +422,76 @@ export default function AbsensiPage() {
               )}
             </tbody>
           </table>
+          </div>
+          <div className="md:hidden space-y-3 p-4">
+            {history.length === 0 ? (
+              <div className="py-12 text-gray-400 font-medium text-center">
+                Belum ada riwayat absensi.
+              </div>
+            ) : (
+              history.map((row, idx) => {
+                const m = row.jam_masuk?.split(":").map(Number);
+                const k = row.jam_keluar?.split(":").map(Number);
+                const durasi =
+                  m && k && m.length === 3 && k.length === 3
+                    ? (() => {
+                        const diff = (k[0] * 60 + k[1]) - (m[0] * 60 + m[1]);
+                        const h = Math.floor(diff / 60);
+                        const min = diff % 60;
+                        return `${h}j ${min}m`;
+                      })()
+                    : "-";
+                return (
+                  <div
+                    key={idx}
+                    className="bg-white rounded-xl border border-gray-100 p-4 shadow-sm space-y-2">
+                    <div className="flex justify-between items-start">
+                      <span className="font-semibold text-gray-700 text-sm">
+                        {formatDateOnly(row.tanggal)}
+                      </span>
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-bold inline-block text-center ${
+                          row.status === "hadir"
+                            ? "bg-green-100 text-green-700"
+                            : row.status === "sakit"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-yellow-100 text-yellow-700"
+                        }`}>
+                        {row.status === "hadir"
+                          ? "Hadir"
+                          : row.status === "sakit"
+                            ? "Sakit"
+                            : "Izin"}
+                      </span>
+                    </div>
+                    {roleId === 1 && (
+                      <div className="text-xs text-gray-500 font-semibold">
+                        {row.user?.name || "-"} &middot;{" "}
+                        {authService.getRoleName(row.user?.role ?? 2)}
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="font-bold text-gray-800">
+                        {formatTimeWIB(row.jam_masuk)}
+                      </span>
+                      <span className="text-gray-400">&rarr;</span>
+                      <span className="font-bold text-gray-800">
+                        {formatTimeWIB(row.jam_keluar)}
+                      </span>
+                      {row.jam_masuk && row.jam_keluar && (
+                        <span className="text-xs text-gray-400 ml-auto">
+                          ({durasi})
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 italic leading-relaxed">
+                      {row.keterangan || "-"}
+                    </p>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>

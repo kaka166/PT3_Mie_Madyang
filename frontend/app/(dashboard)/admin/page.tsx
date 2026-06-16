@@ -283,71 +283,127 @@ export default function AdminDashboardPage() {
             </button>
           </div>
           <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
-            {loadingUsers ? (
-              <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
-            ) : users.length === 0 ? (
-              <div className="py-12 text-center text-gray-400">Belum ada data staf</div>
-            ) : (
-              <table className="w-full text-sm text-left whitespace-nowrap">
-                <thead className="bg-gray-50/50">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold text-left">Nama</th>
-                    <th className="px-5 py-3 font-semibold text-left">Username</th>
-                    <th className="px-5 py-3 font-semibold text-left">Role</th>
-                    <th className="px-5 py-3 font-semibold text-left">Email</th>
-                    <th className="px-5 py-3 font-semibold text-left">No HP</th>
-                    <th className="px-5 py-3 font-semibold text-center">Sesi Aktif</th>
-                    <th className="px-5 py-3 font-semibold text-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {users.map((user: any, idx: number) => {
+            <div className="hidden md:block">
+              {loadingUsers ? (
+                <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
+              ) : users.length === 0 ? (
+                <div className="py-12 text-center text-gray-400">Belum ada data staf</div>
+              ) : (
+                <table className="w-full text-sm text-left whitespace-nowrap">
+                  <thead className="bg-gray-50/50">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold text-left">Nama</th>
+                      <th className="px-5 py-3 font-semibold text-left">Username</th>
+                      <th className="px-5 py-3 font-semibold text-left">Role</th>
+                      <th className="px-5 py-3 font-semibold text-left">Email</th>
+                      <th className="px-5 py-3 font-semibold text-left">No HP</th>
+                      <th className="px-5 py-3 font-semibold text-center">Sesi Aktif</th>
+                      <th className="px-5 py-3 font-semibold text-center">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {users.map((user: any, idx: number) => {
+                      const hasSession = activeSessions.some(s => s.user_id === user.id);
+                      const sessionData = activeSessions.find(s => s.user_id === user.id);
+                      return (
+                        <tr key={user.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                          <td className="px-5 py-3.5 font-bold text-gray-800">{user.name}</td>
+                          <td className="px-5 py-3.5 text-gray-500">@{user.username}</td>
+                          <td className="px-5 py-3.5 ">
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[user.role] || "bg-gray-100 text-gray-600"}`}>
+                              {ROLE_LABELS[user.role] || "Staff"}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5 text-gray-500 text-xs">{user.email}</td>
+                          <td className="px-5 py-3.5 text-gray-500 text-xs">{user.phone || "-"}</td>
+                          <td className="px-5 py-3.5 text-center">
+                            {hasSession ? (
+                              <div>
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                                  <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                                  Aktif
+                                </span>
+                                {sessionData && (
+                                  <div className="text-[10px] text-gray-400 mt-0.5">{formatRupiah(sessionData.total_pemasukan || 0)}</div>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-xs text-gray-300">–</span>
+                            )}
+                          </td>
+                          <td className="px-5 py-3.5 ">
+                            <div className="flex items-center justify-center gap-2">
+                              <button onClick={() => { setEditingUser(user); setEditForm({ username: user.username||"" , name: user.name||"" , email: user.email||"" , phone: user.phone||"" , role: user.role, password: "" }); setShowEditModal(true); }}
+                                className="text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 p-2 rounded-lg transition-colors">
+                                <Pencil size={15} />
+                              </button>
+                              <button onClick={() => handleDeleteUser(user)}
+                                className="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors">
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="md:hidden">
+              {loadingUsers ? (
+                <div className="p-6 space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />)}</div>
+              ) : users.length === 0 ? (
+                <div className="py-12 text-center text-gray-400">Belum ada data staf</div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {users.map((user: any) => {
                     const hasSession = activeSessions.some(s => s.user_id === user.id);
                     const sessionData = activeSessions.find(s => s.user_id === user.id);
                     return (
-                      <tr key={user.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
-                        <td className="px-5 py-3.5 font-bold text-gray-800">{user.name}</td>
-                        <td className="px-5 py-3.5 text-gray-500">@{user.username}</td>
-                        <td className="px-5 py-3.5 ">
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[user.role] || "bg-gray-100 text-gray-600"}`}>
-                            {ROLE_LABELS[user.role] || "Staff"}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3.5 text-gray-500 text-xs">{user.email}</td>
-                        <td className="px-5 py-3.5 text-gray-500 text-xs">{user.phone || "-"}</td>
-                        <td className="px-5 py-3.5 text-center">
+                      <div key={user.id} className="p-4 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-gray-800">{user.name}</span>
+                            <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${ROLE_COLORS[user.role] || "bg-gray-100 text-gray-600"}`}>
+                              {ROLE_LABELS[user.role] || "Staff"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-gray-500">
+                          <span>@{user.username}</span>
+                          <span>{user.email}</span>
+                          <span>{user.phone || "-"}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-1">
                           {hasSession ? (
-                            <div>
-                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
-                                <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                                Aktif
-                              </span>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> Aktif
                               {sessionData && (
-                                <div className="text-[10px] text-gray-400 mt-0.5">{formatRupiah(sessionData.total_pemasukan || 0)}</div>
+                                <span className="ml-0.5">{formatRupiah(sessionData.total_pemasukan || 0)}</span>
                               )}
-                            </div>
+                            </span>
                           ) : (
-                            <span className="text-xs text-gray-300">–</span>
+                            <span className="text-xs text-gray-300">Tidak aktif</span>
                           )}
-                        </td>
-                        <td className="px-5 py-3.5 ">
-                          <div className="flex items-center justify-center gap-2">
+                          <div className="flex gap-1">
                             <button onClick={() => { setEditingUser(user); setEditForm({ username: user.username||"" , name: user.name||"" , email: user.email||"" , phone: user.phone||"" , role: user.role, password: "" }); setShowEditModal(true); }}
                               className="text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 p-2 rounded-lg transition-colors">
-                              <Pencil size={15} />
+                              <Pencil size={14} />
                             </button>
                             <button onClick={() => handleDeleteUser(user)}
                               className="text-red-400 hover:text-red-600 bg-red-50 hover:bg-red-100 p-2 rounded-lg transition-colors">
-                              <Trash2 size={15} />
+                              <Trash2 size={14} />
                             </button>
                           </div>
-                        </td>
-                      </tr>
+                        </div>
+                      </div>
                     );
                   })}
-                </tbody>
-              </table>
-            )}
+                </div>
+              )}
+            </div>
           </div>
           <div className="p-4 border-t text-xs text-gray-400">Total {users.length} staf terdaftar</div>
         </div>
@@ -374,54 +430,107 @@ export default function AdminDashboardPage() {
             </div>
           )}
           <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
-            {loadingShifts ? (
-              <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
-            ) : filteredShifts.length === 0 ? (
-              <div className="py-12 text-center text-gray-400">Belum ada data shift</div>
-            ) : (
-              <table className="w-full text-sm text-left whitespace-nowrap">
-                <thead className="bg-gray-50/50">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold text-left">ID</th>
-                    <th className="px-5 py-3 font-semibold text-left">Kasir</th>
-                    <th className="px-5 py-3 font-semibold text-left">Role</th>
-                    <th className="px-5 py-3 font-semibold text-left">Mulai</th>
-                    <th className="px-5 py-3 font-semibold text-left">Selesai</th>
-                    <th className="px-5 py-3 font-semibold text-left">Durasi</th>
-                    <th className="px-5 py-3 font-semibold text-left">Uang Awal</th>
-                    <th className="px-5 py-3 font-semibold text-left">Total Masuk</th>
-                    <th className="px-5 py-3 font-semibold text-left">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredShifts.map((shift: any, idx: number) => (
-                    <tr key={shift.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
-                      <td className="px-5 py-3.5 font-bold text-gray-500 text-xs">{shift.id}</td>
-                      <td className="px-5 py-3.5 font-bold text-gray-800">{shift.nama}</td>
-                      <td className="px-5 py-3.5 ">
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[shift.role] || "bg-gray-100 text-gray-600"}`}>
+            <div className="hidden md:block">
+              {loadingShifts ? (
+                <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
+              ) : filteredShifts.length === 0 ? (
+                <div className="py-12 text-center text-gray-400">Belum ada data shift</div>
+              ) : (
+                <table className="w-full text-sm text-left whitespace-nowrap">
+                  <thead className="bg-gray-50/50">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold text-left">ID</th>
+                      <th className="px-5 py-3 font-semibold text-left">Kasir</th>
+                      <th className="px-5 py-3 font-semibold text-left">Role</th>
+                      <th className="px-5 py-3 font-semibold text-left">Mulai</th>
+                      <th className="px-5 py-3 font-semibold text-left">Selesai</th>
+                      <th className="px-5 py-3 font-semibold text-left">Durasi</th>
+                      <th className="px-5 py-3 font-semibold text-left">Uang Awal</th>
+                      <th className="px-5 py-3 font-semibold text-left">Total Masuk</th>
+                      <th className="px-5 py-3 font-semibold text-left">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredShifts.map((shift: any, idx: number) => (
+                      <tr key={shift.id} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                        <td className="px-5 py-3.5 font-bold text-gray-500 text-xs">{shift.id}</td>
+                        <td className="px-5 py-3.5 font-bold text-gray-800">{shift.nama}</td>
+                        <td className="px-5 py-3.5 ">
+                          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[shift.role] || "bg-gray-100 text-gray-600"}`}>
+                            {ROLE_LABELS[shift.role] || "Staff"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3.5 text-xs text-gray-600">{shift.mulai ? new Date(shift.mulai).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}</td>
+                        <td className="px-5 py-3.5 text-xs text-gray-600">{shift.selesai ? new Date(shift.selesai).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "–"}</td>
+                        <td className="px-5 py-3.5 text-gray-600">{shift.durasi || "–"}</td>
+                        <td className="px-5 py-3.5 text-gray-600">{formatRupiah(shift.opening_cash || 0)}</td>
+                        <td className="px-5 py-3.5 font-bold text-green-700">{formatRupiah(shift.total_pemasukan || 0)}</td>
+                        <td className="px-5 py-3.5 ">
+                          {!shift.selesai ? (
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> Aktif
+                            </span>
+                          ) : (
+                            <span className="px-2.5 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">Selesai</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="md:hidden">
+              {loadingShifts ? (
+                <div className="p-6 space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />)}</div>
+              ) : filteredShifts.length === 0 ? (
+                <div className="py-12 text-center text-gray-400">Belum ada data shift</div>
+              ) : (
+                <div className="divide-y divide-gray-100">
+                  {filteredShifts.map((shift: any) => (
+                    <div key={shift.id} className="p-4 flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-gray-400">#{shift.id}</span>
+                          {!shift.selesai ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-[10px] font-bold">
+                              <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> Aktif
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-[10px] font-semibold">Selesai</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-gray-800">{shift.nama}</span>
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${ROLE_COLORS[shift.role] || "bg-gray-100 text-gray-600"}`}>
                           {ROLE_LABELS[shift.role] || "Staff"}
                         </span>
-                      </td>
-                      <td className="px-5 py-3.5 text-xs text-gray-600">{shift.mulai ? new Date(shift.mulai).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "-"}</td>
-                      <td className="px-5 py-3.5 text-xs text-gray-600">{shift.selesai ? new Date(shift.selesai).toLocaleString("id-ID", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "–"}</td>
-                      <td className="px-5 py-3.5 text-gray-600">{shift.durasi || "–"}</td>
-                      <td className="px-5 py-3.5 text-gray-600">{formatRupiah(shift.opening_cash || 0)}</td>
-                      <td className="px-5 py-3.5 font-bold text-green-700">{formatRupiah(shift.total_pemasukan || 0)}</td>
-                      <td className="px-5 py-3.5 ">
-                        {!shift.selesai ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
-                            <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" /> Aktif
-                          </span>
-                        ) : (
-                          <span className="px-2.5 py-1 bg-gray-100 text-gray-500 rounded-full text-xs font-semibold">Selesai</span>
-                        )}
-                      </td>
-                    </tr>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-500">
+                        <span>{shift.mulai ? new Date(shift.mulai).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "-"}</span>
+                        <span className="text-gray-300">→</span>
+                        <span>{shift.selesai ? new Date(shift.selesai).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "–"}</span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs">
+                        <div>
+                          <span className="text-gray-400">Uang Awal: </span>
+                          <span className="font-semibold text-gray-700">{formatRupiah(shift.opening_cash || 0)}</span>
+                        </div>
+                        <div>
+                          <span className="text-gray-400">Masuk: </span>
+                          <span className="font-bold text-green-700">{formatRupiah(shift.total_pemasukan || 0)}</span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Durasi: <span className="font-medium text-gray-600">{shift.durasi || "–"}</span>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
-            )}
+                </div>
+              )}
+            </div>
           </div>
           <div className="p-4 border-t text-xs text-gray-400">Total {filteredShifts.length} shift</div>
         </div>
@@ -435,27 +544,70 @@ export default function AdminDashboardPage() {
             <PeriodFilter value={attendanceDateRange} onChange={setAttendanceDateRange} />
           </div>
           <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
-            {loadingAttendance ? (
-              <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
-            ) : filteredAttendance.length === 0 ? (
-              <div className="py-12 text-center text-gray-400">Belum ada data absensi</div>
-            ) : (
-              <table className="w-full text-sm text-left whitespace-nowrap">
-                <thead className="bg-gray-50/50">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold text-left">Tanggal</th>
-                    <th className="px-5 py-3 font-semibold text-left">Nama Staf</th>
-                    <th className="px-5 py-3 font-semibold text-left">Role</th>
-                    <th className="px-5 py-3 font-semibold text-left">Jam Masuk</th>
-                    <th className="px-5 py-3 font-semibold text-left">Jam Keluar</th>
-                    <th className="px-5 py-3 font-semibold text-left">Durasi</th>
-                    <th className="px-5 py-3 font-semibold text-left">Status</th>
-                    <th className="px-5 py-3 font-semibold text-left">Keterangan</th>
-                  </tr>
-                </thead>
-                <tbody>
+            <div className="hidden md:block">
+              {loadingAttendance ? (
+                <div className="p-8 space-y-3">{[1,2,3].map(i => <div key={i} className="h-10 bg-gray-100 rounded animate-pulse" />)}</div>
+              ) : filteredAttendance.length === 0 ? (
+                <div className="py-12 text-center text-gray-400">Belum ada data absensi</div>
+              ) : (
+                <table className="w-full text-sm text-left whitespace-nowrap">
+                  <thead className="bg-gray-50/50">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold text-left">Tanggal</th>
+                      <th className="px-5 py-3 font-semibold text-left">Nama Staf</th>
+                      <th className="px-5 py-3 font-semibold text-left">Role</th>
+                      <th className="px-5 py-3 font-semibold text-left">Jam Masuk</th>
+                      <th className="px-5 py-3 font-semibold text-left">Jam Keluar</th>
+                      <th className="px-5 py-3 font-semibold text-left">Durasi</th>
+                      <th className="px-5 py-3 font-semibold text-left">Status</th>
+                      <th className="px-5 py-3 font-semibold text-left">Keterangan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredAttendance.map((row: any, idx: number) => {
+                      // Hitung durasi
+                      let durasi = "–";
+                      if (row.jam_masuk && row.jam_keluar) {
+                        const [hm, mm] = row.jam_masuk.split(":").map(Number);
+                        const [hk, mk] = row.jam_keluar.split(":").map(Number);
+                        const diff = (hk * 60 + mk) - (hm * 60 + mm);
+                        if (diff > 0) durasi = `${Math.floor(diff/60)}j ${diff%60}m`;
+                      }
+                      return (
+                        <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                          <td className="px-5 py-3.5 text-gray-600 text-xs">{formatTanggal(row.tanggal)}</td>
+                          <td className="px-5 py-3.5 font-bold text-gray-800">{row.user?.name || "-"}</td>
+                          <td className="px-5 py-3.5 ">
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[row.user?.role] || "bg-gray-100 text-gray-600"}`}>
+                              {ROLE_LABELS[row.user?.role] || "Staff"}
+                            </span>
+                          </td>
+                          <td className="px-5 py-3.5 font-semibold text-gray-800">{row.jam_masuk || "–"}</td>
+                          <td className="px-5 py-3.5 font-semibold text-gray-800">{row.jam_keluar || "–"}</td>
+                          <td className="px-5 py-3.5 text-gray-500">{durasi}</td>
+                          <td className="px-5 py-3.5 ">
+                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+                              row.status === "hadir" ? "bg-green-100 text-green-700" :
+                              row.status === "sakit" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
+                            }`}>{row.status}</span>
+                          </td>
+                          <td className="px-5 py-3.5 text-gray-400 italic text-xs">{row.keterangan || "–"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            <div className="md:hidden">
+              {loadingAttendance ? (
+                <div className="p-6 space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-gray-100 rounded-xl animate-pulse" />)}</div>
+              ) : filteredAttendance.length === 0 ? (
+                <div className="py-12 text-center text-gray-400">Belum ada data absensi</div>
+              ) : (
+                <div className="divide-y divide-gray-100">
                   {filteredAttendance.map((row: any, idx: number) => {
-                    // Hitung durasi
                     let durasi = "–";
                     if (row.jam_masuk && row.jam_keluar) {
                       const [hm, mm] = row.jam_masuk.split(":").map(Number);
@@ -464,30 +616,37 @@ export default function AdminDashboardPage() {
                       if (diff > 0) durasi = `${Math.floor(diff/60)}j ${diff%60}m`;
                     }
                     return (
-                      <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
-                        <td className="px-5 py-3.5 text-gray-600 text-xs">{formatTanggal(row.tanggal)}</td>
-                        <td className="px-5 py-3.5 font-bold text-gray-800">{row.user?.name || "-"}</td>
-                        <td className="px-5 py-3.5 ">
-                          <span className={`px-2.5 py-1 rounded-lg text-xs font-bold ${ROLE_COLORS[row.user?.role] || "bg-gray-100 text-gray-600"}`}>
+                      <div key={idx} className="p-4 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500 font-semibold">{formatTanggal(row.tanggal)}</span>
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              row.status === "hadir" ? "bg-green-100 text-green-700" :
+                              row.status === "sakit" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
+                            }`}>{row.status}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-gray-800">{row.user?.name || "-"}</span>
+                          <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold ${ROLE_COLORS[row.user?.role] || "bg-gray-100 text-gray-600"}`}>
                             {ROLE_LABELS[row.user?.role] || "Staff"}
                           </span>
-                        </td>
-                        <td className="px-5 py-3.5 font-semibold text-gray-800">{row.jam_masuk || "–"}</td>
-                        <td className="px-5 py-3.5 font-semibold text-gray-800">{row.jam_keluar || "–"}</td>
-                        <td className="px-5 py-3.5 text-gray-500">{durasi}</td>
-                        <td className="px-5 py-3.5 ">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
-                            row.status === "hadir" ? "bg-green-100 text-green-700" :
-                            row.status === "sakit" ? "bg-red-100 text-red-700" : "bg-yellow-100 text-yellow-700"
-                          }`}>{row.status}</span>
-                        </td>
-                        <td className="px-5 py-3.5 text-gray-400 italic text-xs">{row.keterangan || "–"}</td>
-                      </tr>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-600">
+                          <span className="font-semibold">{row.jam_masuk || "–"}</span>
+                          <span className="text-gray-300">→</span>
+                          <span className="font-semibold">{row.jam_keluar || "–"}</span>
+                          <span className="text-gray-400 ml-1">({durasi})</span>
+                        </div>
+                        {row.keterangan && (
+                          <div className="text-xs text-gray-400 italic">{row.keterangan}</div>
+                        )}
+                      </div>
                     );
                   })}
-                </tbody>
-              </table>
-            )}
+                </div>
+              )}
+            </div>
           </div>
           <div className="p-4 border-t text-xs text-gray-400">Total {filteredAttendance.length} record absensi</div>
         </div>
@@ -521,36 +680,65 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
-              <table className="w-full text-sm text-left whitespace-nowrap">
-                <thead className="bg-gray-50/50">
-                  <tr>
-                    <th className="px-5 py-3 font-semibold text-left">ID</th>
-                    <th className="px-5 py-3 font-semibold text-left">Nama</th>
-                    <th className="px-5 py-3 font-semibold text-left">Kategori</th>
-                    <th className="px-5 py-3 font-semibold text-left">Tanggal</th>
-                    <th className="px-5 py-3 font-semibold text-left">Oleh</th>
-                    <th className="px-5 py-3 font-semibold text-right">Jumlah</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredExpenses.length === 0 ? (
-                    <tr><td colSpan={6} className="py-12 text-center text-gray-400">Belum ada data pengeluaran</td></tr>
-                  ) : (
-                    filteredExpenses.map((expense, idx) => (
-                      <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
-                        <td className="px-5 py-3.5 text-gray-400 text-xs">{expense.id}</td>
-                        <td className="px-5 py-3.5 font-semibold text-gray-800">{expense.nama}</td>
-                        <td className="px-5 py-3.5 ">
-                          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">{expense.kategori}</span>
-                        </td>
-                        <td className="px-5 py-3.5 text-gray-500 text-xs">{expense.waktu ? formatTanggal(expense.waktu) : expense.tanggal || "–"}</td>
-                        <td className="px-5 py-3.5 text-gray-500 text-xs">{expense.user_id || "–"}</td>
-                        <td className="px-5 py-3.5 font-bold text-red-600 text-right">{formatRupiah(expense.jumlah)}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+              <div className="hidden md:block">
+                <table className="w-full text-sm text-left whitespace-nowrap">
+                  <thead className="bg-gray-50/50">
+                    <tr>
+                      <th className="px-5 py-3 font-semibold text-left">ID</th>
+                      <th className="px-5 py-3 font-semibold text-left">Nama</th>
+                      <th className="px-5 py-3 font-semibold text-left">Kategori</th>
+                      <th className="px-5 py-3 font-semibold text-left">Tanggal</th>
+                      <th className="px-5 py-3 font-semibold text-left">Oleh</th>
+                      <th className="px-5 py-3 font-semibold text-right">Jumlah</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredExpenses.length === 0 ? (
+                      <tr><td colSpan={6} className="py-12 text-center text-gray-400">Belum ada data pengeluaran</td></tr>
+                    ) : (
+                      filteredExpenses.map((expense, idx) => (
+                        <tr key={idx} className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
+                          <td className="px-5 py-3.5 text-gray-400 text-xs">{expense.id}</td>
+                          <td className="px-5 py-3.5 font-semibold text-gray-800">{expense.nama}</td>
+                          <td className="px-5 py-3.5 ">
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">{expense.kategori}</span>
+                          </td>
+                          <td className="px-5 py-3.5 text-gray-500 text-xs">{expense.waktu ? formatTanggal(expense.waktu) : expense.tanggal || "–"}</td>
+                          <td className="px-5 py-3.5 text-gray-500 text-xs">{expense.user_id || "–"}</td>
+                          <td className="px-5 py-3.5 font-bold text-red-600 text-right">{formatRupiah(expense.jumlah)}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="md:hidden">
+                {filteredExpenses.length === 0 ? (
+                  <div className="py-12 text-center text-gray-400">Belum ada data pengeluaran</div>
+                ) : (
+                  <div className="divide-y divide-gray-100">
+                    {filteredExpenses.map((expense, idx) => (
+                      <div key={idx} className="p-4 flex flex-col gap-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-gray-800">{expense.nama}</span>
+                            <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-[10px] font-bold">{expense.kategori}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs text-gray-500">
+                            <span>{expense.waktu ? formatTanggal(expense.waktu) : expense.tanggal || "–"}</span>
+                            <span className="ml-2 text-gray-300">#{expense.id}</span>
+                          </div>
+                          <span className="font-bold text-red-600 text-sm">{formatRupiah(expense.jumlah)}</span>
+                        </div>
+                        <div className="text-xs text-gray-400">Oleh: {expense.user_id || "–"}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
             <div className="p-4 border-t text-xs text-gray-400">Total {filteredExpenses.length} pengeluaran</div>
           </div>
@@ -559,47 +747,47 @@ export default function AdminDashboardPage() {
 
       {/* MODAL TAMBAH PENGELUARAN */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6">
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-lg font-bold">Tambah Pengeluaran</h2>
-              <button onClick={() => setShowCreateModal(false)}><X size={20} className="text-neutral-400" /></button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-2 sm:px-4 lg:px-6 py-6 sm:py-10 md:py-16">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl flex flex-col max-h-[85vh] overflow-hidden p-4 sm:p-6">
+            <div className="flex justify-between items-center mb-3 sm:mb-4 shrink-0">
+              <h2 className="text-base sm:text-lg font-bold">Tambah Pengeluaran</h2>
+              <button onClick={() => setShowCreateModal(false)}><X size={18} className="sm:size-5 text-neutral-400" /></button>
             </div>
-            <div className="space-y-4">
+            <div className="overflow-y-auto flex-1 min-h-0 space-y-3 sm:space-y-4">
               {[{label:"Nama Pengeluaran *",key:"nama_pengeluaran",placeholder:"Contoh: Gaji Karyawan",type:"text"},
                 {label:"Jumlah (Rp) *",key:"jumlah",placeholder:"0",type:"number"}].map(f => (
                 <div key={f.key}>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1">{f.label}</label>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">{f.label}</label>
                   <input type={f.type} value={(formData as any)[f.key]} placeholder={f.placeholder}
                     onChange={(e) => setFormData({...formData, [f.key]: e.target.value})}
-                    className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+                    className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
                 </div>
               ))}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Kategori</label>
+                <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">Kategori</label>
                 <select value={formData.kategori} onChange={(e) => setFormData({...formData, kategori: e.target.value})}
-                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200">
+                  className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200">
                   {["Operasional","Gaji","Sewa","Bahan Baku","Lain-lain"].map(o => <option key={o}>{o}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Deskripsi</label>
+                <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">Deskripsi</label>
                 <textarea value={formData.deskripsi} onChange={(e) => setFormData({...formData, deskripsi: e.target.value})}
                   placeholder="Deskripsi (opsional)" rows={2}
-                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200 resize-none" />
+                  className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200 resize-none" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Tanggal</label>
+                <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">Tanggal</label>
                 <input type="date" value={formData.tanggal} onChange={(e) => setFormData({...formData, tanggal: e.target.value})}
-                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+                  className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Bukti (Opsional)</label>
-                <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
+                <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">Bukti (Opsional)</label>
+                <div className="border-2 border-dashed border-gray-200 rounded-xl p-3 sm:p-4 text-center cursor-pointer hover:border-gray-400 transition-colors"
                   onClick={() => document.getElementById("evidence-input")?.click()}>
                   {evidenceFile ? <p className="text-sm text-gray-600">{evidenceFile.name}</p> : (
                     <div className="flex flex-col items-center gap-1">
-                      <Upload size={20} className="text-gray-300" />
+                      <Upload size={18} className="sm:size-5 text-gray-300" />
                       <p className="text-xs text-gray-400">Upload bukti</p>
                     </div>
                   )}
@@ -607,9 +795,9 @@ export default function AdminDashboardPage() {
                 <input id="evidence-input" type="file" accept=".jpg,.jpeg,.png,.pdf" onChange={(e) => setEvidenceFile(e.target.files?.[0] || null)} className="hidden" />
               </div>
             </div>
-            <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowCreateModal(false)} className="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-500 bg-gray-100">Batal</button>
-              <button onClick={handleCreateExpense} className="flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-[#f85656] hover:bg-[#e04545]">Simpan</button>
+            <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-4 shrink-0">
+              <button onClick={() => setShowCreateModal(false)} className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl font-semibold text-gray-500 bg-gray-100 text-sm">Batal</button>
+              <button onClick={handleCreateExpense} className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl font-semibold text-white bg-[#f85656] hover:bg-[#e04545] text-sm">Simpan</button>
             </div>
           </div>
         </div>
@@ -617,41 +805,41 @@ export default function AdminDashboardPage() {
 
       {/* MODAL EDIT USER */}
       {showEditModal && editingUser && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6">
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-lg font-bold">Edit User</h2>
-              <button onClick={() => { setShowEditModal(false); setEditingUser(null); }}><X size={20} className="text-neutral-400" /></button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-2 sm:px-4 py-6 sm:py-10 md:py-16">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl flex flex-col max-h-[85vh] overflow-hidden p-4 sm:p-6">
+            <div className="flex justify-between items-center mb-3 sm:mb-4 shrink-0">
+              <h2 className="text-base sm:text-lg font-bold">Edit User</h2>
+              <button onClick={() => { setShowEditModal(false); setEditingUser(null); }}><X size={18} className="sm:size-5 text-neutral-400" /></button>
             </div>
-            <div className="space-y-4">
+            <div className="overflow-y-auto flex-1 min-h-0 space-y-3 sm:space-y-4">
               {[
                 {label:"Username",key:"username"},{label:"Nama",key:"name"},
                 {label:"Email",key:"email",type:"email"},{label:"No. HP",key:"phone"}
               ].map(f => (
                 <div key={f.key}>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1">{f.label}</label>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">{f.label}</label>
                   <input type={f.type || "text"} value={(editForm as any)[f.key]}
                     onChange={(e) => setEditForm({...editForm, [f.key]: e.target.value})}
-                    className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+                    className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
                 </div>
               ))}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Role</label>
+                <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">Role</label>
                 <select value={editForm.role} onChange={(e) => setEditForm({...editForm, role: Number(e.target.value)})}
-                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200">
+                  className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200">
                   <option value={1}>Owner</option><option value={2}>Kasir</option><option value={3}>Dapur</option>
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Password Baru</label>
+                <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">Password Baru</label>
                 <input type="password" value={editForm.password} placeholder="Kosongkan jika tidak diubah"
                   onChange={(e) => setEditForm({...editForm, password: e.target.value})}
-                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+                  className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
               </div>
             </div>
-            <div className="flex gap-3 mt-5">
-              <button onClick={() => { setShowEditModal(false); setEditingUser(null); }} className="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-500 bg-gray-100">Batal</button>
-              <button onClick={handleUpdateUser} className="flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-[#f85656] hover:bg-[#e04545]">Simpan</button>
+            <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-4 shrink-0">
+              <button onClick={() => { setShowEditModal(false); setEditingUser(null); }} className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl font-semibold text-gray-500 bg-gray-100 text-sm">Batal</button>
+              <button onClick={handleUpdateUser} className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl font-semibold text-white bg-[#f85656] hover:bg-[#e04545] text-sm">Simpan</button>
             </div>
           </div>
         </div>
@@ -659,36 +847,36 @@ export default function AdminDashboardPage() {
 
       {/* MODAL CREATE USER */}
       {showCreateUserModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6">
-            <div className="flex justify-between items-center mb-5">
-              <h2 className="text-lg font-bold">Tambah User Baru</h2>
-              <button onClick={() => setShowCreateUserModal(false)}><X size={20} className="text-neutral-400" /></button>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-2 sm:px-4 py-6 sm:py-10 md:py-16">
+          <div className="bg-white w-full max-w-md rounded-2xl shadow-xl flex flex-col max-h-[85vh] overflow-hidden p-4 sm:p-6">
+            <div className="flex justify-between items-center mb-3 sm:mb-4 shrink-0">
+              <h2 className="text-base sm:text-lg font-bold">Tambah User Baru</h2>
+              <button onClick={() => setShowCreateUserModal(false)}><X size={18} className="sm:size-5 text-neutral-400" /></button>
             </div>
-            <div className="space-y-4">
+            <div className="overflow-y-auto flex-1 min-h-0 space-y-3 sm:space-y-4">
               {[
                 {label:"Username *",key:"username"},{label:"Nama Lengkap *",key:"name"},
                 {label:"Email *",key:"email",type:"email"},{label:"No. HP",key:"phone"},
                 {label:"Password *",key:"password",type:"password"}
               ].map(f => (
                 <div key={f.key}>
-                  <label className="block text-xs font-semibold text-gray-500 mb-1">{f.label}</label>
+                  <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">{f.label}</label>
                   <input type={f.type || "text"} value={(createUserForm as any)[f.key]}
                     onChange={(e) => setCreateUserForm({...createUserForm, [f.key]: e.target.value})}
-                    className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
+                    className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200" />
                 </div>
               ))}
               <div>
-                <label className="block text-xs font-semibold text-gray-500 mb-1">Role</label>
+                <label className="block text-[11px] sm:text-xs font-semibold text-gray-500 mb-0.5 sm:mb-1">Role</label>
                 <select value={createUserForm.role} onChange={(e) => setCreateUserForm({...createUserForm, role: Number(e.target.value)})}
-                  className="w-full bg-gray-50 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200">
+                  className="w-full bg-gray-50 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-200">
                   <option value={1}>Owner</option><option value={2}>Kasir</option><option value={3}>Dapur</option>
                 </select>
               </div>
             </div>
-            <div className="flex gap-3 mt-5">
-              <button onClick={() => setShowCreateUserModal(false)} className="flex-1 px-4 py-3 rounded-xl font-semibold text-gray-500 bg-gray-100">Batal</button>
-              <button onClick={handleCreateUser} className="flex-1 px-4 py-3 rounded-xl font-semibold text-white bg-[#F53E1B] hover:bg-red-600">Tambah</button>
+            <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-4 shrink-0">
+              <button onClick={() => setShowCreateUserModal(false)} className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl font-semibold text-gray-500 bg-gray-100 text-sm">Batal</button>
+              <button onClick={handleCreateUser} className="flex-1 px-4 py-2.5 sm:py-3 rounded-xl font-semibold text-white bg-[#F53E1B] hover:bg-red-600 text-sm">Tambah</button>
             </div>
           </div>
         </div>

@@ -201,9 +201,10 @@ export default function StockBahanPage() {
 
       <button
         onClick={downloadCSV}
-        className="bg-red-400 hover:bg-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 mb-6">
-        <Download size={16} />
-        Download Report
+        className="bg-red-400 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium flex items-center gap-1.5 md:gap-2 mb-6">
+        <Download size={14} className="md:size-4" />
+        <span className="hidden sm:inline">Download Report</span>
+        <span className="sm:hidden">Report</span>
       </button>
 
       {/* ================= STOCK LIST ================= */}
@@ -224,15 +225,15 @@ export default function StockBahanPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
-          <table className="w-full text-sm text-left whitespace-nowrap">
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-xs lg:text-sm text-left">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="px-5 py-3 text-left">ID</th>
-                <th className="px-5 py-3 text-left">Nama Barang</th>
-                <th className="px-5 py-3 ">Jumlah Stock</th>
-                <th className="px-5 py-3 ">Stock Limit</th>
-                <th className="px-5 py-3 ">Status</th>
+                <th className="px-3 lg:px-5 py-3 text-left whitespace-nowrap">ID</th>
+                <th className="px-3 lg:px-5 py-3 text-left whitespace-nowrap">Nama Barang</th>
+                <th className="px-3 lg:px-5 py-3 whitespace-nowrap">Jumlah Stock</th>
+                <th className="px-3 lg:px-5 py-3 whitespace-nowrap">Stock Limit</th>
+                <th className="px-3 lg:px-5 py-3 whitespace-nowrap">Status</th>
               </tr>
             </thead>
 
@@ -242,15 +243,13 @@ export default function StockBahanPage() {
                   key={`${item.nama}-${i}`}
                   onClick={() => { setRiwayatSearch(item.nama); setRiwayatPage(1); }}
                   className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors cursor-pointer">
-                  <td className="px-5 py-3.5 text-left">{item.id}</td>
-                  <td className="px-5 py-3.5 text-left">{item.nama}</td>
-                  <td className="px-5 py-3.5 ">{item.jumlah}</td>
-                  <td className="px-5 py-3.5 text-gray-500">
-                    {item.stock_limit}
-                  </td>
-                  <td className="px-5 py-3.5 flex justify-center">
+                  <td className="px-3 lg:px-5 py-3">{item.id}</td>
+                  <td className="px-3 lg:px-5 py-3 font-medium truncate max-w-[160px] lg:max-w-none">{item.nama}</td>
+                  <td className="px-3 lg:px-5 py-3">{item.jumlah}</td>
+                  <td className="px-3 lg:px-5 py-3 text-gray-500">{item.stock_limit}</td>
+                  <td className="px-3 lg:px-5 py-3">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs ${
+                      className={`inline-block px-2 lg:px-3 py-0.5 lg:py-1 rounded-full text-[10px] lg:text-xs ${
                         item.status === "Aman"
                           ? "bg-green-200 text-green-700"
                           : "bg-red-500 text-white"
@@ -263,6 +262,38 @@ export default function StockBahanPage() {
             </tbody>
           </table>
         </div>
+        {/* Mobile cards */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {(paginatedStock || []).map((item, i) => (
+            <div
+              key={`mobile-stock-${item.nama}-${i}`}
+              onClick={() => { setRiwayatSearch(item.nama); setRiwayatPage(1); }}
+              className="flex items-center gap-3 p-3 hover:bg-red-50 transition-colors cursor-pointer">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{item.nama}</p>
+                <p className="text-[10px] text-gray-400">ID: {item.id}</p>
+                <div className="flex items-center gap-3 mt-1.5">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-gray-400 uppercase font-medium">Stok</span>
+                    <span className="text-xs font-semibold">{item.jumlah}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[10px] text-gray-400 uppercase font-medium">Limit</span>
+                    <span className="text-xs text-gray-500">{item.stock_limit}</span>
+                  </div>
+                </div>
+              </div>
+              <span
+                className={`shrink-0 px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                  item.status === "Aman"
+                    ? "bg-green-200 text-green-700"
+                    : "bg-red-500 text-white"
+                }`}>
+                {item.status}
+              </span>
+            </div>
+          ))}
+        </div>
         <PaginationBar
           totalItems={stockTotal}
           currentPage={stockPage}
@@ -273,37 +304,40 @@ export default function StockBahanPage() {
       </div>
 
       {/* ================= ACTION ================= */}
-      <div className="flex flex-wrap justify-between items-end mb-6">
-        <div className="flex flex-wrap gap-3">
-          <button
-            onClick={() => setIsRestockOpen(true)}
-            className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2">
-            <PackagePlus size={16} /> Laporkan Restock
-          </button>
+      <div className="flex flex-wrap items-center gap-2 mb-6">
+        <button
+          onClick={() => setIsRestockOpen(true)}
+          className="bg-red-400 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-medium transition-all active:scale-95">
+          <PackagePlus size={14} className="md:size-4" /> 
+          <span className="hidden sm:inline">Laporkan Restock</span>
+          <span className="sm:hidden">Restock</span>
+        </button>
 
-          <button
-            onClick={() => setIsPenyesuaianOpen(true)}
-            className="bg-red-400 text-white px-4 py-2 rounded-lg flex gap-2">
-            <Edit size={16} /> Laporkan Penyesuaian
-          </button>
-        </div>
+        <button
+          onClick={() => setIsPenyesuaianOpen(true)}
+          className="bg-red-400 hover:bg-red-500 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-medium transition-all active:scale-95">
+          <Edit size={14} className="md:size-4" /> 
+          <span className="hidden sm:inline">Laporkan Penyesuaian</span>
+          <span className="sm:hidden">Penyesuaian</span>
+        </button>
 
         {/* FILTER */}
-        <div className="relative">
+        <div className="relative ml-auto">
           <button
             onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`px-4 py-2 rounded-lg flex items-center gap-2 text-sm font-medium transition-all
+            className={`px-3 md:px-4 py-2 rounded-lg flex items-center gap-1.5 md:gap-2 text-xs md:text-sm font-medium transition-all
               ${
                 selectedFilter
                   ? "bg-red-100 text-red-600"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}>
-            <Filter size={16} />
-            {selectedFilter || "Filter"}
+            <Filter size={14} className="md:size-4" />
+            <span className="hidden sm:inline">{selectedFilter || "Filter"}</span>
+            <span className="sm:hidden">{selectedFilter ? `Filter: ${selectedFilter}` : "Filter"}</span>
           </button>
 
           {isFilterOpen && (
-            <div className="absolute right-0 sm:left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border p-2 space-y-1 z-50">
+            <div className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-xl shadow-lg border p-1.5 sm:p-2 space-y-0.5 sm:space-y-1 z-50">
               {/* OPTION */}
               {filterOptions.map((opt) => (
                 <button
@@ -312,7 +346,7 @@ export default function StockBahanPage() {
                     setSelectedFilter(opt);
                     setIsFilterOpen(false);
                   }}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
+                  className={`w-full text-left px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm transition ${
                     selectedFilter === opt
                       ? "bg-red-100 text-red-600 font-medium"
                       : "hover:bg-gray-100 text-gray-700"
@@ -322,7 +356,7 @@ export default function StockBahanPage() {
               ))}
 
               {/* DIVIDER */}
-              <div className="border-t my-1"></div>
+              <div className="border-t my-0.5 sm:my-1"></div>
 
               {/* RESET BUTTON */}
               <button
@@ -330,7 +364,7 @@ export default function StockBahanPage() {
                   setSelectedFilter("");
                   setIsFilterOpen(false);
                 }}
-                className="w-full text-left px-3 py-2 rounded-lg text-sm text-gray-500 hover:bg-gray-100">
+                className="w-full text-left px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm text-gray-500 hover:bg-gray-100">
                 Reset Filter
               </button>
             </div>
@@ -340,32 +374,31 @@ export default function StockBahanPage() {
 
       {/* ================= RIWAYAT ================= */}
       <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-        <div className="p-4 border-b flex items-center justify-between gap-4">
-          <h2 className="text-lg font-bold">Riwayat Perubahan</h2>
-          <div className="relative w-full sm:w-56">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+        <div className="p-3 md:p-4 border-b flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+          <h2 className="text-base md:text-lg font-bold">Riwayat Perubahan</h2>
+          <div className="relative w-full sm:w-48 md:w-56">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
             <input
               type="text"
-              placeholder="Cari nama barang..."
+              placeholder="Cari barang..."
               value={riwayatSearch}
               onChange={(e) => { setRiwayatSearch(e.target.value); setRiwayatPage(1); }}
-              className="bg-gray-100 pl-9 pr-4 py-2 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 w-full"
+              className="bg-gray-100 pl-8 md:pl-9 pr-3 md:pr-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm focus:outline-none focus:ring-2 focus:ring-neutral-200 w-full"
             />
           </div>
         </div>
 
-        <div className="overflow-x-auto bg-white rounded-3xl shadow-sm border border-gray-100">
-          <table className="w-full text-sm text-left whitespace-nowrap">
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full text-xs lg:text-sm text-left">
             <thead className="bg-gray-50/50">
               <tr>
-                <th className="px-5 py-3 ">ID</th>
-                <th className="px-5 py-3 ">Item ID</th>
-                <th className="px-5 py-3 ">Nama Barang</th>
-                <th className="px-5 py-3 ">Tipe</th>
-                <th className="px-5 py-3 ">Alasan</th>
-                <th className="px-5 py-3 ">Kuantiti</th>
-                <th className="px-5 py-3 ">Perubahan</th>
-                <th className="px-5 py-3 ">Dibuat Oleh</th>
+                <th className="px-2 md:px-3 lg:px-5 py-3 whitespace-nowrap">ID</th>
+                <th className="px-2 md:px-3 lg:px-5 py-3 whitespace-nowrap">Nama Barang</th>
+                <th className="px-2 md:px-3 lg:px-5 py-3 whitespace-nowrap">Tipe</th>
+                <th className="px-2 md:px-3 lg:px-5 py-3 whitespace-nowrap">Kuantiti</th>
+                <th className="hidden lg:table-cell px-2 md:px-3 lg:px-5 py-3 whitespace-nowrap">Alasan</th>
+                <th className="px-2 md:px-3 lg:px-5 py-3 whitespace-nowrap">Waktu</th>
+                <th className="hidden lg:table-cell px-2 md:px-3 lg:px-5 py-3 whitespace-nowrap">Oleh</th>
               </tr>
             </thead>
 
@@ -374,15 +407,13 @@ export default function StockBahanPage() {
                 <tr
                   key={`${item.nama}-${i}`}
                   className="even:bg-gray-50 odd:bg-white hover:bg-red-50 transition-colors">
-                  <td className="px-5 py-3.5 text-neutral-700">{item.id}</td>
-
-                  <td className="px-5 py-3.5 text-neutral-600">{item.itemId}</td>
-
-                  <td className="px-5 py-3.5 text-neutral-700">{item.nama}</td>
-
-                  <td className="px-5 py-3.5 ">
+                  <td className="px-2 md:px-3 lg:px-5 py-3 text-neutral-700">{item.id}</td>
+                  <td className="px-2 md:px-3 lg:px-5 py-3 text-neutral-700 font-medium">
+                    <span className="block truncate max-w-[120px] md:max-w-[180px] lg:max-w-[220px]" title={item.nama}>{item.nama}</span>
+                  </td>
+                  <td className="px-2 md:px-3 lg:px-5 py-3">
                     <span
-                      className={`px-2 py-1 rounded-full text-xs font-bold ${
+                      className={`inline-block px-1.5 md:px-2 py-0.5 rounded-full text-[9px] md:text-[10px] lg:text-xs font-bold ${
                         item.tipe.toLowerCase() === "restock"
                           ? "bg-green-100 text-green-600"
                           : "bg-red-100 text-red-600"
@@ -390,22 +421,51 @@ export default function StockBahanPage() {
                       {item.tipe}
                     </span>
                   </td>
-
-                  <td className="px-5 py-3.5 text-neutral-600">{item.alasan}</td>
-
-                  <td className="px-5 py-3.5 text-neutral-700">
-                    {item.kuantiti}
+                  <td className="px-2 md:px-3 lg:px-5 py-3 text-neutral-700">{item.kuantiti}</td>
+                  <td className="hidden lg:table-cell px-2 md:px-3 lg:px-5 py-3 text-neutral-600">
+                    <span className="block truncate max-w-[160px]" title={item.alasan}>{item.alasan}</span>
                   </td>
-
-                  <td className="px-5 py-3.5 text-neutral-700">
-                    {formatTanggal(item.waktu)}
+                  <td className="px-2 md:px-3 lg:px-5 py-3 text-neutral-700 whitespace-nowrap text-[10px] md:text-xs lg:text-sm">{formatTanggal(item.waktu)}</td>
+                  <td className="hidden lg:table-cell px-2 md:px-3 lg:px-5 py-3 text-neutral-600">
+                    <span className="block truncate max-w-[120px]" title={item.pembuat}>{item.pembuat}</span>
                   </td>
-
-                  <td className="px-5 py-3.5 text-neutral-600">{item.pembuat}</td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+        {/* Mobile cards */}
+        <div className="md:hidden divide-y divide-gray-100">
+          {(paginatedRiwayat || []).map((item, i) => (
+            <div
+              key={`mobile-riwayat-${item.nama}-${i}`}
+              className="px-3 py-2.5 hover:bg-red-50 transition-colors">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900 truncate">{item.nama}</p>
+                  <p className="text-[10px] text-gray-400">#{item.id}</p>
+                </div>
+                <span
+                  className={`shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                    item.tipe.toLowerCase() === "restock"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-red-100 text-red-600"
+                  }`}>
+                  {item.tipe}
+                </span>
+              </div>
+              <div className="mt-1 flex items-baseline gap-3 text-[11px]">
+                <span className="font-semibold text-gray-700">{item.kuantiti}</span>
+                {item.alasan && (
+                  <span className="text-gray-400 truncate max-w-[160px]" title={item.alasan}>{item.alasan}</span>
+                )}
+              </div>
+              <div className="mt-0.5 flex items-center gap-2 text-[10px] text-gray-400">
+                <span>{formatTanggal(item.waktu)}</span>
+                {item.pembuat && <span className="truncate">· {item.pembuat}</span>}
+              </div>
+            </div>
+          ))}
         </div>
         <PaginationBar
           totalItems={riwayatTotal}

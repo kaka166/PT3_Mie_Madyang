@@ -77,7 +77,8 @@ export default function MenuStokPage() {
         {loading ? (
           <div className="p-12 text-center text-gray-400">Memuat data...</div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 text-left text-gray-500 uppercase text-xs tracking-wider">
@@ -108,6 +109,21 @@ export default function MenuStokPage() {
               </tbody>
             </table>
           </div>
+          <div className="md:hidden divide-y divide-gray-100">
+            {filtered.length === 0 ? (
+              <div className="p-12 text-center text-gray-400">Tidak ada menu ditemukan</div>
+            ) : (
+              filtered.map((menu) => (
+                <MenuMobileCard
+                  key={menu.id}
+                  menu={menu}
+                  onRestok={handleRestok}
+                  updating={updatingId === menu.id}
+                />
+              ))
+            )}
+          </div>
+          </>
         )}
       </div>
     </div>
@@ -170,5 +186,64 @@ function MenuRow({
         </div>
       </td>
     </tr>
+  );
+}
+
+function MenuMobileCard({
+  menu,
+  onRestok,
+  updating,
+}: {
+  menu: Menu;
+  onRestok: (menu: Menu, qty: number) => Promise<void>;
+  updating: boolean;
+}) {
+  const [qty, setQty] = useState(1);
+
+  return (
+    <div className="p-4 border-t border-gray-100">
+      <div className="flex items-start justify-between">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-gray-900 truncate">{menu.nama_menu}</p>
+          <p className="text-xs text-gray-500 mt-0.5">{menu.kategori?.nama_kategori ?? "-"}</p>
+          <p className="text-sm text-gray-700 mt-1">Rp {(menu.harga_jual ?? 0).toLocaleString("id-ID")}</p>
+        </div>
+        <span
+          className={`shrink-0 px-3 py-1 rounded-full text-xs font-bold ${
+            (menu.stock ?? 0) <= 0
+              ? "text-red-500 bg-red-50"
+              : (menu.stock ?? 0) <= 5
+                ? "text-yellow-500 bg-yellow-50"
+                : "text-green-600 bg-green-50"
+          }`}>
+          Stok: {menu.stock ?? 0}
+        </span>
+      </div>
+      <div className="flex items-center gap-2 mt-3">
+        <button
+          onClick={() => setQty((q) => Math.max(1, q - 1))}
+          className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-100">
+          <Minus size={14} />
+        </button>
+        <input
+          type="number"
+          min={1}
+          value={qty}
+          onChange={(e) => setQty(Math.max(1, Number(e.target.value) || 1))}
+          className="w-14 text-center border border-gray-200 rounded-lg py-1 text-sm outline-none focus:border-[#F53E1B]"
+        />
+        <button
+          onClick={() => setQty((q) => q + 1)}
+          className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 hover:bg-gray-100">
+          <Plus size={14} />
+        </button>
+        <button
+          onClick={() => onRestok(menu, qty)}
+          disabled={updating}
+          className="ml-auto bg-[#F53E1B] hover:bg-red-600 disabled:opacity-50 text-white px-4 py-1.5 rounded-lg text-sm font-medium transition-colors">
+          {updating ? "..." : "Restok"}
+        </button>
+      </div>
+    </div>
   );
 }

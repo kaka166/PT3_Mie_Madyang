@@ -93,25 +93,25 @@ export default function NotificationCenter() {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-3 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-[60]">
-          <div className="p-4 border-b flex items-center justify-between bg-gradient-to-r from-neutral-50 to-white">
-            <h3 className="font-bold text-sm text-gray-700 flex items-center gap-2">
-              <Bell size={16} />
+        <div className="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 mt-3 w-auto sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden z-[60]">
+          <div className="p-3 sm:p-4 border-b flex items-center justify-between bg-gradient-to-r from-neutral-50 to-white">
+            <h3 className="font-bold text-xs sm:text-sm text-gray-700 flex items-center gap-1.5 sm:gap-2">
+              <Bell size={14} className="sm:size-4" />
               Notifikasi
               {count > 0 && (
-                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                <span className="bg-red-500 text-white text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-full">
                   {count}
                 </span>
               )}
             </h3>
-            <div className="flex gap-1">
+            <div className="flex gap-0.5 sm:gap-1">
               {notifs.length > 0 && count > 0 && (
                 <button
                   onClick={handleMarkAll}
                   className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                   title="Tandai semua sudah dibaca"
                 >
-                  <CheckCheck size={16} />
+                  <CheckCheck size={14} className="sm:size-4" />
                 </button>
               )}
               {notifs.length > 0 && (
@@ -120,34 +120,34 @@ export default function NotificationCenter() {
                   className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   title="Hapus semua notifikasi"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} className="sm:size-4" />
                 </button>
               )}
               <button
                 onClick={() => setOpen(false)}
                 className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <X size={16} />
+                <X size={14} className="sm:size-4" />
               </button>
             </div>
           </div>
 
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-72 sm:max-h-80 overflow-y-auto">
             {notifs.length === 0 ? (
-              <div className="py-12 text-center text-gray-400">
-                <Bell size={32} className="mx-auto mb-2 text-gray-200" />
-                <p className="text-sm font-medium">Belum ada notifikasi</p>
+              <div className="py-8 sm:py-12 text-center text-gray-400">
+                <Bell size={24} className="sm:size-8 mx-auto mb-2 text-gray-200" />
+                <p className="text-xs sm:text-sm font-medium">Belum ada notifikasi</p>
               </div>
             ) : (
               notifs.map((n) => (
                 <div
                   key={n.id}
-                  className={`px-4 py-3 border-b border-gray-50 transition-colors hover:bg-gray-50 cursor-pointer ${
+                  className={`px-3 sm:px-4 py-2.5 sm:py-3 border-b border-gray-50 transition-colors hover:bg-gray-50 cursor-pointer ${
                     !n.read ? "bg-blue-50/30" : ""
                   }`}
                   onClick={() => handleMarkRead(n.id)}
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-2 sm:gap-3">
                     <span
                       className={`mt-1 w-2 h-2 rounded-full flex-shrink-0 ${
                         typeDots[n.type]
@@ -155,18 +155,18 @@ export default function NotificationCenter() {
                     />
                     <div className="flex-1 min-w-0">
                       <p
-                        className={`text-sm ${
+                        className={`text-xs sm:text-sm ${
                           n.read ? "text-gray-600" : "text-gray-800 font-semibold"
                         }`}
                       >
                         {n.title}
                       </p>
-                      <p className="text-xs text-gray-400 mt-0.5 line-clamp-2">
+                      <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 line-clamp-2">
                         {n.message}
                       </p>
-                      <div className="flex items-center gap-1.5 mt-1.5">
-                        <Clock size={10} className="text-gray-300" />
-                        <span className="text-[10px] text-gray-400">
+                      <div className="flex items-center gap-1 mt-1">
+                        <Clock size={9} className="sm:size-2.5 text-gray-300" />
+                        <span className="text-[9px] sm:text-[10px] text-gray-400">
                           {formatTime(n.timestamp)}
                         </span>
                       </div>

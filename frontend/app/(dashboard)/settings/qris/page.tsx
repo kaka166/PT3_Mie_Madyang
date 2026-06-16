@@ -158,56 +158,58 @@ export default function QrisSettingsPage() {
       )}
 
       {showModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="bg-white rounded-[2.5rem] p-10 w-full max-w-lg shadow-2xl animate-in fade-in zoom-in duration-200">
-            <div className="flex justify-between items-center mb-8">
-              <h2 className="text-2xl font-bold text-neutral-800">{editId ? "Edit QRIS" : "Tambah QRIS"}</h2>
-              <button onClick={() => setShowModal(false)} className="p-2 hover:bg-zinc-100 rounded-full transition-colors"><X size={24} /></button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[200] px-2 sm:px-4 py-6 sm:py-10 md:py-16">
+          <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="flex justify-between items-center px-4 md:px-10 pt-4 md:pt-8 pb-0 shrink-0">
+              <h2 className="text-base md:text-2xl font-bold text-neutral-800">{editId ? "Edit QRIS" : "Tambah QRIS"}</h2>
+              <button onClick={() => setShowModal(false)} className="p-1.5 md:p-2 hover:bg-zinc-100 rounded-full transition-colors"><X size={18} className="md:size-6" /></button>
             </div>
-            <div className="space-y-5">
-              <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">Nama Bank</label>
-                <input type="text" value={form.nama_bank} onChange={(e) => setForm({ ...form, nama_bank: e.target.value })} className="w-full border-b-2 border-zinc-100 py-2 outline-none focus:border-red-500 font-bold text-lg transition-all" placeholder="Contoh: BCA" />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">Nama Pemilik</label>
-                <input type="text" value={form.nama_pemilik} onChange={(e) => setForm({ ...form, nama_pemilik: e.target.value })} className="w-full border-b-2 border-zinc-100 py-2 outline-none focus:border-red-500 font-bold text-lg transition-all" placeholder="Nama pemilik rekening" />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">No Rekening</label>
-                <input type="text" value={form.no_rekening} onChange={(e) => setForm({ ...form, no_rekening: e.target.value })} className="w-full border-b-2 border-zinc-100 py-2 outline-none focus:border-red-500 font-bold text-lg transition-all" placeholder="Nomor rekening" />
-              </div>
-              <div>
-                <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-2">Gambar QRIS</label>
-                <div className="border-2 border-dashed border-zinc-200 rounded-3xl p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
-                  <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    setGambar(file);
-                    if (file) setPreview(URL.createObjectURL(file));
-                  }} />
-                  {preview ? (
-                    <img src={preview} alt="Preview" className="w-32 h-32 object-contain mx-auto rounded-xl" />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="w-12 h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Plus size={24} /></div>
-                      <p className="text-xs font-bold text-zinc-400">Klik untuk upload gambar QR</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center justify-between bg-zinc-50 p-4 rounded-2xl">
+            <div className="overflow-y-auto flex-1 min-h-0 px-4 md:px-10 pb-4 md:pb-8">
+              <div className="space-y-4 md:space-y-5 pt-4 md:pt-8">
                 <div>
-                  <p className="text-sm font-bold text-neutral-700">Aktif</p>
-                  <p className="text-[10px] text-zinc-400">Tampilkan di POS</p>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1 md:mb-2">Nama Bank</label>
+                  <input type="text" value={form.nama_bank} onChange={(e) => setForm({ ...form, nama_bank: e.target.value })} className="w-full border-b-2 border-zinc-100 py-1.5 md:py-2 outline-none focus:border-red-500 font-bold text-sm md:text-lg transition-all" placeholder="Contoh: BCA" />
                 </div>
-                <button type="button" onClick={() => setForm({ ...form, is_active: !form.is_active })} className={`w-12 h-7 flex items-center rounded-full transition-all px-0.5 ${form.is_active ? "bg-green-500" : "bg-zinc-300"}`}>
-                  <div className={`w-5 h-5 bg-white rounded-full shadow-md transform transition-all ${form.is_active ? "translate-x-5" : "translate-x-0"}`} />
-                </button>
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1 md:mb-2">Nama Pemilik</label>
+                  <input type="text" value={form.nama_pemilik} onChange={(e) => setForm({ ...form, nama_pemilik: e.target.value })} className="w-full border-b-2 border-zinc-100 py-1.5 md:py-2 outline-none focus:border-red-500 font-bold text-sm md:text-lg transition-all" placeholder="Nama pemilik rekening" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1 md:mb-2">No Rekening</label>
+                  <input type="text" value={form.no_rekening} onChange={(e) => setForm({ ...form, no_rekening: e.target.value })} className="w-full border-b-2 border-zinc-100 py-1.5 md:py-2 outline-none focus:border-red-500 font-bold text-sm md:text-lg transition-all" placeholder="Nomor rekening" />
+                </div>
+                <div>
+                  <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest block mb-1 md:mb-2">Gambar QRIS</label>
+                  <div className="border-2 border-dashed border-zinc-200 rounded-2xl md:rounded-3xl p-4 md:p-6 text-center hover:border-red-200 transition-all cursor-pointer relative group">
+                    <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      setGambar(file);
+                      if (file) setPreview(URL.createObjectURL(file));
+                    }} />
+                    {preview ? (
+                      <img src={preview} alt="Preview" className="w-24 h-24 md:w-32 md:h-32 object-contain mx-auto rounded-xl" />
+                    ) : (
+                      <div className="flex flex-col items-center gap-1.5 md:gap-2">
+                        <div className="w-10 h-10 md:w-12 md:h-12 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform"><Plus size={18} className="md:size-6" /></div>
+                        <p className="text-[10px] md:text-xs font-bold text-zinc-400">Klik untuk upload gambar QR</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between bg-zinc-50 p-3 md:p-4 rounded-xl md:rounded-2xl">
+                  <div>
+                    <p className="text-xs md:text-sm font-bold text-neutral-700">Aktif</p>
+                    <p className="text-[10px] text-zinc-400">Tampilkan di POS</p>
+                  </div>
+                  <button type="button" onClick={() => setForm({ ...form, is_active: !form.is_active })} className={`w-11 md:w-12 h-6 md:h-7 flex items-center rounded-full transition-all px-0.5 shrink-0 ${form.is_active ? "bg-green-500" : "bg-zinc-300"}`}>
+                    <div className={`w-[18px] md:w-5 h-[18px] md:h-5 bg-white rounded-full shadow-md transform transition-all ${form.is_active ? "translate-x-[22px] md:translate-x-6" : "translate-x-0"}`} />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div className="flex justify-end gap-3 mt-10">
-              <button onClick={() => setShowModal(false)} className="px-8 py-3 text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors">Batal</button>
-              <button onClick={handleSubmit} className="px-10 py-3 bg-neutral-900 hover:bg-black text-white rounded-2xl text-sm font-bold active:scale-95 transition-all shadow-xl shadow-zinc-200">Simpan</button>
+              <div className="flex justify-end gap-2 md:gap-3 mt-6 md:mt-10 shrink-0">
+                <button onClick={() => setShowModal(false)} className="px-5 md:px-8 py-2.5 md:py-3 text-xs md:text-sm font-bold text-zinc-400 hover:text-zinc-600 transition-colors">Batal</button>
+                <button onClick={handleSubmit} className="px-6 md:px-10 py-2.5 md:py-3 bg-neutral-900 hover:bg-black text-white rounded-xl md:rounded-2xl text-xs md:text-sm font-bold active:scale-95 transition-all shadow-lg md:shadow-xl shadow-zinc-200">Simpan</button>
+              </div>
             </div>
           </div>
         </div>
