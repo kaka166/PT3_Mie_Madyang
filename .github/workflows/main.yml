@@ -26,6 +26,7 @@ jobs:
             echo "${{ secrets.SSH_PASSWORD }}" | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan config:cache
             echo "${{ secrets.SSH_PASSWORD }}" | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan route:cache
             echo "${{ secrets.SSH_PASSWORD }}" | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan storage:link || true
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan l5-swagger:generate
             echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chown -R www-data:www-data /var/www/PT3_Mie_Madyang/backend/storage /var/www/PT3_Mie_Madyang/backend/bootstrap/cache
             echo "${{ secrets.SSH_PASSWORD }}" | sudo -S systemctl restart php8.2-fpm
 
