@@ -10,7 +10,9 @@ return [
     'allowed_origins' => [
         'http://localhost:3000',
         'http://127.0.0.1:3000',
-        'https://mie-madyang.farelzy.my.id',
+        'https://sixseventh.my.id',
+        'https://www.sixseventh.my.id',
+        'https://api.sixseventh.my.id',
     ],
 
     'allowed_origins_patterns' => [],

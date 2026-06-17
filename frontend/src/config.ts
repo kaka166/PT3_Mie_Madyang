@@ -1,6 +1,6 @@
 // src/config.ts
 
-const PROD_BASE_URL = "https://api.farelzy.my.id";
+const PROD_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.sixseventh.my.id";
 const DEV_BASE_URL = "http://127.0.0.1:8000";
 
 export const getBaseUrl = (): string => {

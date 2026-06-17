@@ -1,8 +1,8 @@
-name: Deploy Ma-Dyang Backend
+name: Deploy Ma-Dyang
 
 on:
   push:
-    branches: [ main ] # CI/CD jalan setiap kamu push ke branch main
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -11,24 +11,26 @@ jobs:
       - name: Deploying to VPS via SSH
         uses: appleboy/ssh-action@master
         with:
-          host: '203.194.114.74'
-          username: 'mie'
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
           port: 22
-          password: 'MieenakPol@!'
+          password: ${{ secrets.SSH_PASSWORD }}
           script: |
-            echo 'MieenakPol@!' | sudo -S -u www-data git -C /var/www/PT3_Mie_Madyang reset --hard origin/main
-            echo 'MieenakPol@!' | sudo -S -u www-data git -C /var/www/PT3_Mie_Madyang pull origin main
-            
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git -C /var/www/PT3_Mie_Madyang reset --hard origin/main
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S git -C /var/www/PT3_Mie_Madyang pull origin main
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chown -R $USER:www-data /var/www/PT3_Mie_Madyang
+
             # --- Deploy Backend ---
-            echo 'MieenakPol@!' | sudo -S -u www-data composer --working-dir=/var/www/PT3_Mie_Madyang/backend install --no-dev --optimize-autoloader
-            echo 'MieenakPol@!' | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan migrate --force
-            echo 'MieenakPol@!' | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan config:cache
-            echo 'MieenakPol@!' | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan route:cache
-            echo 'MieenakPol@!' | sudo -S systemctl restart php8.2-fpm
-            
+            cd /var/www/PT3_Mie_Madyang/backend && composer install --no-dev --optimize-autoloader
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan migrate --force
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan config:cache
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan route:cache
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S -u www-data php /var/www/PT3_Mie_Madyang/backend/artisan storage:link || true
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S chown -R www-data:www-data /var/www/PT3_Mie_Madyang/backend/storage /var/www/PT3_Mie_Madyang/backend/bootstrap/cache
+            echo "${{ secrets.SSH_PASSWORD }}" | sudo -S systemctl restart php8.2-fpm
+
             # --- Deploy Frontend ---
-            echo 'MieenakPol@!' | sudo -S -u www-data bash -c 'cd /var/www/PT3_Mie_Madyang/frontend && npm install'
-            echo 'MieenakPol@!' | sudo -S -u www-data bash -c 'cd /var/www/PT3_Mie_Madyang/frontend && npm run build'
-            echo 'MieenakPol@!' | sudo -S -u www-data pm2 restart frontend
-            
-            echo "Anjay, Deploy Frontend & Backend Berhasil, Lur!"
+            cd /var/www/PT3_Mie_Madyang/frontend && npm install && npm run build
+            pm2 restart mie-madyang-frontend || pm2 start npm --name "mie-madyang-frontend" --cwd "/var/www/PT3_Mie_Madyang/frontend" -- start
+
+            echo "Deploy Frontend & Backend Berhasil!"
